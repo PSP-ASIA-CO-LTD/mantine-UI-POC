@@ -11,8 +11,11 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom'; // add Import
 
 export function Login() {
+    const navigate = useNavigate();
+
     const form = useForm({
         initialValues: {
             email: '',
@@ -38,6 +41,10 @@ export function Login() {
             message: `Welcome, ${values.email}`,
             color: 'blue',
         });
+
+        // Dashboard or Home after Login
+        // Route in App.tsx
+        navigate('/home');
     };
 
     return (
@@ -63,7 +70,12 @@ export function Login() {
                             {...form.getInputProps('password')}
                         />
                         <Group justify="space-between" mt="lg">
-                            <Text size="sm" c="blue" style={{ cursor: 'pointer' }}>
+                            <Text
+                                size="sm"
+                                c="blue"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => navigate('/forgot-password')} // if forgot password
+                            >
                                 Forgot Password?
                             </Text>
                         </Group>

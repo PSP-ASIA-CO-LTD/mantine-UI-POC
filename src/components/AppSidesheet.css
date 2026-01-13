@@ -1,0 +1,126 @@
+.sidesheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: hsla(0, 0%, 0%, 0.1);
+    backdrop-filter: blur(0px);
+    z-index: 1040;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease, visibility 0.4s;
+}
+
+.sidesheet-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    backdrop-filter: blur(8px);
+    background: hsla(0, 0%, 0%, 0.3);
+}
+
+.sidesheet {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 80%;
+    max-width: 1200px;
+    height: 100vh;
+    background: var(--mantine-color-body);
+    box-shadow: -10px 0 30px hsla(0, 0%, 0%, 0.1);
+    z-index: 1050;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+}
+
+.sidesheet-open {
+    transform: translateX(0);
+}
+
+.sidesheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.5em 2em;
+    border-bottom: 0.0625em solid var(--mantine-color-gray-3);
+    flex-shrink: 0;
+    min-height: 80px;
+}
+
+.sidesheet-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.sidesheet-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    padding: 0;
+    margin: 0;
+    color: hsl(0, 0%, 20%);
+}
+
+.sidesheet-close-btn {
+    background: transparent !important;
+    border: none !important;
+    color: hsl(0, 0%, 40%);
+    font-size: 2.5em;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidesheet-close-btn:hover {
+    color: hsl(211, 100%, 50%);
+    transform: scale(1.1);
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.sidesheet-main {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0;
+}
+
+.sidesheet-left-pane {
+    display: flex;
+    flex-direction: column;
+    border-right: 0.0625em solid var(--mantine-color-gray-3);
+    padding: 2em;
+    overflow-y: auto;
+}
+
+.sidesheet-right-pane {
+    display: flex;
+    flex-direction: column;
+    padding: 2em;
+    overflow-y: auto;
+    background: hsl(0, 0%, 98%);
+}
+
+#sidesheet-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 1.5em;
+}
+
+.sidesheet-footer {
+    padding: 1.5em 2em;
+    border-top: 0.0625em solid var(--mantine-color-gray-3);
+    background: var(--mantine-color-body);
+    flex-shrink: 0;
+}
