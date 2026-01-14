@@ -1,0 +1,2 @@
+id,customer,package_id,room,check_in,check_out,status
+ord-101,John Doe,pkg-1,101,2025-12-20,2026-01-08,Confirmed

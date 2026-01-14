@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid Diagram Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            inline-size: 100vw;
+            block-size: 100vh;
+            overflow: hidden;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: var(--spacer, 1rem);
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            gap: var(--spacer, 1rem);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacer, 1rem);
+        }
+
+        .file-name {
+            font-size: 0.875rem;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            inline-size: 1.5rem;
+            block-size: 1.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .file-picker-wrapper {
+            position: relative;
+        }
+
+        .file-picker-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #1976d2;
+            color: white;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+
+        .file-picker-label:hover {
+            background-color: #1565c0;
+        }
+
+        .file-picker {
+            position: absolute;
+            opacity: 0;
+            inline-size: 0;
+            block-size: 0;
+            overflow: hidden;
+        }
+
+        .diagram-container {
+            inline-size: 100%;
+            block-size: 100%;
+            overflow: auto;
+            background-color: white;
+            position: relative;
+            cursor: default;
+        }
+
+        .diagram-container:not(.empty) {
+            cursor: grab;
+        }
+
+        .diagram-container.panning {
+            cursor: grabbing;
+        }
+
+        .diagram-container.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.875rem;
+        }
+
+        .mermaid {
+            inline-size: 100%;
+            block-size: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease-out;
+            transform-origin: center center;
+        }
+
+        .mermaid svg {
+            display: block;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="file-info" id="fileInfo" style="display: none;">
+            <span class="file-name" id="fileName"></span>
+            <button class="close-btn" id="closeBtn" aria-label="Close file">×</button>
+        </div>
+        <div class="file-picker-wrapper">
+            <label for="filePicker" class="file-picker-label">Choose File</label>
+            <input type="file" id="filePicker" class="file-picker" accept=".mmd,.mermaid,.md">
+        </div>
+    </nav>
+    <div class="diagram-container empty" id="diagramContainer">
+        <div>No diagram loaded</div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+
+        const filePicker = document.getElementById('filePicker');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const closeBtn = document.getElementById('closeBtn');
+        const diagramContainer = document.getElementById('diagramContainer');
+
+        let currentDiagramId = null;
+        let currentZoom = 1;
+        let baseScale = 1;
+        const MIN_ZOOM = 0.1;
+        const MAX_ZOOM = 5;
+        const ZOOM_STEP = 0.05;
+        
+        // Pan state
+        let isPanning = false;
+        let panStartX = 0;
+        let panStartY = 0;
+        let panOffsetX = 0;
+        let panOffsetY = 0;
+
+        function scaleDiagramToFit(svg) {
+            if (!svg) return;
+            
+            const container = diagramContainer;
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            
+            // Get SVG dimensions from viewBox or actual size
+            const viewBox = svg.viewBox.baseVal;
+            const svgWidth = viewBox.width || svg.clientWidth || svg.getBBox().width;
+            const svgHeight = viewBox.height || svg.clientHeight || svg.getBBox().height;
+            
+            if (svgWidth === 0 || svgHeight === 0) return;
+            
+            // Calculate scale to maximize diagram size while fitting container
+            const scaleX = containerWidth / svgWidth;
+            const scaleY = containerHeight / svgHeight;
+            const scale = Math.min(scaleX, scaleY);
+            
+            // Store base scale for zoom calculations
+            baseScale = scale;
+            currentZoom = 1;
+            
+            // Apply the scale
+            const scaledWidth = svgWidth * scale;
+            const scaledHeight = svgHeight * scale;
+            
+            // Apply scaling to fill available space
+            svg.style.width = `${scaledWidth}px`;
+            svg.style.height = `${scaledHeight}px`;
+            svg.style.maxWidth = 'none';
+            svg.style.maxHeight = 'none';
+            
+            // Center the SVG if needed
+            const mermaidDiv = svg.closest('.mermaid');
+            if (mermaidDiv) {
+                mermaidDiv.style.width = `${scaledWidth}px`;
+                mermaidDiv.style.height = `${scaledHeight}px`;
+                // Reset pan offset when fitting
+                panOffsetX = 0;
+                panOffsetY = 0;
+                updateTransform();
+            }
+        }
+
+        function applyZoom(delta) {
+            const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, currentZoom + delta));
+            currentZoom = newZoom;
+            updateTransform();
+        }
+
+        function updateTransform() {
+            const mermaidDiv = document.querySelector('.mermaid');
+            if (mermaidDiv) {
+                mermaidDiv.style.transform = `translate(${panOffsetX}px, ${panOffsetY}px) scale(${currentZoom})`;
+            }
+        }
+
+        function loadDiagram(content) {
+            // Clear previous diagram
+            if (currentDiagramId) {
+                const prevElement = document.getElementById(currentDiagramId);
+                if (prevElement) {
+                    prevElement.remove();
+                }
+            }
+
+            // Create new diagram element
+            currentDiagramId = 'mermaid-diagram-' + Date.now();
+            const diagramElement = document.createElement('div');
+            diagramElement.id = currentDiagramId;
+            diagramElement.className = 'mermaid';
+            diagramElement.textContent = content;
+
+            diagramContainer.innerHTML = '';
+            diagramContainer.appendChild(diagramElement);
+            diagramContainer.classList.remove('empty');
+
+            // Render the diagram
+            mermaid.run({
+                nodes: [diagramElement]
+            }).then(() => {
+                // Find the SVG and scale it to fit
+                const svg = diagramElement.querySelector('svg');
+                if (svg) {
+                    scaleDiagramToFit(svg);
+                    
+                    // Handle window resize
+                    const resizeObserver = new ResizeObserver(() => {
+                        scaleDiagramToFit(svg);
+                    });
+                    resizeObserver.observe(diagramContainer);
+                }
+            }).catch(err => {
+                console.error('Mermaid rendering error:', err);
+                diagramContainer.innerHTML = `<div style="color: #d32f2f; padding: 1rem;">Error rendering diagram: ${err.message}</div>`;
+            });
+        }
+
+        function resetViewer() {
+            filePicker.value = '';
+            fileInfo.style.display = 'none';
+            diagramContainer.innerHTML = '<div>No diagram loaded</div>';
+            diagramContainer.classList.add('empty');
+            currentDiagramId = null;
+            currentZoom = 1;
+            baseScale = 1;
+            panOffsetX = 0;
+            panOffsetY = 0;
+            isPanning = false;
+            diagramContainer.classList.remove('panning');
+        }
+
+        filePicker.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            fileName.textContent = file.name;
+            fileInfo.style.display = 'flex';
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const content = event.target.result;
+                loadDiagram(content);
+            };
+            reader.onerror = () => {
+                alert('Error reading file');
+                resetViewer();
+            };
+            reader.readAsText(file);
+        });
+
+        closeBtn.addEventListener('click', () => {
+            resetViewer();
+        });
+
+        // Mouse wheel zoom on diagram container
+        diagramContainer.addEventListener('wheel', (e) => {
+            // Only zoom when hovering over the diagram area (not empty state)
+            if (diagramContainer.classList.contains('empty')) return;
+            
+            // Don't zoom if panning
+            if (isPanning) return;
+            
+            // Prevent default scrolling when zooming
+            e.preventDefault();
+            
+            // Zoom in/out based on wheel direction
+            const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+            applyZoom(delta);
+        }, { passive: false });
+
+        // Pan handlers - drag to pan
+        diagramContainer.addEventListener('mousedown', (e) => {
+            if (diagramContainer.classList.contains('empty')) return;
+            
+            e.preventDefault();
+            isPanning = true;
+            diagramContainer.classList.add('panning');
+            panStartX = e.clientX - panOffsetX;
+            panStartY = e.clientY - panOffsetY;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isPanning) return;
+            
+            e.preventDefault();
+            panOffsetX = e.clientX - panStartX;
+            panOffsetY = e.clientY - panStartY;
+            updateTransform();
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (isPanning) {
+                isPanning = false;
+                diagramContainer.classList.remove('panning');
+            }
+        });
+
+        // Also handle mouse leave to stop panning
+        diagramContainer.addEventListener('mouseleave', () => {
+            if (isPanning) {
+                isPanning = false;
+                diagramContainer.classList.remove('panning');
+            }
+        });
+    </script>
+</body>
+</html>

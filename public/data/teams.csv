@@ -1,0 +1,4 @@
+id,name,dept,members,assignmentTypes
+tm-1,Frontend Team,Frontend,"st-1|st-2","at-1:Check-in Guidance:500"
+tm-2,Kitchen Team,Kitchen,"st-3","at-400:Daily 3 Meal:400"
+tm-3,Service Team,Housekeeping,"st-4","at-1500:Full Service:1500|at-300:Room Cleaning:300"
