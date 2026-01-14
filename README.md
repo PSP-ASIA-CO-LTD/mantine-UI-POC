@@ -37,7 +37,32 @@ The built files will be in the `dist` directory.
 ### Preview Production Build
 
 ```bash
+npm run build
 npm run preview
+```
+
+### Deploy to Production
+
+#### Option 1: Static Hosting (Recommended)
+Deploy to Vercel, Netlify, or GitHub Pages:
+
+```bash
+npm run build
+# Then upload the `dist` folder to your hosting service
+```
+
+#### Option 2: Serve with Node.js
+```bash
+npm run build
+# Serve the dist folder with any static file server
+npx serve dist
+```
+
+#### Option 3: Serve with Python
+```bash
+npm run build
+cd dist
+python3 -m http.server 8080
 ```
 
 ## Project Structure
