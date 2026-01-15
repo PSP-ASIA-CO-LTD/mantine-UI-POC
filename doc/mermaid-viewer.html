@@ -25,7 +25,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            padding: var(--spacer, 1rem);
+            padding: var(--spacer, 0.5rem);
             background-color: #f5f5f5;
             border-bottom: 1px solid #e0e0e0;
             gap: var(--spacer, 1rem);
@@ -90,6 +90,45 @@
             overflow: hidden;
         }
 
+        .controls {
+            display: none;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .controls.visible {
+            display: flex;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .control-group select {
+            padding: 0.35rem 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .control-group select:hover {
+            border-color: #999;
+        }
+
+        .control-group select:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
         .diagram-container {
             inline-size: 100%;
             block-size: 100%;
@@ -129,6 +168,103 @@
             display: block;
             margin: 0;
         }
+
+        /* ER Diagram Auto-Styling */
+        .mermaid svg .er.entityBox {
+            fill: #ffffff;
+            stroke: #d0d0d0;
+            stroke-width: 1px;
+        }
+
+        .mermaid svg .er.entityLabel {
+            fill: #333333;
+            font-weight: 600;
+        }
+
+        .mermaid svg .er.attributeBoxOdd,
+        .mermaid svg .er.attributeBoxEven {
+            fill: #ffffff;
+            stroke: #e0e0e0;
+            stroke-width: 0.5px;
+        }
+
+        /* Flowchart node styling for ER-like appearance */
+        .mermaid svg .node rect,
+        .mermaid svg .node polygon {
+            rx: 8px;
+            ry: 8px;
+        }
+
+        .mermaid svg .node .label {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* HTML Labels inside nodes - Entity styling */
+        .mermaid svg foreignObject {
+            overflow: visible;
+        }
+
+        .mermaid svg foreignObject div {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .mermaid svg foreignObject b,
+        .mermaid svg foreignObject strong {
+            font-weight: 700;
+            color: #222;
+        }
+
+        /* Style for subgraph boxes */
+        .mermaid svg .cluster rect {
+            fill: #ececec !important;
+            stroke: #e0e0e0 !important;
+            stroke-width: 1px !important;
+            rx: 12px !important;
+            ry: 12px !important;
+        }
+
+        .mermaid svg .cluster .nodeLabel {
+            font-weight: 600;
+            fill: #666666;
+        }
+
+        /* Edge/relationship line styling */
+        .mermaid svg .edge-pattern-solid {
+            stroke: #888888;
+        }
+
+        .mermaid svg .flowchart-link {
+            stroke: #888888 !important;
+            stroke-width: 1.5px !important;
+        }
+
+        .mermaid svg .marker {
+            fill: #888888 !important;
+            stroke: #888888 !important;
+        }
+
+        /* Edge labels */
+        .mermaid svg .edgeLabel {
+            background-color: white;
+            font-size: 11px;
+        }
+
+        .mermaid svg .edgeLabel rect {
+            fill: white !important;
+            opacity: 0.9;
+        }
+
+        /* Entity header styling (applied via JS) */
+        .er-entity-header {
+            background-color: #f5c6c6 !important;
+            padding: 8px 12px !important;
+            border-radius: 6px 6px 0 0 !important;
+            margin: -8px -12px 8px -12px !important;
+            display: block !important;
+        }
     </style>
 </head>
 <body>
@@ -136,6 +272,51 @@
         <div class="file-info" id="fileInfo" style="display: none;">
             <span class="file-name" id="fileName"></span>
             <button class="close-btn" id="closeBtn" aria-label="Close file">×</button>
+        </div>
+        <div class="controls" id="controls">
+            <div class="control-group">
+                <label for="directionSelect">Direction:</label>
+                <select id="directionSelect">
+                    <option value="TB">Top → Bottom</option>
+                    <option value="BT">Bottom → Top</option>
+                    <option value="LR">Left → Right</option>
+                    <option value="RL">Right → Left</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="curveSelect">Curve:</label>
+                <select id="curveSelect">
+                    <option value="basis">Basis (smooth)</option>
+                    <option value="linear">Linear</option>
+                    <option value="cardinal">Cardinal</option>
+                    <option value="monotoneX">Monotone X</option>
+                    <option value="monotoneY">Monotone Y</option>
+                    <option value="natural">Natural</option>
+                    <option value="step">Step</option>
+                    <option value="stepAfter">Step After</option>
+                    <option value="stepBefore">Step Before</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="nodeSpacing">Node Gap:</label>
+                <select id="nodeSpacing">
+                    <option value="20">20</option>
+                    <option value="30" selected>30</option>
+                    <option value="50">50</option>
+                    <option value="80">80</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="rankSpacing">Rank Gap:</label>
+                <select id="rankSpacing">
+                    <option value="30">30</option>
+                    <option value="50" selected>50</option>
+                    <option value="80">80</option>
+                    <option value="100">100</option>
+                    <option value="150">150</option>
+                </select>
+            </div>
         </div>
         <div class="file-picker-wrapper">
             <label for="filePicker" class="file-picker-label">Choose File</label>
@@ -147,24 +328,72 @@
     </div>
 
     <script>
-        mermaid.initialize({ 
-            startOnLoad: false,
-            theme: 'default',
-            securityLevel: 'loose'
-        });
+        function getMermaidConfig() {
+            const direction = document.getElementById('directionSelect').value;
+            const curve = document.getElementById('curveSelect').value;
+            const nodeSpacing = parseInt(document.getElementById('nodeSpacing').value);
+            const rankSpacing = parseInt(document.getElementById('rankSpacing').value);
+
+            const config = {
+                startOnLoad: false,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    primaryColor: '#f5c6c6',
+                    primaryBorderColor: '#d0d0d0',
+                    primaryTextColor: '#333333',
+                    secondaryColor: '#ffffff',
+                    tertiaryColor: '#fafafa',
+                    lineColor: '#888888',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+                    fontSize: '14px',
+                    attributeBackgroundColorOdd: '#ffffff',
+                    attributeBackgroundColorEven: '#f9f9f9',
+                    clusterBkg: '#fafafa',
+                    clusterBorder: '#e0e0e0'
+                },
+                flowchart: {
+                    nodeSpacing: nodeSpacing,
+                    rankSpacing: rankSpacing,
+                    curve: curve,
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    defaultRenderer: 'dagre-wrapper'
+                },
+                er: {
+                    useMaxWidth: true,
+                    entityPadding: 15,
+                    fontSize: 14,
+                    stroke: '#d0d0d0',
+                    fill: '#f5c6c6',
+                    layoutDirection: direction
+                }
+            };
+
+            return config;
+        }
+
+        // Initialize mermaid
+        mermaid.initialize(getMermaidConfig());
 
         const filePicker = document.getElementById('filePicker');
         const fileInfo = document.getElementById('fileInfo');
         const fileName = document.getElementById('fileName');
         const closeBtn = document.getElementById('closeBtn');
         const diagramContainer = document.getElementById('diagramContainer');
+        const controls = document.getElementById('controls');
+        const directionSelect = document.getElementById('directionSelect');
+        const curveSelect = document.getElementById('curveSelect');
+        const nodeSpacingSelect = document.getElementById('nodeSpacing');
+        const rankSpacingSelect = document.getElementById('rankSpacing');
 
         let currentDiagramId = null;
+        let currentDiagramContent = null;
         let currentZoom = 1;
         let baseScale = 1;
         const MIN_ZOOM = 0.1;
         const MAX_ZOOM = 5;
-        const ZOOM_STEP = 0.05;
+        const ZOOM_STEP = 0.035;
         
         // Pan state
         let isPanning = false;
@@ -172,6 +401,17 @@
         let panStartY = 0;
         let panOffsetX = 0;
         let panOffsetY = 0;
+
+        // Add control change listeners
+        [directionSelect, curveSelect, nodeSpacingSelect, rankSpacingSelect].forEach(control => {
+            control.addEventListener('change', () => {
+                if (currentDiagramContent) {
+                    // Re-initialize mermaid with new config
+                    mermaid.initialize(getMermaidConfig());
+                    loadDiagram(currentDiagramContent);
+                }
+            });
+        });
 
         function scaleDiagramToFit(svg) {
             if (!svg) return;
@@ -232,6 +472,12 @@
         }
 
         function loadDiagram(content) {
+            // Store content for re-rendering
+            currentDiagramContent = content;
+            
+            // Show controls
+            controls.classList.add('visible');
+            
             // Clear previous diagram
             if (currentDiagramId) {
                 const prevElement = document.getElementById(currentDiagramId);
@@ -240,12 +486,24 @@
                 }
             }
 
+            // Inject direction into flowchart
+            const direction = directionSelect.value;
+            let processedContent = content;
+            
+            // For flowchart, replace the direction in the declaration (e.g., flowchart TB -> flowchart LR)
+            if (content.trim().startsWith('flowchart')) {
+                processedContent = content.replace(
+                    /^(flowchart)\s+(TB|BT|LR|RL)/m,
+                    `$1 ${direction}`
+                );
+            }
+
             // Create new diagram element
             currentDiagramId = 'mermaid-diagram-' + Date.now();
             const diagramElement = document.createElement('div');
             diagramElement.id = currentDiagramId;
             diagramElement.className = 'mermaid';
-            diagramElement.textContent = content;
+            diagramElement.textContent = processedContent;
 
             diagramContainer.innerHTML = '';
             diagramContainer.appendChild(diagramElement);
@@ -258,6 +516,9 @@
                 // Find the SVG and scale it to fit
                 const svg = diagramElement.querySelector('svg');
                 if (svg) {
+                    // Apply ER diagram auto-styling
+                    applyERDiagramStyling(svg);
+                    
                     scaleDiagramToFit(svg);
                     
                     // Handle window resize
@@ -272,12 +533,90 @@
             });
         }
 
+        // Apply ER diagram styling to make it look like classic ER diagrams
+        function applyERDiagramStyling(svg) {
+            // Style entity boxes (flowchart nodes used as entities)
+            const nodes = svg.querySelectorAll('.node');
+            nodes.forEach(node => {
+                const rect = node.querySelector('rect, polygon');
+                const label = node.querySelector('.nodeLabel, .label');
+                
+                if (rect) {
+                    // Check if this looks like an entity (has multiple lines / table-like content)
+                    const foreignObject = node.querySelector('foreignObject');
+                    if (foreignObject) {
+                        const content = foreignObject.textContent || '';
+                        const lines = content.split('\n').filter(l => l.trim());
+                        
+                        // If it has multiple lines (entity with fields), style as ER entity
+                        if (lines.length > 2) {
+                            rect.style.fill = '#ffffff';
+                            rect.style.stroke = '#d0d0d0';
+                            rect.style.strokeWidth = '1px';
+                            rect.setAttribute('rx', '6');
+                            rect.setAttribute('ry', '6');
+                            
+                            // Style the header (first line - entity name)
+                            const divs = foreignObject.querySelectorAll('div, span, p');
+                            if (divs.length > 0) {
+                                // Find the title element (usually first bold element)
+                                const titleEl = foreignObject.querySelector('b, strong');
+                                if (titleEl) {
+                                    // Create a background for the header
+                                    const parent = titleEl.closest('div, span, p');
+                                    if (parent) {
+                                        parent.style.backgroundColor = '#f5c6c6';
+                                        parent.style.padding = '8px 12px';
+                                        parent.style.marginBottom = '4px';
+                                        parent.style.borderRadius = '4px 4px 0 0';
+                                        parent.style.display = 'block';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Style ER diagram specific elements
+            const entityBoxes = svg.querySelectorAll('.er.entityBox');
+            entityBoxes.forEach(box => {
+                box.style.fill = '#ffffff';
+                box.style.stroke = '#d0d0d0';
+            });
+
+            // Style entity labels (headers)
+            const entityLabels = svg.querySelectorAll('.er.entityLabel');
+            entityLabels.forEach(label => {
+                const rect = label.querySelector('rect');
+                if (rect) {
+                    rect.style.fill = '#f5c6c6';
+                }
+            });
+
+            // Style relationship lines
+            const paths = svg.querySelectorAll('path.er, .flowchart-link, .edge-pattern-solid');
+            paths.forEach(path => {
+                path.style.stroke = '#888888';
+                path.style.strokeWidth = '1.5px';
+            });
+
+            // Style markers (arrows/symbols)
+            const markers = svg.querySelectorAll('marker path');
+            markers.forEach(marker => {
+                marker.style.fill = '#888888';
+                marker.style.stroke = '#888888';
+            });
+        }
+
         function resetViewer() {
             filePicker.value = '';
             fileInfo.style.display = 'none';
+            controls.classList.remove('visible');
             diagramContainer.innerHTML = '<div>No diagram loaded</div>';
             diagramContainer.classList.add('empty');
             currentDiagramId = null;
+            currentDiagramContent = null;
             currentZoom = 1;
             baseScale = 1;
             panOffsetX = 0;
