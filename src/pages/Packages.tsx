@@ -20,7 +20,8 @@ export function Packages() {
     const [packages, setPackages] = useState<Package[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // states Edit
+    // edit states
+    const [activePackage, setActivePackage] = useState<Package | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editableServices, setEditableServices] = useState<Service[]>([]);
 
@@ -46,12 +47,8 @@ export function Packages() {
         );
     };
 
-    const handlePackageClick = (pkg: Package) => {
-        // reset state everytime when open
-        setIsEditing(false);
-        setEditableServices([...pkg.services]);
-
-        // LEFT PANE
+    // 🔑 function เดียวสำหรับเปิด sidesheet
+    const openPackageSidesheet = (pkg: Package) => {
         const leftPane = (
             <div>
                 {buildLeftSection(
@@ -73,7 +70,6 @@ export function Packages() {
             </div>
         );
 
-        // RIGHT PANE (Services)
         const rightPane = (
             <div>
                 <Text fw={600} mb="md">
@@ -124,7 +120,6 @@ export function Packages() {
             </div>
         );
 
-        // FOOTER
         const footer = (
             <AppSidesheetFooter
                 onCancel={() => {
@@ -133,7 +128,6 @@ export function Packages() {
                 }}
                 onSave={() => {
                     if (!isEditing) {
-                        // enter edit mode
                         setIsEditing(true);
                     } else {
                         // TODO: API.updatePackage(pkg.id, {
@@ -154,6 +148,21 @@ export function Packages() {
             footer,
         });
     };
+
+    // เปิดครั้งแรก
+    const handlePackageClick = (pkg: Package) => {
+        setActivePackage(pkg);
+        setIsEditing(false);
+        setEditableServices([...pkg.services]);
+
+        openPackageSidesheet(pkg);
+    };
+
+    // 🔥 re-open sidesheet เมื่อ state เปลี่ยน
+    useEffect(() => {
+        if (!activePackage) return;
+        openPackageSidesheet(activePackage);
+    }, [isEditing, editableServices]);
 
     if (loading) {
         return <div>Loading...</div>;
