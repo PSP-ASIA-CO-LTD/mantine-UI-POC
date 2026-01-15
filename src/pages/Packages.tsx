@@ -47,7 +47,7 @@ export function Packages() {
         );
     };
 
-    // 🔑 function เดียวสำหรับเปิด sidesheet
+    // function sidesheet
     const openPackageSidesheet = (pkg: Package) => {
         const leftPane = (
             <div>
@@ -158,7 +158,7 @@ export function Packages() {
         openPackageSidesheet(pkg);
     };
 
-    // 🔥 re-open sidesheet เมื่อ state เปลี่ยน
+    // re-open sidesheet when state change
     useEffect(() => {
         if (!activePackage) return;
         openPackageSidesheet(activePackage);
