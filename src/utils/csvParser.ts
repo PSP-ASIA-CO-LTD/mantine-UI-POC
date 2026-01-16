@@ -107,6 +107,7 @@ export const buildDatabase = async (): Promise<Database> => {
             id: row.id,
             name: row.name,
             dept: row.dept,
+            description: row.description,
             members: parseMembers(row.members),
             tasks: [],
             assignmentTypes: assignmentMap[row.id] || parseAssignmentTypes(row.assignmentTypes)

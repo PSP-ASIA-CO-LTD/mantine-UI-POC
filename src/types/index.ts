@@ -27,6 +27,7 @@ export interface Team {
     id: string;
     name: string;
     dept: string;
+    description: string;
     members: string[];
     tasks: any[];
     assignmentTypes: AssignmentType[];
