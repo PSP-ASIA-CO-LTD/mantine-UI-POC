@@ -34,12 +34,16 @@ export const API = {
         const data = await loadDB();
         return data.staff;
     },
-    
+
     getTeams: async (): Promise<Team[]> => {
         await delay();
         const data = await loadDB();
-        return data.teams;
+        return data.teams.map((team) => ({
+            ...team,
+            description: team.description,
+        }));
     },
+
     
     getOrders: async () => {
         await delay();
