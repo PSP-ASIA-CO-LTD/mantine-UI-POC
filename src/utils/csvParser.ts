@@ -110,8 +110,9 @@ export const buildDatabase = async (): Promise<Database> => {
             description: row.description,
             members: parseMembers(row.members),
             tasks: [],
-            assignmentTypes: assignmentMap[row.id] || parseAssignmentTypes(row.assignmentTypes)
+            assignmentTypes: parseAssignmentTypes(row.assignmentTypes),
         }));
+
 
         // Process orders
         const orders: Order[] = ordersData.map((row: any) => ({
