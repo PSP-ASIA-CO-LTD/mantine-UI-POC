@@ -1,4 +1,4 @@
 id,name,dept,description,members,assignmentTypes
-tm-1,Frontend Team,Frontend,"Responsible for building and maintaining the user interface and user experience.","Miss Alice Flexbox|Mr. Max Overflow","at-1:Check-in Guidance:500"
-tm-2,Kitchen Team,Kitchen,"Handles food preparation, cooking, and kitchen operations.","Mr. Chef Fryday","at-400:Daily 3 Meal:400"
-tm-3,Service Team,Housekeeping,"Provides cleaning, room service, and overall guest support.","Miss Moppa Cleaner","at-1500:Full Service:1500|at-300:Room Cleaning:300"
+tm-1,Frontend Team,Frontend,"Responsible for building and maintaining the user interface and user experience.","Miss Alice Flexbox|Mr. Max Overflow","at-1:Check-in Guidance:Frontend:500"
+tm-2,Kitchen Team,Kitchen,"Handles food preparation, cooking, and kitchen operations.","Mr. Chef Fryday","at-400:Daily 3 Meal:Kitchen:400"
+tm-3,Service Team,Housekeeping,"Provides cleaning, room service, and overall guest support.","Miss Moppa Cleaner","at-1500:Full Service:Housekeeping:1500|at-300:Room Cleaning:Housekeeping:300"

@@ -38,13 +38,10 @@ export const API = {
     getTeams: async (): Promise<Team[]> => {
         await delay();
         const data = await loadDB();
-        return data.teams.map((team) => ({
-            ...team,
-            description: team.description,
-        }));
+        return data.teams;
     },
 
-    
+
     getOrders: async () => {
         await delay();
         const data = await loadDB();
@@ -78,7 +75,8 @@ export const API = {
         data.packages = data.packages.filter(p => p.id !== id);
         return true;
     },
-    
+
+
     saveTeam: async (teamData: Partial<Team> & { id: string }): Promise<Team | null> => {
         await delay(500);
         const data = await loadDB();
@@ -89,7 +87,15 @@ export const API = {
         }
         return null;
     },
-    
+
+    deleteTeam: async (id: string): Promise<boolean> => {
+        await delay(400);
+        const data = await loadDB();
+        data.teams = data.teams.filter(t => t.id !== id);
+        return true;
+    },
+
+
     saveStaff: async (staffData: Partial<Staff> & { id: string }): Promise<Staff | null> => {
         await delay(500);
         const data = await loadDB();

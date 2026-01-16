@@ -20,10 +20,10 @@ export function Packages() {
     const [packages, setPackages] = useState<Package[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // edit states
     const [activePackage, setActivePackage] = useState<Package | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editableServices, setEditableServices] = useState<Service[]>([]);
+    const [saving, setSaving] = useState(false);
 
     const { open, close } = useSidesheet();
 
@@ -42,28 +42,22 @@ export function Packages() {
     }, []);
 
     const removeService = (index: number) => {
-        setEditableServices((prev) =>
-            prev.filter((_, i) => i !== index)
-        );
+        setEditableServices((prev) => prev.filter((_, i) => i !== index));
     };
 
-    // function sidesheet
     const openPackageSidesheet = (pkg: Package) => {
         const leftPane = (
             <div>
                 {buildLeftSection(
                     'Price',
-                    <Badge color="blue" size="lg" data-er-field="SALE_PACKAGE.price">
+                    <Badge color="blue" size="lg">
                         ฿{pkg.price.toLocaleString()}
                     </Badge>
                 )}
-                {buildLeftSection(
-                    'Duration',
-                    <Text data-er-field="SALE_PACKAGE.duration_days">{pkg.duration} days</Text>
-                )}
+                {buildLeftSection('Duration', <Text>{pkg.duration} days</Text>)}
                 {buildLeftSection(
                     'Description',
-                    <Text size="sm" c="dimmed" data-er-field="SALE_PACKAGE.description">
+                    <Text size="sm" c="dimmed">
                         {pkg.description}
                     </Text>
                 )}
@@ -72,15 +66,14 @@ export function Packages() {
 
         const rightPane = (
             <div>
-                <Text fw={600} mb="md" data-er-field="SALE_PACKAGE.items">
+                <Text fw={600} mb="md">
                     Services ({editableServices.length})
                 </Text>
-
                 {editableServices.map((service, idx) => (
-                    <Card key={idx} padding="md" mb="sm" withBorder data-er-field="TASK">
+                    <Card key={idx} padding="md" mb="sm" withBorder>
                         <Stack gap="xs">
                             <Group justify="space-between">
-                                <Text fw={500} data-er-field="TASK.title">{service.title}</Text>
+                                <Text fw={500}>{service.title}</Text>
 
                                 {isEditing ? (
                                     <Button
@@ -95,22 +88,20 @@ export function Packages() {
                                         Remove
                                     </Button>
                                 ) : (
-                                    <Badge size="sm" data-er-field="TASK.department_id">
-                                        {service.dept}
-                                    </Badge>
+                                    <Badge size="sm">{service.dept}</Badge>
                                 )}
                             </Group>
 
-                            <Text size="sm" c="dimmed" data-er-field="TASK.description">
+                            <Text size="sm" c="dimmed">
                                 {service.description}
                             </Text>
 
                             <Group gap="xs">
-                                <Text size="xs" c="dimmed" data-er-field="TASK.interval">
+                                <Text size="xs" c="dimmed">
                                     {service.interval}
                                 </Text>
                                 <Text size="xs" c="dimmed">•</Text>
-                                <Text size="xs" c="dimmed" data-er-field="TASK.price">
+                                <Text size="xs" c="dimmed">
                                     ฿{service.price.toLocaleString()}
                                 </Text>
                             </Group>
@@ -126,17 +117,34 @@ export function Packages() {
                     setIsEditing(false);
                     close();
                 }}
-                onSave={() => {
+                onSave={async () => {
                     if (!isEditing) {
                         setIsEditing(true);
-                    } else {
-                        // TODO: API.updatePackage(pkg.id, {
-                        //   services: editableServices
-                        // })
+                        return;
+                    }
+
+                    if (!activePackage) return;
+
+                    try {
+                        setSaving(true);
+                        const updated = await API.savePackage({
+                            id: activePackage.id,
+                            services: editableServices,
+                        });
+
+                        setPackages((prev) =>
+                            prev.map((p) => (p.id === updated.id ? updated : p))
+                        );
                         close();
+                    } catch (error) {
+                        console.error('Failed to save package:', error);
+                    } finally {
+                        setSaving(false);
+                        setIsEditing(false);
                     }
                 }}
                 saveLabel={isEditing ? 'Save Changes' : 'Edit Package'}
+                isLoading={saving}
             />
         );
 
@@ -149,16 +157,13 @@ export function Packages() {
         });
     };
 
-    // เปิดครั้งแรก
     const handlePackageClick = (pkg: Package) => {
         setActivePackage(pkg);
         setIsEditing(false);
         setEditableServices([...pkg.services]);
-
         openPackageSidesheet(pkg);
     };
 
-    // re-open sidesheet when state change
     useEffect(() => {
         if (!activePackage) return;
         openPackageSidesheet(activePackage);
@@ -179,38 +184,32 @@ export function Packages() {
 
             <Grid>
                 {packages.map((pkg) => (
-                    <Grid.Col
-                        key={pkg.id}
-                        span={{ base: 12, sm: 6, md: 4 }}
-                    >
+                    <Grid.Col key={pkg.id} span={{ base: 12, sm: 6, md: 4 }}>
                         <Card
                             padding="lg"
                             radius="md"
                             withBorder
                             style={{ cursor: 'pointer' }}
                             onClick={() => handlePackageClick(pkg)}
-                            data-er-field="SALE_PACKAGE"
                         >
                             <Stack gap="xs">
                                 <Group justify="space-between">
-                                    <Text fw={600} size="lg" data-er-field="SALE_PACKAGE.name">
+                                    <Text fw={600} size="lg">
                                         {pkg.name}
                                     </Text>
-                                    <Badge color="blue" data-er-field="SALE_PACKAGE.price">
+                                    <Badge color="blue">
                                         ฿{pkg.price.toLocaleString()}
                                     </Badge>
                                 </Group>
-
-                                <Text size="sm" c="dimmed" lineClamp={2} data-er-field="SALE_PACKAGE.description">
+                                <Text size="sm" c="dimmed" lineClamp={2}>
                                     {pkg.description}
                                 </Text>
-
                                 <Group gap="xs">
-                                    <Text size="xs" c="dimmed" data-er-field="SALE_PACKAGE.duration_days">
+                                    <Text size="xs" c="dimmed">
                                         Duration: {pkg.duration} days
                                     </Text>
                                     <Text size="xs" c="dimmed">•</Text>
-                                    <Text size="xs" c="dimmed" data-er-field="SALE_PACKAGE.items">
+                                    <Text size="xs" c="dimmed">
                                         {pkg.services.length} services
                                     </Text>
                                 </Group>

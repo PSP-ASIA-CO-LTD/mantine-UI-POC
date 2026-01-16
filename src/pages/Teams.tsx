@@ -16,11 +16,17 @@ import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { buildLeftSection } from '../utils/sidesheetHelper';
-import type { Team } from '../types';
+import type { Team, AssignmentType } from '../types';
 
 export function Teams() {
     const [teams, setTeams] = useState<Team[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // edit states
+    const [activeTeam, setActiveTeam] = useState<Team | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editableServices, setEditableServices] = useState<AssignmentType[]>([]);
+
     const { open, close } = useSidesheet();
 
     useEffect(() => {
@@ -37,7 +43,11 @@ export function Teams() {
         loadTeams();
     }, []);
 
-    const handleTeamClick = async (team: Team) => {
+    const removeService = (index: number) => {
+        setEditableServices((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const openTeamSidesheet = (team: Team) => {
         const leftPane = (
             <div>
                 {buildLeftSection(
@@ -47,15 +57,12 @@ export function Teams() {
                     </Badge>
                 )}
 
-                {/* Description */}
                 <Divider my="xl" />
 
                 {buildLeftSection(
                     'Description',
                     team.description ? (
-                        <Text size="sm" c="dimmed">
-                            {team.description}
-                        </Text>
+                        <Text size="sm">{team.description}</Text>
                     ) : (
                         <Text size="sm" c="dimmed">
                             No description provided
@@ -90,47 +97,65 @@ export function Teams() {
 
         const rightPane = (
             <div>
-                <Group justify="space-between" mb="md">
-                    <Text fw={600}>Services</Text>
-                </Group>
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                    {team.assignmentTypes && team.assignmentTypes.length > 0 ? (
-                        <Stack gap="md">
-                            {team.assignmentTypes.map((at, index) => (
-                                <Card key={index} padding="md" withBorder>
-                                    <Stack gap="xs">
-                                        <Text fw={500}>{at.name}</Text>
-                                        {at.description && (
-                                            <Text size="sm" c="dimmed">
-                                                {at.description}
-                                            </Text>
-                                        )}
-                                        {at.price > 0 && (
-                                            <Text size="sm" c="dimmed">
-                                                ฿{at.price.toLocaleString()}
-                                            </Text>
-                                        )}
-                                    </Stack>
-                                </Card>
-                            ))}
+                <Text fw={600} mb="md">
+                    Services ({editableServices.length})
+                </Text>
+
+                {editableServices.map((service, idx) => (
+                    <Card key={idx} padding="md" mb="sm" withBorder>
+                        <Stack gap="xs">
+                            <Group justify="space-between">
+                                <Text fw={500}>{service.name}</Text>
+
+                                {isEditing ? (
+                                    <Button
+                                        size="xs"
+                                        color="red"
+                                        variant="light"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeService(idx);
+                                        }}
+                                    >
+                                        Remove
+                                    </Button>
+                                ) : (
+                                    <Badge color="gray">{team.dept}</Badge>
+                                )}
+                            </Group>
+
+                            {service.description && (
+                                <Text size="sm" c="dimmed">
+                                    {service.description}
+                                </Text>
+                            )}
+
+                            {service.price > 0 && (
+                                <Text size="sm" c="dimmed">
+                                    ฿{service.price.toLocaleString()}
+                                </Text>
+                            )}
                         </Stack>
-                    ) : (
-                        <Text size="sm" c="dimmed" ta="center" py="xl">
-                            No services registered
-                        </Text>
-                    )}
-                </div>
+                    </Card>
+                ))}
             </div>
         );
 
         const footer = (
             <AppSidesheetFooter
-                onCancel={close}
-                onSave={() => {
-                    // Handle save/edit
+                onCancel={() => {
+                    setIsEditing(false);
                     close();
                 }}
-                saveLabel="Edit Department"
+                onSave={() => {
+                    if (!isEditing) {
+                        setIsEditing(true);
+                    } else {
+                        // TODO: API.updateTeam(team.id, { assignmentTypes: editableServices })
+                        close();
+                    }
+                }}
+                saveLabel={isEditing ? 'Save Changes' : 'Edit Department'}
             />
         );
 
@@ -142,6 +167,18 @@ export function Teams() {
             footer,
         });
     };
+
+    const handleTeamClick = (team: Team) => {
+        setActiveTeam(team);
+        setIsEditing(false);
+        setEditableServices([...team.assignmentTypes]);
+        openTeamSidesheet(team);
+    };
+
+    useEffect(() => {
+        if (!activeTeam) return;
+        openTeamSidesheet(activeTeam);
+    }, [isEditing, editableServices]);
 
     if (loading) {
         return <div>Loading...</div>;
