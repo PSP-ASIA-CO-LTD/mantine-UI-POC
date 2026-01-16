@@ -108,6 +108,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 value={businessInfo.businessName}
                 onChange={(e) => setBusinessInfo({ ...businessInfo, businessName: e.target.value })}
                 required
+                data-er-field="BUSINESS.business_name"
               />
 
               <TextInput
@@ -116,6 +117,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 value={businessInfo.businessType}
                 onChange={(e) => setBusinessInfo({ ...businessInfo, businessType: e.target.value })}
                 required
+                data-er-field="BUSINESS.business_type"
               />
 
               <Textarea
@@ -125,6 +127,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 onChange={(e) => setBusinessInfo({ ...businessInfo, address: e.target.value })}
                 required
                 rows={3}
+                data-er-field="BUSINESS.address"
               />
 
               <TextInput
@@ -134,6 +137,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 value={businessInfo.phone}
                 onChange={(e) => setBusinessInfo({ ...businessInfo, phone: e.target.value })}
                 required
+                data-er-field="BUSINESS.phone"
               />
             </Stack>
           )}
@@ -203,6 +207,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                   value={facilityInfo.numberOfBeds}
                   onChange={(e) => setFacilityInfo({ ...facilityInfo, numberOfBeds: e.target.value })}
                   required
+                  data-er-field="VENUE.number_of_beds"
                 />
 
                 <TextInput
@@ -212,6 +217,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                   value={facilityInfo.numberOfFloors}
                   onChange={(e) => setFacilityInfo({ ...facilityInfo, numberOfFloors: e.target.value })}
                   required
+                  data-er-field="VENUE.number_of_floors"
                 />
               </Group>
 
@@ -221,6 +227,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 value={facilityInfo.operatingHours}
                 onChange={(e) => setFacilityInfo({ ...facilityInfo, operatingHours: e.target.value })}
                 required
+                data-er-field="VENUE.operating_hours"
               />
 
               <TextInput
@@ -229,6 +236,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 value={facilityInfo.licenseNumber}
                 onChange={(e) => setFacilityInfo({ ...facilityInfo, licenseNumber: e.target.value })}
                 required
+                data-er-field="VENUE.license_number"
               />
             </Stack>
           )}
@@ -244,6 +252,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 value={preferences.timezone}
                 onChange={(e) => setPreferences({ ...preferences, timezone: e.target.value })}
                 required
+                data-er-field="BUSINESS.timezone"
               />
 
               <TextInput
@@ -252,6 +261,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 value={preferences.currency}
                 onChange={(e) => setPreferences({ ...preferences, currency: e.target.value })}
                 required
+                data-er-field="BUSINESS.currency"
               />
 
               <TextInput
@@ -260,6 +270,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 value={preferences.language}
                 onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
                 required
+                data-er-field="BUSINESS.language"
               />
 
               <Paper
@@ -338,8 +349,8 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 backgroundColor: index === currentStep
                   ? 'var(--mantine-color-blue-6)'
                   : index < currentStep
-                  ? 'var(--mantine-color-blue-4)'
-                  : 'var(--mantine-color-gray-3)',
+                    ? 'var(--mantine-color-blue-4)'
+                    : 'var(--mantine-color-gray-3)',
                 transition: 'background-color 0.3s'
               }}
             />

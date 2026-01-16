@@ -7,11 +7,14 @@ import { Packages } from './pages/Packages';
 import { Teams } from './pages/Teams';
 import { Staff } from './pages/Staff';
 import { SidesheetProvider } from './contexts/SidesheetContext';
+import { DebugProvider } from './contexts/DebugContext';
+import { DebugOverlay } from './components/DebugOverlay';
 import './App.css';
 
 function App() {
     return (
         <BrowserRouter>
+            <DebugProvider>
             <SidesheetProvider>
                 <AppShell
                     navbar={{ width: 280, breakpoint: 'sm' }}
@@ -31,7 +34,9 @@ function App() {
                         </Routes>
                     </AppShell.Main>
                 </AppShell>
+                <DebugOverlay />
             </SidesheetProvider>
+            </DebugProvider>
         </BrowserRouter>
     );
 }

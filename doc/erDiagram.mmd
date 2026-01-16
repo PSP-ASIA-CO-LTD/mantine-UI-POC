@@ -1,150 +1,157 @@
-graph TD
-    %% Resident Domain
-    RESIDENT["RESIDENT<br/>---<br/>first_name<br/>last_name<br/>date_of_birth<br/>gender<br/>photo_url<br/>emergency_contact_name<br/>emergency_contact_phone"]
+flowchart TB
+    %% ==========================================
+    %% CLIENT & BUSINESS
+    %% ==========================================
+    CLIENT["<b>CLIENT</b>
+    ─────────────────
+    uuid <b>id</b> PK
+    string <b>name</b>
+    string <b>contact_info</b>"]
+
+    BUSINESS["<b>BUSINESS</b>
+    ─────────────────
+    uuid <b>id</b> PK
+    uuid <b>client_id</b> FK
+    string <b>business_name</b>
+    string <b>business_type</b>
+    string <b>address</b>
+    string <b>phone</b>
+    string <b>timezone</b>
+    string <b>currency</b>
+    string <b>language</b>"]
+
+    %% ==========================================
+    %% VENUE (Building/Facility)
+    %% ==========================================
+    subgraph VenueDomain["🏢 Venue Domain"]
+        direction LR
+        VENUE["<b>VENUE</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>business_id</b> FK
+        string <b>venue_name</b>
+        string <b>address</b>
+        int <b>room_count</b>
+        int <b>number_of_beds</b>
+        int <b>number_of_floors</b>
+        string <b>operating_hours</b>
+        string <b>license_number</b>"]
+
+        ROOM["<b>ROOM</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>venue_id</b> FK
+        string <b>room_number</b>
+        string <b>room_type</b>
+        string <b>occupancy_status</b>"]
+    end
+
+    %% ==========================================
+    %% ORGANIZATIONAL STRUCTURE
+    %% ==========================================
+    subgraph OrgDomain["👥 Organization Domain"]
+        direction TB
+        DEPARTMENT["<b>DEPARTMENT</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>business_id</b> FK
+        string <b>department_name</b>
+        text <b>description</b>"]
+
+        STAFF["<b>STAFF</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>department_id</b> FK
+        string <b>name</b>
+        string <b>role</b>
+        string <b>status</b>"]
+
+        STAFF_VENUE["<b>STAFF_VENUE</b>
+        ─────────────────
+        uuid <b>staff_id</b> FK
+        uuid <b>venue_id</b> FK
+        string <b>role_in_venue</b>"]
+    end
+
+    %% ==========================================
+    %% SERVICE & TASK SYSTEM
+    %% ==========================================
+    subgraph ServiceDomain["🛠️ Service Domain"]
+        direction TB
+        TASK["<b>TASK (SERVICE)</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>department_id</b> FK
+        string <b>title</b>
+        text <b>description</b>
+        decimal <b>price</b>
+        string <b>unit_type</b> (per room/bed/visit)
+        string <b>interval</b> (frequency)
+        int <b>duration_minutes</b>"]
+    end
+
+    %% ==========================================
+    %% SALE SYSTEM (PACKAGES)
+    %% ==========================================
+    subgraph SaleDomain["💰 Sale System"]
+        direction TB
+        SALE_PACKAGE["<b>SALE PACKAGE</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>business_id</b> FK
+        uuid <b>created_by_staff_id</b> FK
+        string <b>name</b>
+        text <b>description</b>
+        decimal <b>price</b> (total price)
+        decimal <b>package_margin</b>
+        int <b>duration_days</b>
+        decimal <b>total_base_cost</b>"]
+
+        PACKAGE_ITEM["<b>PACKAGE_ITEM</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>package_id</b> FK
+        uuid <b>task_id</b> FK
+        int <b>total_occurrences</b>
+        int <b>room_multiplier</b>
+        decimal <b>unit_cost_at_sale</b>
+        decimal <b>total_item_cost</b>"]
+    end
+
+    %% ==========================================
+    %% RELATIONSHIPS
+    %% ==========================================
     
-    RESIDENT_PACKAGE["RESIDENT_PACKAGE<br/>---<br/>start_date<br/>end_date<br/>status"]
+    CLIENT -->|1:N| BUSINESS
+    BUSINESS -->|1:N| VENUE
+    BUSINESS -->|1:N| DEPARTMENT
+    BUSINESS -->|1:N| SALE_PACKAGE
     
-    CARE_PLAN["CARE_PLAN<br/>---<br/>plan_name<br/>description<br/>start_date<br/>end_date<br/>status"]
+    VENUE -->|1:N| ROOM
+    DEPARTMENT -->|1:N| STAFF
+    DEPARTMENT -->|1:N| TASK
     
-    MEDICAL_RECORD["MEDICAL_RECORD<br/>---<br/>record_date<br/>diagnosis<br/>treatment<br/>notes"]
+    STAFF -->|N:N| STAFF_VENUE
+    VENUE -->|N:N| STAFF_VENUE
     
-    PRESCRIPTION["PRESCRIPTION<br/>---<br/>dosage<br/>frequency<br/>route<br/>start_date<br/>end_date<br/>status<br/>special_instructions"]
+    SALE_PACKAGE -->|1:N| PACKAGE_ITEM
+    PACKAGE_ITEM -->|N:1| TASK
     
-    VITAL_SIGNS["VITAL_SIGNS<br/>---<br/>measurement_date<br/>blood_pressure_systolic<br/>blood_pressure_diastolic<br/>heart_rate<br/>temperature<br/>respiratory_rate<br/>oxygen_saturation<br/>weight<br/>notes"]
+    STAFF -->|Calculates| SALE_PACKAGE
     
-    ACTIVITY_LOG["ACTIVITY_LOG<br/>---<br/>activity_type<br/>activity_date<br/>duration_minutes<br/>description"]
+    %% ==========================================
+    %% STYLING
+    %% ==========================================
+    classDef mainStyle fill:#f5f5f5,stroke:#333,stroke-width:2px
+    classDef clientStyle fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
+    classDef venueStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef orgStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef serviceStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef saleStyle fill:#fff9c4,stroke:#f9a825,stroke-width:2px
     
-    CARE_ACTIVITY["CARE_ACTIVITY<br/>---<br/>activity_name<br/>description<br/>frequency<br/>scheduled_time<br/>status"]
-    
-    THERAPY_SESSION["THERAPY_SESSION<br/>---<br/>therapy_type<br/>session_date<br/>duration_minutes<br/>notes<br/>progress_rating"]
-    
-    ADMINISTRATION_LOG["ADMINISTRATION_LOG<br/>---<br/>administered_date<br/>administered_time<br/>dosage_given<br/>status<br/>notes"]
-    
-    FAMILY_MEMBER["FAMILY_MEMBER<br/>---<br/>first_name<br/>last_name<br/>relationship<br/>phone<br/>email<br/>address<br/>is_emergency_contact<br/>photo_url"]
-    
-    MESSAGE["MESSAGE<br/>---<br/>sender_type<br/>message_content<br/>sent_date<br/>is_read"]
-    
-    VISIT_LOG["VISIT_LOG<br/>---<br/>visit_date<br/>check_in_time<br/>check_out_time<br/>purpose<br/>notes"]
-    
-    RESIDENT -->|1 to many| RESIDENT_PACKAGE
-    RESIDENT -->|1 to many| CARE_PLAN
-    RESIDENT -->|1 to many| MEDICAL_RECORD
-    RESIDENT -->|1 to many| PRESCRIPTION
-    RESIDENT -->|1 to many| VITAL_SIGNS
-    RESIDENT -->|1 to many| ACTIVITY_LOG
-    RESIDENT -->|1 to many| FAMILY_MEMBER
-    
-    CARE_PLAN -->|1 to many| CARE_ACTIVITY
-    CARE_PLAN -->|1 to many| THERAPY_SESSION
-    
-    FAMILY_MEMBER -->|1 to many| MESSAGE
-    FAMILY_MEMBER -->|1 to many| VISIT_LOG
-    
-    PRESCRIPTION -->|many to 1| RESIDENT
-    ADMINISTRATION_LOG -->|many to 1| RESIDENT
-    
-    %% Medication Domain
-    MEDICATION["MEDICATION<br/>---<br/>medication_name<br/>generic_name<br/>medication_type<br/>manufacturer<br/>description<br/>side_effects<br/>contraindications<br/>storage_requirements"]
-    
-    MEDICATION -->|1 to many| PRESCRIPTION
-    MEDICATION -->|1 to many| ADMINISTRATION_LOG
-    
-    %% Package Domain
-    PACKAGE["PACKAGE<br/>---<br/>package_name<br/>description<br/>selling_price<br/>margin_price<br/>duration_months<br/>status"]
-    
-    PACKAGE_SERVICE["PACKAGE_SERVICE<br/>---<br/>quantity_included"]
-    
-    SERVICE["SERVICE<br/>---<br/>service_name<br/>description<br/>service_type<br/>unit_price<br/>duration_minutes<br/>status"]
-    
-    PACKAGE_TASK["PACKAGE_TASK<br/>---<br/>quantity_included"]
-    
-    PACKAGE -->|1 to many| PACKAGE_SERVICE
-    PACKAGE_SERVICE -->|many to 1| SERVICE
-    PACKAGE -->|1 to many| PACKAGE_TASK
-    PACKAGE_TASK -->|many to 1| TASK
-    
-    %% Employee Domain
-    EMPLOYEE["EMPLOYEE<br/>---<br/>first_name<br/>last_name<br/>email<br/>phone<br/>position<br/>hire_date<br/>employment_status<br/>photo_url"]
-    
-    SHIFT["SHIFT<br/>---<br/>shift_date<br/>start_time<br/>end_time<br/>shift_type<br/>status<br/>notes"]
-    
-    DEPARTMENT["DEPARTMENT<br/>---<br/>department_name<br/>description"]
-    
-    TASK["TASK<br/>---<br/>title<br/>description<br/>priority<br/>due_date<br/>status"]
-    
-    TASK_TYPE["TASK_TYPE<br/>---<br/>type_name<br/>description<br/>default_priority"]
-    
-    TASK_LOG["TASK_LOG<br/>---<br/>action_date<br/>action_type<br/>notes"]
-    
-    EMPLOYEE -->|1 to many| TASK
-    EMPLOYEE -->|1 to many| SHIFT
-    EMPLOYEE -->|many to 1| DEPARTMENT
-    
-    TASK -->|many to 1| TASK_TYPE
-    TASK -->|many to 1| DEPARTMENT
-    TASK -->|1 to many| TASK_LOG
-    
-    %% Facility Domain
-    ROOM_BED["ROOM_BED<br/>---<br/>room_number<br/>bed_number<br/>room_type<br/>floor_number<br/>occupancy_status<br/>amenities"]
-    
-    FACILITY["FACILITY<br/>---<br/>facility_name<br/>address<br/>city<br/>state<br/>postal_code<br/>phone<br/>email<br/>capacity<br/>facility_type"]
-    
-    MAINTENANCE_REQUEST["MAINTENANCE_REQUEST<br/>---<br/>request_date<br/>issue_description<br/>priority<br/>status<br/>completion_date<br/>resolution_notes"]
-    
-    ROOM_BED -->|many to 1| FACILITY
-    ROOM_BED -->|1 to many| MAINTENANCE_REQUEST
-    
-    %% Business Domain
-    BUSINESS["BUSINESS<br/>---<br/>business_name<br/>business_type<br/>address<br/>phone<br/>number_of_beds<br/>number_of_floors<br/>operating_hours<br/>license_number<br/>timezone<br/>currency<br/>language"]
-    
-    BUSINESS -->|1 to many| DEPARTMENT
-    BUSINESS -->|1 to many| PACKAGE
-    FACILITY -->|many to 1| BUSINESS
-    
-    %% Financial Domain
-    CONTRACT["CONTRACT<br/>---<br/>contract_number<br/>start_date<br/>end_date<br/>monthly_rate<br/>payment_terms<br/>deposit_amount<br/>status<br/>signed_date<br/>contract_document_url"]
-    
-    BILLING["BILLING<br/>---<br/>billing_period_start<br/>billing_period_end<br/>amount_due<br/>amount_paid<br/>balance<br/>due_date<br/>status"]
-    
-    PAYMENT["PAYMENT<br/>---<br/>payment_date<br/>amount<br/>payment_method<br/>transaction_reference<br/>notes"]
-    
-    INVOICE["INVOICE<br/>---<br/>invoice_number<br/>invoice_date<br/>total_amount<br/>tax_amount<br/>discount_amount<br/>invoice_document_url"]
-    
-    CONTRACT -->|1 to many| BILLING
-    BILLING -->|1 to many| PAYMENT
-    BILLING -->|1 to 0 or 1| INVOICE
-    
-    %% Inventory Domain
-    INVENTORY["INVENTORY<br/>---<br/>quantity_on_hand<br/>quantity_reserved<br/>reorder_level<br/>reorder_quantity<br/>location<br/>last_restocked_date"]
-    
-    PRODUCT["PRODUCT<br/>---<br/>product_name<br/>description<br/>category<br/>unit_of_measure<br/>unit_cost<br/>supplier_name<br/>sku<br/>barcode<br/>status"]
-    
-    PURCHASE_ORDER["PURCHASE_ORDER<br/>---<br/>order_number<br/>order_date<br/>expected_delivery_date<br/>total_amount<br/>status<br/>notes"]
-    
-    VENDOR["VENDOR<br/>---<br/>vendor_name<br/>contact_person<br/>phone<br/>email<br/>address<br/>payment_terms<br/>status"]
-    
-    GOODS_RECEIPT["GOODS_RECEIPT<br/>---<br/>receipt_date<br/>quantity_received<br/>condition<br/>notes"]
-    
-    INVENTORY -->|1 to 1| PRODUCT
-    PURCHASE_ORDER -->|many to many| PRODUCT
-    PURCHASE_ORDER -->|many to 1| VENDOR
-    PURCHASE_ORDER -->|1 to 0 or 1| GOODS_RECEIPT
-    
-    %% Styling for domains
-    classDef residentDomain fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef medicationDomain fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef packageDomain fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    classDef employeeDomain fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    classDef facilityDomain fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    classDef businessDomain fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
-    classDef financialDomain fill:#fff9c4,stroke:#f9a825,stroke-width:2px
-    classDef inventoryDomain fill:#e0f2f1,stroke:#00897b,stroke-width:2px
-    
-    class RESIDENT,RESIDENT_PACKAGE,CARE_PLAN,MEDICAL_RECORD,PRESCRIPTION,VITAL_SIGNS,ACTIVITY_LOG,CARE_ACTIVITY,THERAPY_SESSION,ADMINISTRATION_LOG,FAMILY_MEMBER,MESSAGE,VISIT_LOG residentDomain
-    class MEDICATION medicationDomain
-    class PACKAGE,PACKAGE_SERVICE,PACKAGE_TASK,SERVICE packageDomain
-    class EMPLOYEE,SHIFT,DEPARTMENT,TASK,TASK_TYPE,TASK_LOG employeeDomain
-    class ROOM_BED,FACILITY,MAINTENANCE_REQUEST facilityDomain
-    class BUSINESS businessDomain
-    class CONTRACT,BILLING,PAYMENT,INVOICE financialDomain
-    class INVENTORY,PRODUCT,PURCHASE_ORDER,VENDOR,GOODS_RECEIPT inventoryDomain
+    class CLIENT clientStyle
+    class BUSINESS clientStyle
+    class VENUE,ROOM venueStyle
+    class DEPARTMENT,STAFF,STAFF_VENUE orgStyle
+    class TASK serviceStyle
+    class SALE_PACKAGE,PACKAGE_ITEM saleStyle

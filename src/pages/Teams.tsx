@@ -30,17 +30,17 @@ export function Teams() {
         // Left Pane: Team Information (removed duplicate Team Name section)
         const leftPane = (
             <div>
-                {buildLeftSection('Department', <Badge color="gray" size="lg">{team.dept}</Badge>)}
-                
+                {buildLeftSection('Department', <Badge color="gray" size="lg" data-er-field="DEPARTMENT.department_name">{team.dept}</Badge>)}
+
                 <Divider my="xl" />
-                
+
                 <div style={{ marginTop: '2rem' }}>
-                    <Text fw={600} mb="md" size="sm">Department Members</Text>
+                    <Text fw={600} mb="md" size="sm" data-er-field="DEPARTMENT.staff">Department Members</Text>
                     {team.members && team.members.length > 0 ? (
                         <List size="sm" spacing="xs">
                             {team.members.map((memberId, idx) => (
-                                <List.Item key={idx}>
-                                    <Text size="sm" c="dimmed">{memberId}</Text>
+                                <List.Item key={idx} data-er-field="STAFF">
+                                    <Text size="sm" c="dimmed" data-er-field="STAFF.name">{memberId}</Text>
                                 </List.Item>
                             ))}
                         </List>
@@ -61,14 +61,14 @@ export function Teams() {
                     {team.assignmentTypes && team.assignmentTypes.length > 0 ? (
                         <Stack gap="md">
                             {team.assignmentTypes.map((at, index) => (
-                                <Card key={index} padding="md" withBorder>
+                                <Card key={index} padding="md" withBorder data-er-field="TASK">
                                     <Stack gap="xs">
-                                        <Text fw={500}>{at.name}</Text>
+                                        <Text fw={500} data-er-field="TASK.title">{at.name}</Text>
                                         {at.description && (
-                                            <Text size="sm" c="dimmed">{at.description}</Text>
+                                            <Text size="sm" c="dimmed" data-er-field="TASK.description">{at.description}</Text>
                                         )}
                                         {at.price > 0 && (
-                                            <Text size="sm" c="dimmed">฿{at.price.toLocaleString()}</Text>
+                                            <Text size="sm" c="dimmed" data-er-field="TASK.price">฿{at.price.toLocaleString()}</Text>
                                         )}
                                     </Stack>
                                 </Card>
@@ -119,16 +119,17 @@ export function Teams() {
             <Grid>
                 {teams.map((team) => (
                     <Grid.Col key={team.id} span={{ base: 12, sm: 6, md: 4 }}>
-                        <Card 
-                            padding="lg" 
-                            radius="md" 
-                            withBorder 
+                        <Card
+                            padding="lg"
+                            radius="md"
+                            withBorder
                             style={{ cursor: 'pointer' }}
                             onClick={() => handleTeamClick(team)}
+                            data-er-field="DEPARTMENT"
                         >
                             <Stack gap="xs">
                                 <Group justify="space-between">
-                                    <Text fw={600} size="lg">{team.name}</Text>
+                                    <Text fw={600} size="lg" data-er-field="DEPARTMENT.department_name">{team.name}</Text>
                                     <Badge color="gray">{team.dept}</Badge>
                                 </Group>
                                 <Group gap="xs">

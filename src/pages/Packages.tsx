@@ -53,17 +53,17 @@ export function Packages() {
             <div>
                 {buildLeftSection(
                     'Price',
-                    <Badge color="blue" size="lg">
+                    <Badge color="blue" size="lg" data-er-field="SALE_PACKAGE.price">
                         ฿{pkg.price.toLocaleString()}
                     </Badge>
                 )}
                 {buildLeftSection(
                     'Duration',
-                    <Text>{pkg.duration} days</Text>
+                    <Text data-er-field="SALE_PACKAGE.duration_days">{pkg.duration} days</Text>
                 )}
                 {buildLeftSection(
                     'Description',
-                    <Text size="sm" c="dimmed">
+                    <Text size="sm" c="dimmed" data-er-field="SALE_PACKAGE.description">
                         {pkg.description}
                     </Text>
                 )}
@@ -72,15 +72,15 @@ export function Packages() {
 
         const rightPane = (
             <div>
-                <Text fw={600} mb="md">
+                <Text fw={600} mb="md" data-er-field="SALE_PACKAGE.items">
                     Services ({editableServices.length})
                 </Text>
 
                 {editableServices.map((service, idx) => (
-                    <Card key={idx} padding="md" mb="sm" withBorder>
+                    <Card key={idx} padding="md" mb="sm" withBorder data-er-field="TASK">
                         <Stack gap="xs">
                             <Group justify="space-between">
-                                <Text fw={500}>{service.title}</Text>
+                                <Text fw={500} data-er-field="TASK.title">{service.title}</Text>
 
                                 {isEditing ? (
                                     <Button
@@ -95,22 +95,22 @@ export function Packages() {
                                         Remove
                                     </Button>
                                 ) : (
-                                    <Badge size="sm">
+                                    <Badge size="sm" data-er-field="TASK.department_id">
                                         {service.dept}
                                     </Badge>
                                 )}
                             </Group>
 
-                            <Text size="sm" c="dimmed">
+                            <Text size="sm" c="dimmed" data-er-field="TASK.description">
                                 {service.description}
                             </Text>
 
                             <Group gap="xs">
-                                <Text size="xs" c="dimmed">
+                                <Text size="xs" c="dimmed" data-er-field="TASK.interval">
                                     {service.interval}
                                 </Text>
                                 <Text size="xs" c="dimmed">•</Text>
-                                <Text size="xs" c="dimmed">
+                                <Text size="xs" c="dimmed" data-er-field="TASK.price">
                                     ฿{service.price.toLocaleString()}
                                 </Text>
                             </Group>
@@ -189,27 +189,28 @@ export function Packages() {
                             withBorder
                             style={{ cursor: 'pointer' }}
                             onClick={() => handlePackageClick(pkg)}
+                            data-er-field="SALE_PACKAGE"
                         >
                             <Stack gap="xs">
                                 <Group justify="space-between">
-                                    <Text fw={600} size="lg">
+                                    <Text fw={600} size="lg" data-er-field="SALE_PACKAGE.name">
                                         {pkg.name}
                                     </Text>
-                                    <Badge color="blue">
+                                    <Badge color="blue" data-er-field="SALE_PACKAGE.price">
                                         ฿{pkg.price.toLocaleString()}
                                     </Badge>
                                 </Group>
 
-                                <Text size="sm" c="dimmed" lineClamp={2}>
+                                <Text size="sm" c="dimmed" lineClamp={2} data-er-field="SALE_PACKAGE.description">
                                     {pkg.description}
                                 </Text>
 
                                 <Group gap="xs">
-                                    <Text size="xs" c="dimmed">
+                                    <Text size="xs" c="dimmed" data-er-field="SALE_PACKAGE.duration_days">
                                         Duration: {pkg.duration} days
                                     </Text>
                                     <Text size="xs" c="dimmed">•</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text size="xs" c="dimmed" data-er-field="SALE_PACKAGE.items">
                                         {pkg.services.length} services
                                     </Text>
                                 </Group>

@@ -47,22 +47,22 @@ export function Staff() {
                 </Table.Thead>
                 <Table.Tbody>
                     {staff.map((member) => (
-                        <Table.Tr key={member.id}>
+                        <Table.Tr key={member.id} data-er-field="STAFF">
                             <Table.Td>
                                 <Group gap="sm">
                                     <Avatar color="blue" radius="md">
                                         {member.name.charAt(0)}
                                     </Avatar>
                                     <div>
-                                        <Text fw={500}>{member.name}</Text>
-                                        <Text size="xs" c="dimmed">ID: {member.id}</Text>
+                                        <Text fw={500} data-er-field="STAFF.name">{member.name}</Text>
+                                        <Text size="xs" c="dimmed" data-er-field="STAFF.id">ID: {member.id}</Text>
                                     </div>
                                 </Group>
                             </Table.Td>
-                            <Table.Td>{member.dept}</Table.Td>
-                            <Table.Td>{member.role}</Table.Td>
+                            <Table.Td data-er-field="STAFF.department_id">{member.dept}</Table.Td>
+                            <Table.Td data-er-field="STAFF.role">{member.role}</Table.Td>
                             <Table.Td>
-                                <Badge color="green">{member.status}</Badge>
+                                <Badge color="green" data-er-field="STAFF.status">{member.status}</Badge>
                             </Table.Td>
                             <Table.Td>
                                 <Group justify="flex-end">
