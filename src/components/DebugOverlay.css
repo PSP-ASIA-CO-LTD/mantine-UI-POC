@@ -50,23 +50,9 @@ body.debug-mode [data-er-field] {
     position: relative;
 }
 
+/* Hide labels by default - they will be shown via React overlay on hover */
 body.debug-mode [data-er-field]::after {
-    content: attr(data-er-field);
-    position: absolute;
-    top: -28px;
-    left: 0;
-    font-size: 12px;
-    font-weight: 600;
-    font-family: monospace;
-    background: var(--debug-color, #333);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 999999;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    letter-spacing: 0.02em;
+    display: none;
 }
 
 /* Domain-specific colors using CSS classes */

@@ -39,7 +39,7 @@ function parseErField(value: string): { entity: string; field: string } | null {
 export function DebugOverlay() {
     const { isDebugMode, toggleDebugMode } = useDebug();
     const [fields, setFields] = useState<FieldInfo[]>([]);
-    const [hoveredField, setHoveredField] = useState<FieldInfo | null>(null);
+    const [hoveredFieldId, setHoveredFieldId] = useState<string | null>(null);
 
     // Drag state
     const [panelPosition, setPanelPosition] = useState({ x: 20, y: 20 });
@@ -145,18 +145,32 @@ export function DebugOverlay() {
         }
     }, [isDebugMode]);
 
-    const handleFieldClick = (field: FieldInfo) => {
-        field.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Create a field identifier helper
+    const getFieldId = (entity: string, field: string) => `${entity}.${field}`;
+
+    const handleFieldClick = (entity: string, field: string) => {
+        // Find the first instance of this field and scroll to it
+        const firstInstance = fields.find(
+            f => f.entity === entity && f.field === field
+        );
+        if (firstInstance) {
+            firstInstance.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     };
 
-    // Group fields by entity
+    // Group fields by entity, then by unique field name
+    // For display, we only show one entry per unique field
     const groupedFields = fields.reduce((acc, field) => {
         if (!acc[field.entity]) {
-            acc[field.entity] = [];
+            acc[field.entity] = new Map<string, FieldInfo>();
         }
-        acc[field.entity].push(field);
+        const fieldId = field.field;
+        // Only keep the first instance of each field for display
+        if (!acc[field.entity].has(fieldId)) {
+            acc[field.entity].set(fieldId, field);
+        }
         return acc;
-    }, {} as Record<string, FieldInfo[]>);
+    }, {} as Record<string, Map<string, FieldInfo>>);
 
     return (
         <>
@@ -176,25 +190,31 @@ export function DebugOverlay() {
 
             {isDebugMode && (
                 <>
-                    {/* Field Highlights */}
+                    {/* Field Highlights - Only show when hovered */}
                     {fields.map((field, idx) => {
                         const color = entityColors[field.entity] || '#666';
-                        const isHovered = hoveredField === field;
+                        const fieldId = getFieldId(field.entity, field.field);
+                        const isHovered = hoveredFieldId === fieldId;
+                        
+                        // Only render if this field is being hovered
+                        if (!isHovered) return null;
+                        
+                        // Recalculate rect for accuracy
+                        const currentRect = field.element.getBoundingClientRect();
                         return (
                             <div
                                 key={`${field.entity}.${field.field}-${idx}`}
-                                className={`debug-field-highlight ${isHovered ? 'hovered' : ''}`}
+                                className="debug-field-highlight hovered"
                                 style={{
                                     position: 'fixed',
-                                    left: field.rect.left,
-                                    top: field.rect.top,
-                                    width: field.rect.width,
-                                    height: field.rect.height,
+                                    left: currentRect.left,
+                                    top: currentRect.top,
+                                    width: currentRect.width,
+                                    height: currentRect.height,
                                     border: `2px solid ${color}`,
                                     borderRadius: 4,
                                     pointerEvents: 'none',
                                     zIndex: 99998,
-                                    backgroundColor: isHovered ? `${color}22` : 'transparent',
                                 }}
                             >
                                 <span
@@ -253,43 +273,70 @@ export function DebugOverlay() {
                             </Text>
                         ) : (
                             <Stack gap="sm">
-                                {Object.entries(groupedFields).map(([entity, entityFields]) => (
-                                    <div key={entity}>
-                                        <Badge
-                                            size="sm"
-                                            color="gray"
-                                            variant="outline"
-                                            mb={4}
-                                            style={{
-                                                borderColor: entityColors[entity] || '#666',
-                                                color: entityColors[entity] || '#666',
-                                            }}
-                                        >
-                                            {entity}
-                                        </Badge>
-                                        <Stack gap={4}>
-                                            {entityFields.map((field, idx) => (
-                                                <Text
-                                                    key={`${field.field}-${idx}`}
-                                                    size="xs"
-                                                    className="debug-field-item"
-                                                    onClick={() => handleFieldClick(field)}
-                                                    onMouseEnter={() => setHoveredField(field)}
-                                                    onMouseLeave={() => setHoveredField(null)}
-                                                    style={{
-                                                        cursor: 'pointer',
-                                                        padding: '2px 8px',
-                                                        borderRadius: 4,
-                                                        backgroundColor: hoveredField === field ? '#f0f0f0' : 'transparent',
-                                                        fontFamily: 'monospace',
-                                                    }}
-                                                >
-                                                    .{field.field}
-                                                </Text>
-                                            ))}
-                                        </Stack>
-                                    </div>
-                                ))}
+                                {Object.entries(groupedFields).map(([entity, fieldMap]) => {
+                                    const uniqueFields = Array.from(fieldMap.values());
+                                    // Count total instances of each field
+                                    const fieldCounts = fields.reduce((acc, field) => {
+                                        if (field.entity === entity) {
+                                            const count = acc.get(field.field) || 0;
+                                            acc.set(field.field, count + 1);
+                                        }
+                                        return acc;
+                                    }, new Map<string, number>());
+
+                                    return (
+                                        <div key={entity}>
+                                            <Badge
+                                                size="sm"
+                                                color="gray"
+                                                variant="outline"
+                                                mb={4}
+                                                style={{
+                                                    borderColor: entityColors[entity] || '#666',
+                                                    color: entityColors[entity] || '#666',
+                                                }}
+                                            >
+                                                {entity}
+                                            </Badge>
+                                            <Stack gap={4}>
+                                                {uniqueFields.map((field) => {
+                                                    const fieldId = getFieldId(entity, field.field);
+                                                    const count = fieldCounts.get(field.field) || 1;
+                                                    const isHovered = hoveredFieldId === fieldId;
+                                                    return (
+                                                        <Text
+                                                            key={fieldId}
+                                                            size="xs"
+                                                            className="debug-field-item"
+                                                            onClick={() => handleFieldClick(entity, field.field)}
+                                                            onMouseEnter={() => setHoveredFieldId(fieldId)}
+                                                            onMouseLeave={() => setHoveredFieldId(null)}
+                                                            style={{
+                                                                cursor: 'pointer',
+                                                                padding: '2px 8px',
+                                                                borderRadius: 4,
+                                                                backgroundColor: isHovered ? '#f0f0f0' : 'transparent',
+                                                                fontFamily: 'monospace',
+                                                            }}
+                                                        >
+                                                            .{field.field}
+                                                            {count > 1 && (
+                                                                <Text
+                                                                    component="span"
+                                                                    size="xs"
+                                                                    c="dimmed"
+                                                                    ml={4}
+                                                                >
+                                                                    ({count})
+                                                                </Text>
+                                                            )}
+                                                        </Text>
+                                                    );
+                                                })}
+                                            </Stack>
+                                        </div>
+                                    );
+                                })}
                             </Stack>
                         )}
                     </Paper>

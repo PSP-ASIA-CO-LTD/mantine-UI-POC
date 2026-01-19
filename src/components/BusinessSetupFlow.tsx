@@ -99,17 +99,19 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
         >
           {/* Step 1: Business Information */}
           {currentStep === 0 && (
-            <Stack gap="md">
+            <Stack gap="md" data-er-field="BUSINESS">
               <Title order={3} mb="sm">Business Information</Title>
 
-              <TextInput
-                label="Business Name"
-                placeholder="Enter your nursing home name"
-                value={businessInfo.businessName}
-                onChange={(e) => setBusinessInfo({ ...businessInfo, businessName: e.target.value })}
-                required
-                data-er-field="BUSINESS.business_name"
-              />
+              <div data-er-field="BUSINESS">
+                <TextInput
+                  label="Business Name"
+                  placeholder="Enter your nursing home name"
+                  value={businessInfo.businessName}
+                  onChange={(e) => setBusinessInfo({ ...businessInfo, businessName: e.target.value })}
+                  required
+                  data-er-field="BUSINESS.business_name"
+                />
+              </div>
 
               <TextInput
                 label="Business Type"
@@ -196,7 +198,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
 
           {/* Step 3: Facility Details */}
           {currentStep === 2 && (
-            <Stack gap="md">
+            <Stack gap="md" data-er-field="VENUE">
               <Title order={3} mb="sm">Facility Details</Title>
 
               <Group grow>
