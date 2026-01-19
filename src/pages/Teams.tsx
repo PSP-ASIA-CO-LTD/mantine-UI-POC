@@ -51,8 +51,15 @@ export function Teams() {
         const leftPane = (
             <div>
                 {buildLeftSection(
+                    'Department ID',
+                    <Text size="sm" fw={500} data-er-field="DEPARTMENT.id">{team.id}</Text>
+                )}
+
+                <Divider my="xl" />
+
+                {buildLeftSection(
                     'Department',
-                    <Badge color="gray" size="lg">
+                    <Badge color="gray" size="lg" data-er-field="DEPARTMENT.business_id">
                         {team.dept}
                     </Badge>
                 )}
@@ -62,9 +69,9 @@ export function Teams() {
                 {buildLeftSection(
                     'Description',
                     team.description ? (
-                        <Text size="sm">{team.description}</Text>
+                        <Text size="sm" data-er-field="DEPARTMENT.description">{team.description}</Text>
                     ) : (
-                        <Text size="sm" c="dimmed">
+                        <Text size="sm" c="dimmed" data-er-field="DEPARTMENT.description">
                             No description provided
                         </Text>
                     )
@@ -102,10 +109,10 @@ export function Teams() {
                 </Text>
 
                 {editableServices.map((service, idx) => (
-                    <Card key={idx} padding="md" mb="sm" withBorder>
+                    <Card key={idx} padding="md" mb="sm" withBorder data-er-field="TASK">
                         <Stack gap="xs">
                             <Group justify="space-between">
-                                <Text fw={500}>{service.name}</Text>
+                                <Text fw={500} data-er-field="TASK.title">{service.name}</Text>
 
                                 {isEditing ? (
                                     <Button
@@ -120,18 +127,18 @@ export function Teams() {
                                         Remove
                                     </Button>
                                 ) : (
-                                    <Badge color="gray">{team.dept}</Badge>
+                                    <Badge color="gray" data-er-field="TASK.department_id">{team.dept}</Badge>
                                 )}
                             </Group>
 
                             {service.description && (
-                                <Text size="sm" c="dimmed">
+                                <Text size="sm" c="dimmed" data-er-field="TASK.description">
                                     {service.description}
                                 </Text>
                             )}
 
                             {service.price > 0 && (
-                                <Text size="sm" c="dimmed">
+                                <Text size="sm" c="dimmed" data-er-field="TASK.price">
                                     ฿{service.price.toLocaleString()}
                                 </Text>
                             )}
@@ -161,6 +168,7 @@ export function Teams() {
 
         open({
             title: team.name,
+            titleDataAttribute: 'DEPARTMENT.department_name',
             subtitle: 'Department Name',
             leftPane,
             rightPane,
@@ -202,13 +210,14 @@ export function Teams() {
                             withBorder
                             style={{ cursor: 'pointer' }}
                             onClick={() => handleTeamClick(team)}
+                            data-er-field="DEPARTMENT"
                         >
                             <Stack gap="xs">
                                 <Group justify="space-between">
-                                    <Text fw={600} size="lg">
+                                    <Text fw={600} size="lg" data-er-field="DEPARTMENT.department_name">
                                         {team.name}
                                     </Text>
-                                    <Badge color="gray">{team.dept}</Badge>
+                                    <Badge color="gray" data-er-field="DEPARTMENT.business_id">{team.dept}</Badge>
                                 </Group>
                                 <Group gap="xs">
                                     <Text size="xs" c="dimmed">

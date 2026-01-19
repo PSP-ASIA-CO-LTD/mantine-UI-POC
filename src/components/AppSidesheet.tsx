@@ -7,6 +7,7 @@ interface AppSidesheetProps {
     opened: boolean;
     onClose: () => void;
     title?: string;
+    titleDataAttribute?: string;
     subtitle?: string;
     leftPane?: ReactNode;
     rightPane?: ReactNode;
@@ -18,6 +19,7 @@ export function AppSidesheet({
     opened,
     onClose,
     title = '',
+    titleDataAttribute,
     subtitle,
     leftPane,
     rightPane,
@@ -85,7 +87,7 @@ export function AppSidesheet({
                                 {subtitle}
                             </Text>
                         )}
-                        <Title order={2} className="sidesheet-title">{title}</Title>
+                        <Title order={2} className="sidesheet-title" {...(titleDataAttribute ? { 'data-er-field': titleDataAttribute } : {})}>{title}</Title>
                     </div>
                     <Button
                         variant="subtle"
