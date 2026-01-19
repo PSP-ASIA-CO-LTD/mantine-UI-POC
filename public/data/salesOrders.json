@@ -1,0 +1,38 @@
+[
+  {
+    "id": "so-1",
+    "packageId": "pkg-1",
+    "packageName": "20-day Elder Recreation",
+    "residentId": "res-1",
+    "guardianId": "gdn-1",
+    "roomId": "room-101",
+    "checkIn": "2025-12-20",
+    "checkOut": "2026-01-08",
+    "adjustedDays": 20,
+    "basePrice": 85000,
+    "adjustedPrice": 85000,
+    "status": "active",
+    "createdAt": "2025-12-15T11:00:00Z",
+    "createdBy": "Manager Alice",
+    "paidAt": "2025-12-15T12:00:00Z",
+    "notes": "Regular check-in"
+  },
+  {
+    "id": "so-2",
+    "packageId": "pkg-2",
+    "packageName": "Golden Years Premium",
+    "residentId": "res-2",
+    "guardianId": "gdn-2",
+    "roomId": "room-103",
+    "checkIn": "2026-01-10",
+    "checkOut": "2026-02-09",
+    "adjustedDays": 30,
+    "basePrice": 120000,
+    "adjustedPrice": 120000,
+    "status": "paid",
+    "createdAt": "2025-12-18T16:00:00Z",
+    "createdBy": "Manager Alice",
+    "paidAt": "2025-12-19T09:00:00Z",
+    "notes": "Premium package with nursing support"
+  }
+]

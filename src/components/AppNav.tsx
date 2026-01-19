@@ -1,6 +1,15 @@
 import { NavLink } from 'react-router-dom';
 import { Stack, Text, Avatar, Group } from '@mantine/core';
-import { IconChartLine, IconBox, IconUsers, IconUser, IconSettings } from '@tabler/icons-react';
+import { 
+    IconChartLine, 
+    IconBox, 
+    IconUsers, 
+    IconUser, 
+    IconSettings,
+    IconShoppingCart,
+    IconReceipt,
+    IconCalendarCheck
+} from '@tabler/icons-react';
 import './AppNav.css';
 
 export function AppNav() {
@@ -12,28 +21,55 @@ export function AppNav() {
             </header>
             
             <nav className="app-nav-content">
-                <Stack gap="xs">
-                    <NavLink to="/business-setup" className="nav-link">
-                        <IconSettings size={20} />
-                        <span>Business Setup</span>
-                    </NavLink>
-                    <NavLink to="/dashboard" className="nav-link">
-                        <IconChartLine size={20} />
-                        <span>Dashboard</span>
-                    </NavLink>
-                    <NavLink to="/packages" className="nav-link">
-                        <IconBox size={20} />
-                        <span>Packages</span>
-                    </NavLink>
-                    <NavLink to="/teams" className="nav-link">
-                        <IconUsers size={20} />
-                        <span>Departments</span>
-                    </NavLink>
-                    <NavLink to="/staff" className="nav-link">
-                        <IconUser size={20} />
-                        <span>Staff</span>
-                    </NavLink>
-                </Stack>
+                <div className="nav-group">
+                    <div className="nav-group-label">Frontoffice</div>
+                    <Stack gap="xs">
+                        <NavLink to="/sales" end className="nav-link">
+                            <IconChartLine size={20} />
+                            <span>Sales Dashboard</span>
+                        </NavLink>
+                        <NavLink to="/sales/order" className="nav-link">
+                            <IconShoppingCart size={20} />
+                            <span>Create Sales Order</span>
+                        </NavLink>
+                    </Stack>
+                </div>
+
+                <div className="nav-group">
+                    <div className="nav-group-label">Operations</div>
+                    <Stack gap="xs">
+                        <NavLink to="/staff/tasks" className="nav-link">
+                            <IconCalendarCheck size={20} />
+                            <span>Staff Tasks</span>
+                        </NavLink>
+                    </Stack>
+                </div>
+
+                <div className="nav-group">
+                    <div className="nav-group-label">Backoffice</div>
+                    <Stack gap="xs">
+                        <NavLink to="/business-setup" className="nav-link">
+                            <IconSettings size={20} />
+                            <span>Business Setup</span>
+                        </NavLink>
+                        <NavLink to="/dashboard" className="nav-link">
+                            <IconReceipt size={20} />
+                            <span>Dashboard</span>
+                        </NavLink>
+                        <NavLink to="/packages" className="nav-link">
+                            <IconBox size={20} />
+                            <span>Packages</span>
+                        </NavLink>
+                        <NavLink to="/teams" className="nav-link">
+                            <IconUsers size={20} />
+                            <span>Departments</span>
+                        </NavLink>
+                        <NavLink to="/staff" end className="nav-link">
+                            <IconUser size={20} />
+                            <span>Staff</span>
+                        </NavLink>
+                    </Stack>
+                </div>
             </nav>
             
             <footer className="app-nav-footer">

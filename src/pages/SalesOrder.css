@@ -1,0 +1,44 @@
+.sales-order-page {
+    --_gap: var(--mantine-spacing-md);
+}
+
+.package-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--_gap);
+}
+
+.package-card {
+    transition: box-shadow 0.2s;
+}
+
+.package-card:hover {
+    box-shadow: var(--mantine-shadow-sm);
+}
+
+.room-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--_gap);
+}
+
+.room-card {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.room-card:hover {
+    border-color: var(--mantine-color-blue-4);
+    box-shadow: var(--mantine-shadow-sm);
+}
+
+.room-card.selected {
+    border-color: var(--mantine-color-green-6);
+    background-color: var(--mantine-color-green-0);
+}
+
+@media print {
+    .sales-order-page button {
+        display: none;
+    }
+}

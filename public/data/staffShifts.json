@@ -1,0 +1,82 @@
+[
+  {
+    "id": "shift-1",
+    "staffId": "st-3",
+    "staffName": "Mr.Chef Fryday",
+    "dept": "Kitchen",
+    "date": "2026-01-19",
+    "startTime": "06:00",
+    "endTime": "14:00",
+    "status": "scheduled"
+  },
+  {
+    "id": "shift-2",
+    "staffId": "st-4",
+    "staffName": "Miss Moppa Cleaner",
+    "dept": "Housekeeping",
+    "date": "2026-01-19",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "status": "scheduled"
+  },
+  {
+    "id": "shift-3",
+    "staffId": "st-5",
+    "staffName": "Dr. Prasert",
+    "dept": "Medical",
+    "date": "2026-01-19",
+    "startTime": "09:00",
+    "endTime": "17:00",
+    "status": "scheduled"
+  },
+  {
+    "id": "shift-4",
+    "staffId": "st-3",
+    "staffName": "Mr.Chef Fryday",
+    "dept": "Kitchen",
+    "date": "2026-01-20",
+    "startTime": "06:00",
+    "endTime": "14:00",
+    "status": "scheduled"
+  },
+  {
+    "id": "shift-5",
+    "staffId": "st-4",
+    "staffName": "Miss Moppa Cleaner",
+    "dept": "Housekeeping",
+    "date": "2026-01-20",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "status": "scheduled"
+  },
+  {
+    "id": "shift-6",
+    "staffId": "st-3",
+    "staffName": "Mr.Chef Fryday",
+    "dept": "Kitchen",
+    "date": "2026-01-21",
+    "startTime": "06:00",
+    "endTime": "14:00",
+    "status": "scheduled"
+  },
+  {
+    "id": "shift-7",
+    "staffId": "st-4",
+    "staffName": "Miss Moppa Cleaner",
+    "dept": "Housekeeping",
+    "date": "2026-01-21",
+    "startTime": "08:00",
+    "endTime": "16:00",
+    "status": "scheduled"
+  },
+  {
+    "id": "shift-8",
+    "staffId": "st-3",
+    "staffName": "Mr.Chef Fryday",
+    "dept": "Kitchen",
+    "date": "2026-01-22",
+    "startTime": "06:00",
+    "endTime": "14:00",
+    "status": "scheduled"
+  }
+]

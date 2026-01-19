@@ -1,0 +1,50 @@
+[
+  {
+    "id": "inv-1",
+    "salesOrderId": "so-1",
+    "invoiceNumber": "INV-2025-0001",
+    "guardianId": "gdn-1",
+    "guardianName": "สมชาย ใจดี",
+    "residentName": "คุณยาย สุขใจ",
+    "items": [
+      {
+        "description": "20-day Elder Recreation Package",
+        "quantity": 1,
+        "unitPrice": 85000,
+        "total": 85000
+      }
+    ],
+    "subtotal": 85000,
+    "tax": 5950,
+    "total": 90950,
+    "status": "paid",
+    "issuedAt": "2025-12-15T11:30:00Z",
+    "paidAt": "2025-12-15T12:00:00Z",
+    "paymentMethod": "transfer",
+    "notes": ""
+  },
+  {
+    "id": "inv-2",
+    "salesOrderId": "so-2",
+    "invoiceNumber": "INV-2025-0002",
+    "guardianId": "gdn-2",
+    "guardianName": "John Doe",
+    "residentName": "Grandma Smith",
+    "items": [
+      {
+        "description": "Golden Years Premium Package (30 days)",
+        "quantity": 1,
+        "unitPrice": 120000,
+        "total": 120000
+      }
+    ],
+    "subtotal": 120000,
+    "tax": 8400,
+    "total": 128400,
+    "status": "paid",
+    "issuedAt": "2025-12-18T16:30:00Z",
+    "paidAt": "2025-12-19T09:00:00Z",
+    "paymentMethod": "credit_card",
+    "notes": ""
+  }
+]
