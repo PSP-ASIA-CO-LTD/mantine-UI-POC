@@ -21,7 +21,6 @@ import type { Package, Service } from '../types';
 export function Packages() {
     const [packages, setPackages] = useState<Package[]>([]);
     const [loading, setLoading] = useState(true);
-
     const [activePackage, setActivePackage] = useState<Package | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editableServices, setEditableServices] = useState<Service[]>([]);
