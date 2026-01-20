@@ -88,6 +88,7 @@ export interface Guardian {
     email: string;
     address: string;
     relationship: string; // e.g., 'son', 'daughter', 'spouse', 'relative'
+    pays: boolean; // indicates if this guardian contributes to payment
     createdAt: string;
 }
 
@@ -223,4 +224,37 @@ export interface SalesDashboardStats {
     pendingPayments: number;
     activeResidents: number;
     recentSales: SalesOrder[];
+}
+
+// ==================== SALES ORDER STORAGE ====================
+
+export interface AdditionalServices {
+    additionalBed: boolean;
+    specialAmenities: string[];
+    selfProvidePampers: boolean;
+    selfProvideMedications: boolean;
+}
+
+export interface CompleteSalesOrderData {
+    id: string;
+    // Package info
+    package: Package | null;
+    adjustedDays: number;
+    checkIn: string | null; // ISO string
+    checkOut: string | null; // ISO string
+    // People
+    guardians: Guardian[];
+    primaryContactGuardianId: string | null;
+    resident: Resident | null;
+    // Room & services
+    room: Room | null;
+    additionalServices: AdditionalServices;
+    // Generated documents
+    salesOrder: SalesOrder | null;
+    invoice: Invoice | null;
+    contract: Contract | null;
+    // Meta
+    status: 'draft' | 'pending_payment' | 'paid' | 'completed';
+    createdAt: string;
+    updatedAt: string;
 }

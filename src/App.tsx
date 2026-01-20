@@ -8,9 +8,11 @@ import { Teams } from './pages/Teams';
 import { Staff } from './pages/Staff';
 import { SalesDashboard } from './pages/SalesDashboard';
 import { SalesOrderPage } from './pages/SalesOrder';
+import { SalesOrderInvoice } from './pages/SalesOrderInvoice';
 import { StaffTasks } from './pages/StaffTasks';
 import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
+import { SalesOrderProvider } from './contexts/SalesOrderContext';
 import { DebugOverlay } from './components/DebugOverlay';
 import './App.css';
 
@@ -46,6 +48,7 @@ function AppLayout() {
                     <Route path="/" element={<Navigate to="/sales" replace />} />
                     <Route path="/sales" element={<SalesDashboard />} />
                     <Route path="/sales/order" element={<SalesOrderPage />} />
+                    <Route path="/sales/order/invoice" element={<SalesOrderInvoice />} />
                     <Route path="/business-setup" element={<BusinessSetup />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/packages" element={<Packages />} />
@@ -61,10 +64,12 @@ function App() {
     return (
         <BrowserRouter>
             <DebugProvider>
+            <SalesOrderProvider>
             <SidesheetProvider>
                 <AppLayout />
                 <DebugOverlay />
             </SidesheetProvider>
+            </SalesOrderProvider>
             </DebugProvider>
         </BrowserRouter>
     );

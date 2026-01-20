@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Title,
@@ -23,6 +23,7 @@ import {
     Checkbox,
     Modal,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { DateInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { 
@@ -36,19 +37,37 @@ import {
     IconCheck,
     IconPrinter,
     IconMail,
-    IconArrowLeft
+    IconArrowLeft,
+    IconPlus,
+    IconTrash,
+    IconBed,
+    IconPhone
 } from '@tabler/icons-react';
 import { API } from '../api';
-import type { Package, Room, Guardian, Resident, SalesOrder, Invoice, Contract } from '../types';
+import { useSalesOrder } from '../contexts/SalesOrderContext';
+import type { Package, Room, Guardian, Resident, SalesOrder, Invoice, Contract, AdditionalServices } from '../types';
 import './SalesOrder.css';
+
+interface GuardianFormValues {
+    id?: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string;
+    address: string;
+    relationship: string;
+    pays: boolean;
+}
 
 interface CheckoutData {
     package: Package | null;
     adjustedDays: number;
     checkIn: Date | null;
-    guardian: Guardian | null;
+    guardians: Guardian[];
+    primaryContactGuardianId: string | null;
     resident: Resident | null;
     room: Room | null;
+    additionalServices: AdditionalServices;
     salesOrder: SalesOrder | null;
     invoice: Invoice | null;
     contract: Contract | null;
@@ -56,6 +75,8 @@ interface CheckoutData {
 
 export function SalesOrderPage() {
     const navigate = useNavigate();
+    const { currentDraft, initNewDraft, updateDraft, saveDraft } = useSalesOrder();
+    
     const [packages, setPackages] = useState<Package[]>([]);
     const [rooms, setRooms] = useState<Room[]>([]);
     const [loading, setLoading] = useState(true);
@@ -65,32 +86,140 @@ export function SalesOrderPage() {
         package: null,
         adjustedDays: 0,
         checkIn: null,
-        guardian: null,
+        guardians: [],
+        primaryContactGuardianId: null,
         resident: null,
         room: null,
+        additionalServices: {
+            additionalBed: false,
+            specialAmenities: [],
+            selfProvidePampers: false,
+            selfProvideMedications: false
+        },
         salesOrder: null,
         invoice: null,
         contract: null
     });
     const [processing, setProcessing] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [guardianForms, setGuardianForms] = useState<GuardianFormValues[]>([{
+        firstName: '',
+        lastName: '',
+        phone: '',
+        email: '',
+        address: '',
+        relationship: 'son',
+        pays: true
+    }]);
+    
+    // Payment modals state
+    const [showBankModal, setShowBankModal] = useState(false);
+    const [showCreditCardModal, setShowCreditCardModal] = useState(false);
+    const [selectedBank, setSelectedBank] = useState<string | null>(null);
+    const [creditCardLast4, setCreditCardLast4] = useState('');
+    const [showPromptPayModal, setShowPromptPayModal] = useState(false);
+    const [guardianErrors, setGuardianErrors] = useState<Record<number, Record<string, string>>>({});
 
-    const guardianForm = useForm({
-        initialValues: {
+    // Sync local state with context for persistence
+    const syncToContext = useCallback(() => {
+        updateDraft({
+            package: checkoutData.package,
+            adjustedDays: checkoutData.adjustedDays,
+            checkIn: checkoutData.checkIn?.toISOString() || null,
+            checkOut: checkoutData.checkIn && checkoutData.adjustedDays 
+                ? new Date(checkoutData.checkIn.getTime() + (checkoutData.adjustedDays - 1) * 24 * 60 * 60 * 1000).toISOString()
+                : null,
+            guardians: checkoutData.guardians,
+            primaryContactGuardianId: checkoutData.primaryContactGuardianId,
+            resident: checkoutData.resident,
+            room: checkoutData.room,
+            additionalServices: checkoutData.additionalServices,
+            salesOrder: checkoutData.salesOrder,
+            invoice: checkoutData.invoice,
+            contract: checkoutData.contract,
+            status: checkoutData.salesOrder?.status === 'paid' ? 'paid' 
+                : checkoutData.invoice ? 'pending_payment' 
+                : 'draft'
+        });
+    }, [checkoutData, updateDraft]);
+
+    // Initialize draft on mount or restore from context
+    useEffect(() => {
+        if (!currentDraft) {
+            initNewDraft();
+        } else if (currentDraft.package) {
+            // Restore state from existing draft
+            setCheckoutData({
+                package: currentDraft.package,
+                adjustedDays: currentDraft.adjustedDays,
+                checkIn: currentDraft.checkIn ? new Date(currentDraft.checkIn) : null,
+                guardians: currentDraft.guardians,
+                primaryContactGuardianId: currentDraft.primaryContactGuardianId,
+                resident: currentDraft.resident,
+                room: currentDraft.room,
+                additionalServices: currentDraft.additionalServices,
+                salesOrder: currentDraft.salesOrder,
+                invoice: currentDraft.invoice,
+                contract: currentDraft.contract
+            });
+            // Restore guardian forms from saved guardians
+            if (currentDraft.guardians.length > 0) {
+                setGuardianForms(currentDraft.guardians.map(g => ({
+                    id: g.id,
+                    firstName: g.firstName,
+                    lastName: g.lastName,
+                    phone: g.phone,
+                    email: g.email,
+                    address: g.address,
+                    relationship: g.relationship,
+                    pays: g.pays
+                })));
+            }
+            // Determine current step based on saved data
+            if (currentDraft.contract) setStep(4);
+            else if (currentDraft.invoice) setStep(3);
+            else if (currentDraft.room) setStep(2);
+            else if (currentDraft.guardians.length > 0) setStep(1);
+        }
+    }, []);
+
+    const validateGuardian = (guardian: GuardianFormValues): Record<string, string> => {
+        const errors: Record<string, string> = {};
+        if (guardian.firstName.length < 2) errors.firstName = 'First name is required';
+        if (guardian.lastName.length < 2) errors.lastName = 'Last name is required';
+        if (guardian.phone.length < 9) errors.phone = 'Valid phone is required';
+        if (!/^\S+@\S+$/.test(guardian.email)) errors.email = 'Valid email is required';
+        return errors;
+    };
+
+    const addGuardian = () => {
+        setGuardianForms(prev => [...prev, {
             firstName: '',
             lastName: '',
             phone: '',
             email: '',
             address: '',
-            relationship: 'son'
-        },
-        validate: {
-            firstName: (value) => value.length < 2 ? 'First name is required' : null,
-            lastName: (value) => value.length < 2 ? 'Last name is required' : null,
-            phone: (value) => value.length < 9 ? 'Valid phone is required' : null,
-            email: (value) => !/^\S+@\S+$/.test(value) ? 'Valid email is required' : null,
+            relationship: 'relative',
+            pays: false
+        }]);
+    };
+
+    const removeGuardian = (index: number) => {
+        if (guardianForms.length > 1) {
+            setGuardianForms(prev => prev.filter((_, i) => i !== index));
+            setGuardianErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[index];
+                return newErrors;
+            });
         }
-    });
+    };
+
+    const updateGuardianField = (index: number, field: keyof GuardianFormValues, value: string) => {
+        setGuardianForms(prev => prev.map((g, i) => 
+            i === index ? { ...g, [field]: value } : g
+        ));
+    };
 
     const residentForm = useForm({
         initialValues: {
@@ -129,6 +258,16 @@ export function SalesOrderPage() {
         loadData();
     }, []);
 
+    // Auto-sync to context when checkout data changes (debounced)
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (checkoutData.package || checkoutData.guardians.length > 0) {
+                syncToContext();
+            }
+        }, 500);
+        return () => clearTimeout(timeout);
+    }, [checkoutData, syncToContext]);
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('th-TH').format(amount);
     };
@@ -157,44 +296,111 @@ export function SalesOrderPage() {
         }));
     };
 
-    const handleSetCheckIn = (date: Date | null) => {
+    const handleSetCheckIn = (value: Date | string | null) => {
+        const date = value instanceof Date ? value : value ? new Date(value) : null;
         setCheckoutData(prev => ({
             ...prev,
             checkIn: date
         }));
     };
 
-    const handleGuardianSubmit = async () => {
-        if (!guardianForm.validate().hasErrors) {
-            setProcessing(true);
-            try {
-                const guardian = await API.saveGuardian(guardianForm.values);
-                setCheckoutData(prev => ({ ...prev, guardian }));
-                setStep(2);
-            } catch (error) {
-                console.error('Failed to save guardian:', error);
-            } finally {
-                setProcessing(false);
-            }
-        }
+    const handleCopyGuardianToResident = () => {
+        const firstGuardian = guardianForms[0];
+        residentForm.setValues({
+            ...residentForm.values,
+            firstName: firstGuardian.firstName,
+            lastName: firstGuardian.lastName,
+            emergencyContact: firstGuardian.phone
+        });
     };
 
-    const handleResidentSubmit = async () => {
-        if (!residentForm.validate().hasErrors && checkoutData.guardian) {
-            setProcessing(true);
-            try {
-                const resident = await API.saveResident({
-                    ...residentForm.values,
-                    gender: residentForm.values.gender as 'male' | 'female' | 'other',
-                    guardianId: checkoutData.guardian.id
-                });
-                setCheckoutData(prev => ({ ...prev, resident }));
-                setStep(3);
-            } catch (error) {
-                console.error('Failed to save resident:', error);
-            } finally {
-                setProcessing(false);
+    // Auto-fill sample data for testing
+    const handleAutoFillContactInfo = () => {
+        // Set 2 guardians
+        setGuardianForms([
+            {
+                firstName: 'สมชาย',
+                lastName: 'ใจดี',
+                phone: '081-234-5678',
+                email: 'somchai.jaidee@email.com',
+                address: '123/45 ถ.สุขุมวิท 55 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ 10110',
+                relationship: 'son',
+                pays: true
+            },
+            {
+                firstName: 'สมหญิง',
+                lastName: 'ใจดี',
+                phone: '082-345-6789',
+                email: 'somying.jaidee@email.com',
+                address: '88/9 หมู่บ้านพฤกษา ถ.รัตนาธิเบศร์ อ.เมือง จ.นนทบุรี 11000',
+                relationship: 'daughter',
+                pays: true
             }
+        ]);
+        
+        // Set resident info
+        residentForm.setValues({
+            firstName: 'สมศรี',
+            lastName: 'ใจดี',
+            dateOfBirth: '1948-05-15',
+            gender: 'female',
+            idNumber: '3-1001-00123-45-6',
+            medicalConditions: 'เบาหวานชนิดที่ 2, ความดันโลหิตสูง, ข้อเข่าเสื่อม',
+            allergies: 'Penicillin, ถั่วลิสง',
+            dietaryRestrictions: 'อาหารลดโซเดียม, ลดน้ำตาล',
+            emergencyContact: '081-234-5678'
+        });
+        
+        // Clear any validation errors
+        setGuardianErrors({});
+    };
+
+    const handleContactSubmit = async () => {
+        // Validate all guardians
+        let allValid = true;
+        const newErrors: Record<number, Record<string, string>> = {};
+        
+        guardianForms.forEach((guardian, index) => {
+            const errors = validateGuardian(guardian);
+            if (Object.keys(errors).length > 0) {
+                allValid = false;
+                newErrors[index] = errors;
+            }
+        });
+        
+        setGuardianErrors(newErrors);
+        
+        const residentValid = !residentForm.validate().hasErrors;
+        
+        if (!allValid || !residentValid) return;
+        
+        setProcessing(true);
+        try {
+            // Save all guardians
+            const savedGuardians: Guardian[] = [];
+            for (const guardianData of guardianForms) {
+                const guardian = await API.saveGuardian(guardianData);
+                savedGuardians.push(guardian);
+            }
+            
+            // Use first guardian as the primary guardian for resident
+            const resident = await API.saveResident({
+                ...residentForm.values,
+                gender: residentForm.values.gender as 'male' | 'female' | 'other',
+                guardianId: savedGuardians[0].id
+            });
+            
+            setCheckoutData(prev => ({ 
+                ...prev, 
+                guardians: savedGuardians, 
+                primaryContactGuardianId: savedGuardians[0].id,
+                resident 
+            }));
+            setStep(2);
+        } catch (error) {
+            console.error('Failed to save contact info:', error);
+        } finally {
+            setProcessing(false);
         }
     };
 
@@ -203,7 +409,49 @@ export function SalesOrderPage() {
     };
 
     const handleCreateOrder = async () => {
-        if (!checkoutData.package || !checkoutData.guardian || !checkoutData.resident || !checkoutData.room || !checkoutData.checkIn) return;
+        const primaryGuardian = checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0];
+        
+        // Validate all required data before proceeding
+        if (!checkoutData.package) {
+            notifications.show({
+                title: 'Missing Information',
+                message: 'Please select a package first',
+                color: 'red',
+            });
+            return;
+        }
+        if (!primaryGuardian) {
+            notifications.show({
+                title: 'Missing Information',
+                message: 'Please add guardian information first',
+                color: 'red',
+            });
+            return;
+        }
+        if (!checkoutData.resident) {
+            notifications.show({
+                title: 'Missing Information',
+                message: 'Please add resident information first',
+                color: 'red',
+            });
+            return;
+        }
+        if (!checkoutData.room) {
+            notifications.show({
+                title: 'Missing Information',
+                message: 'Please select a room first',
+                color: 'red',
+            });
+            return;
+        }
+        if (!checkoutData.checkIn) {
+            notifications.show({
+                title: 'Missing Information',
+                message: 'Please select a check-in date first',
+                color: 'red',
+            });
+            return;
+        }
         
         setProcessing(true);
         try {
@@ -216,7 +464,7 @@ export function SalesOrderPage() {
                 packageId: checkoutData.package.id,
                 packageName: checkoutData.package.name,
                 residentId: checkoutData.resident.id,
-                guardianId: checkoutData.guardian.id,
+                guardianId: primaryGuardian.id,
                 roomId: checkoutData.room.id,
                 checkIn: checkoutData.checkIn.toISOString().split('T')[0],
                 checkOut: checkOut.toISOString().split('T')[0],
@@ -229,8 +477,8 @@ export function SalesOrderPage() {
 
             const invoice = await API.createInvoice({
                 salesOrderId: salesOrder.id,
-                guardianId: checkoutData.guardian.id,
-                guardianName: `${checkoutData.guardian.firstName} ${checkoutData.guardian.lastName}`,
+                guardianId: primaryGuardian.id,
+                guardianName: `${primaryGuardian.firstName} ${primaryGuardian.lastName}`,
                 residentName: `${checkoutData.resident.firstName} ${checkoutData.resident.lastName}`,
                 items: [{
                     description: `${checkoutData.package.name} (${checkoutData.adjustedDays} days)`,
@@ -245,16 +493,24 @@ export function SalesOrderPage() {
             });
 
             setCheckoutData(prev => ({ ...prev, salesOrder, invoice }));
-            setStep(4);
+            // Save to persistent storage
+            saveDraft();
+            setStep(3);
         } catch (error) {
             console.error('Failed to create order:', error);
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to create order. Please try again.',
+                color: 'red',
+            });
         } finally {
             setProcessing(false);
         }
     };
 
     const handleMarkPaid = async (method: 'cash' | 'transfer' | 'credit_card') => {
-        if (!checkoutData.invoice || !checkoutData.salesOrder || !checkoutData.guardian || !checkoutData.resident) return;
+        const primaryGuardian = checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0];
+        if (!checkoutData.invoice || !checkoutData.salesOrder || !primaryGuardian || !checkoutData.resident) return;
         
         setProcessing(true);
         try {
@@ -271,7 +527,7 @@ export function SalesOrderPage() {
 
             const contract = await API.createContract({
                 salesOrderId: checkoutData.salesOrder.id,
-                guardianId: checkoutData.guardian.id,
+                guardianId: primaryGuardian.id,
                 residentId: checkoutData.resident.id,
                 startDate: checkoutData.salesOrder.checkIn,
                 endDate: checkoutData.salesOrder.checkOut,
@@ -293,7 +549,7 @@ export function SalesOrderPage() {
             await API.createNotification({
                 type: 'sale',
                 title: 'New Sale Completed',
-                message: `${checkoutData.package?.name} sold to ${checkoutData.guardian.firstName} ${checkoutData.guardian.lastName} for resident ${checkoutData.resident.firstName} ${checkoutData.resident.lastName}. Total: ฿${formatCurrency(checkoutData.invoice.total)}`,
+                message: `${checkoutData.package?.name} sold to ${primaryGuardian.firstName} ${primaryGuardian.lastName} for resident ${checkoutData.resident.firstName} ${checkoutData.resident.lastName}. Total: ฿${formatCurrency(checkoutData.invoice.total)}`,
                 relatedId: checkoutData.salesOrder.id
             });
 
@@ -303,7 +559,9 @@ export function SalesOrderPage() {
                 invoice: { ...prev.invoice!, status: 'paid', paidAt: new Date().toISOString(), paymentMethod: method },
                 salesOrder: { ...prev.salesOrder!, status: 'paid', paidAt: new Date().toISOString() }
             }));
-            setStep(5);
+            // Save completed order to persistent storage
+            saveDraft();
+            setStep(4);
         } catch (error) {
             console.error('Failed to process payment:', error);
         } finally {
@@ -326,6 +584,48 @@ export function SalesOrderPage() {
         return labels[type];
     };
 
+    // Generate step descriptions based on filled data
+    const getStepDescription = (stepIndex: number): string | undefined => {
+        switch (stepIndex) {
+            case 0: // Select Package
+                if (checkoutData.package) {
+                    return checkoutData.package.name;
+                }
+                return undefined;
+            case 1: // Contact Info
+                if (checkoutData.guardians.length > 0 && checkoutData.resident) {
+                    const guardianCount = checkoutData.guardians.length;
+                    return `${guardianCount} Guardian${guardianCount > 1 ? 's' : ''}, 1 Resident`;
+                }
+                return undefined;
+            case 2: // Select Room
+                if (checkoutData.room) {
+                    const extras: string[] = [];
+                    if (checkoutData.additionalServices.additionalBed) extras.push('Bed');
+                    if (checkoutData.additionalServices.specialAmenities.length > 0) {
+                        extras.push(`+${checkoutData.additionalServices.specialAmenities.length}`);
+                    }
+                    const extraStr = extras.length > 0 ? ` + ${extras.join(', ')}` : '';
+                    return `Room ${checkoutData.room.number}${extraStr}`;
+                }
+                return undefined;
+            case 3: // Invoice
+                if (checkoutData.invoice?.status === 'paid') {
+                    return 'Paid';
+                }
+                return undefined;
+            case 4: // Contract
+                if (step >= 5) {
+                    return 'Signed';
+                }
+                return undefined;
+            case 5: // Complete
+                return undefined;
+            default:
+                return undefined;
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -339,13 +639,44 @@ export function SalesOrderPage() {
                 <Title order={2}>Create Sales Order</Title>
             </Group>
 
-            <Stepper active={step} onStepClick={setStep} allowNextStepsSelect={false} mb="xl">
-                <Stepper.Step label="Select Package" icon={<IconReceipt size={18} />} />
-                <Stepper.Step label="Guardian Info" icon={<IconUser size={18} />} />
-                <Stepper.Step label="Resident Info" icon={<IconUser size={18} />} />
-                <Stepper.Step label="Select Room" icon={<IconHome size={18} />} />
-                <Stepper.Step label="Invoice" icon={<IconReceipt size={18} />} />
-                <Stepper.Step label="Complete" icon={<IconCheck size={18} />} />
+            <Stepper 
+                active={step} 
+                onStepClick={setStep} 
+                mb="xl"
+                color="blue"
+                size="sm"
+                iconSize={32}
+            >
+                <Stepper.Step 
+                    label="Select Package" 
+                    description={getStepDescription(0)}
+                    icon={<IconReceipt size={16} />} 
+                />
+                <Stepper.Step 
+                    label="Contact Info" 
+                    description={getStepDescription(1)}
+                    icon={<IconUser size={16} />} 
+                />
+                <Stepper.Step 
+                    label="Select Room" 
+                    description={getStepDescription(2)}
+                    icon={<IconHome size={16} />} 
+                />
+                <Stepper.Step 
+                    label="Invoice" 
+                    description={getStepDescription(3)}
+                    icon={<IconReceipt size={16} />} 
+                />
+                <Stepper.Step 
+                    label="Contract" 
+                    description={getStepDescription(4)}
+                    icon={<IconFileText size={16} />} 
+                />
+                <Stepper.Step 
+                    label="Complete" 
+                    description={getStepDescription(5)}
+                    icon={<IconCheck size={16} />} 
+                />
             </Stepper>
 
             {/* Step 0: Package Selection */}
@@ -412,6 +743,8 @@ export function SalesOrderPage() {
                                             }}
                                             min={pkg.duration}
                                             max={365}
+                                            suffix=" days"
+                                            classNames={{ controls: 'days-input-controls' }}
                                         />
                                     </Grid.Col>
                                     <Grid.Col span={4}>
@@ -451,313 +784,928 @@ export function SalesOrderPage() {
                 </div>
             )}
 
-            {/* Step 1: Guardian Info */}
+            {/* Step 1: Guardian & Resident Info (Combined) */}
             {step === 1 && (
-                <Card padding="lg" radius="md" withBorder>
-                    <Text fw={600} size="lg" mb="md">Guardian Information</Text>
-                    <Text size="sm" c="dimmed" mb="lg">
-                        Please provide the contact person responsible for the resident.
-                    </Text>
-
-                    <Grid>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="First Name"
-                                placeholder="Enter first name"
-                                required
-                                {...guardianForm.getInputProps('firstName')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="Last Name"
-                                placeholder="Enter last name"
-                                required
-                                {...guardianForm.getInputProps('lastName')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="Phone"
-                                placeholder="08X-XXX-XXXX"
-                                required
-                                {...guardianForm.getInputProps('phone')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="Email"
-                                placeholder="email@example.com"
-                                required
-                                {...guardianForm.getInputProps('email')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={8}>
-                            <TextInput
-                                label="Address"
-                                placeholder="Full address"
-                                {...guardianForm.getInputProps('address')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={4}>
-                            <Select
-                                label="Relationship"
-                                data={[
-                                    { value: 'son', label: 'Son' },
-                                    { value: 'daughter', label: 'Daughter' },
-                                    { value: 'spouse', label: 'Spouse' },
-                                    { value: 'relative', label: 'Relative' },
-                                    { value: 'other', label: 'Other' }
-                                ]}
-                                {...guardianForm.getInputProps('relationship')}
-                            />
-                        </Grid.Col>
-                    </Grid>
-
-                    <Group justify="space-between" mt="xl">
-                        <Button variant="subtle" onClick={() => setStep(0)}>Back</Button>
-                        <Button onClick={handleGuardianSubmit} loading={processing}>
-                            Continue
+                <div className="contact-forms-grid">
+                    {/* Auto-fill Button for Testing */}
+                    <div className="autofill-bar">
+                        <Button 
+                            variant="filled" 
+                            color="grape"
+                            size="sm"
+                            onClick={handleAutoFillContactInfo}
+                        >
+                            Auto-fill Sample Data (2 Guardians + 1 Resident)
                         </Button>
-                    </Group>
-                </Card>
-            )}
+                    </div>
 
-            {/* Step 2: Resident Info */}
-            {step === 2 && (
-                <Card padding="lg" radius="md" withBorder>
-                    <Text fw={600} size="lg" mb="md">Resident Information</Text>
-                    <Text size="sm" c="dimmed" mb="lg">
-                        Please provide details about the person who will be staying.
-                    </Text>
+                    {/* Guardian Block */}
+                    <Card padding="lg" radius="md" withBorder className="guardians-card">
+                        <Group justify="space-between" mb="md">
+                            <div>
+                                <Text fw={600} size="lg">Guardian Information</Text>
+                                <Text size="sm" c="dimmed">
+                                    Contact persons responsible for the resident.
+                                </Text>
+                            </div>
+                            <Button 
+                                variant="light" 
+                                size="xs"
+                                leftSection={<IconPlus size={14} />}
+                                onClick={addGuardian}
+                            >
+                                Add Guardian
+                            </Button>
+                        </Group>
 
-                    <Grid>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="First Name"
-                                placeholder="Enter first name"
-                                required
-                                {...residentForm.getInputProps('firstName')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="Last Name"
-                                placeholder="Enter last name"
-                                required
-                                {...residentForm.getInputProps('lastName')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={4}>
-                            <TextInput
-                                label="Date of Birth"
-                                type="date"
-                                required
-                                {...residentForm.getInputProps('dateOfBirth')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={4}>
-                            <Select
-                                label="Gender"
-                                data={[
-                                    { value: 'male', label: 'Male' },
-                                    { value: 'female', label: 'Female' },
-                                    { value: 'other', label: 'Other' }
-                                ]}
-                                {...residentForm.getInputProps('gender')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={4}>
-                            <TextInput
-                                label="ID Number"
-                                placeholder="National ID"
-                                {...residentForm.getInputProps('idNumber')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={12}>
+                        <Stack gap="lg">
+                            {guardianForms.map((guardian, index) => (
+                                <Paper key={index} p="md" withBorder className="guardian-form-block">
+                                    <Group justify="space-between" mb="sm">
+                                        <Badge variant="light" size="sm">
+                                            Guardian {index + 1} {index === 0 && '(Primary)'}
+                                        </Badge>
+                                        {guardianForms.length > 1 && (
+                                            <ActionIcon 
+                                                variant="subtle" 
+                                                color="red" 
+                                                size="sm"
+                                                onClick={() => removeGuardian(index)}
+                                            >
+                                                <IconTrash size={14} />
+                                            </ActionIcon>
+                                        )}
+                                    </Group>
+                                    <Stack gap="md">
+                                        <Grid>
+                                            <Grid.Col span={6}>
+                                                <TextInput
+                                                    label="First Name"
+                                                    placeholder="Enter first name"
+                                                    required
+                                                    value={guardian.firstName}
+                                                    onChange={(e) => updateGuardianField(index, 'firstName', e.target.value)}
+                                                    error={guardianErrors[index]?.firstName}
+                                                />
+                                            </Grid.Col>
+                                            <Grid.Col span={6}>
+                                                <TextInput
+                                                    label="Last Name"
+                                                    placeholder="Enter last name"
+                                                    required
+                                                    value={guardian.lastName}
+                                                    onChange={(e) => updateGuardianField(index, 'lastName', e.target.value)}
+                                                    error={guardianErrors[index]?.lastName}
+                                                />
+                                            </Grid.Col>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.Col span={6}>
+                                                <TextInput
+                                                    label="Phone"
+                                                    placeholder="08X-XXX-XXXX"
+                                                    required
+                                                    value={guardian.phone}
+                                                    onChange={(e) => updateGuardianField(index, 'phone', e.target.value)}
+                                                    error={guardianErrors[index]?.phone}
+                                                />
+                                            </Grid.Col>
+                                            <Grid.Col span={6}>
+                                                <TextInput
+                                                    label="Email"
+                                                    placeholder="email@example.com"
+                                                    required
+                                                    value={guardian.email}
+                                                    onChange={(e) => updateGuardianField(index, 'email', e.target.value)}
+                                                    error={guardianErrors[index]?.email}
+                                                />
+                                            </Grid.Col>
+                                        </Grid>
+                                        <TextInput
+                                            label="Address"
+                                            placeholder="Full address"
+                                            value={guardian.address}
+                                            onChange={(e) => updateGuardianField(index, 'address', e.target.value)}
+                                        />
+                                        <Select
+                                            label="Relationship to Resident"
+                                            data={[
+                                                { value: 'son', label: 'Son' },
+                                                { value: 'daughter', label: 'Daughter' },
+                                                { value: 'spouse', label: 'Spouse' },
+                                                { value: 'relative', label: 'Relative' },
+                                                { value: 'other', label: 'Other' }
+                                            ]}
+                                            value={guardian.relationship}
+                                            onChange={(val) => updateGuardianField(index, 'relationship', val || 'other')}
+                                        />
+                                        <Checkbox
+                                            label="This guardian pays for care"
+                                            description="Check if this guardian contributes to payment"
+                                            checked={guardian.pays ?? false}
+                                            onChange={(e) => {
+                                                const checked = e.currentTarget.checked;
+                                                setGuardianForms(prev => prev.map((g, i) => 
+                                                    i === index ? { ...g, pays: checked } : g
+                                                 ));
+                                            }}
+                                        />
+                                    </Stack>
+                                </Paper>
+                            ))}
+                        </Stack>
+                    </Card>
+
+                    {/* Resident Block */}
+                    <Card padding="lg" radius="md" withBorder>
+                        <Group justify="space-between" mb="md">
+                            <div>
+                                <Text fw={600} size="lg">Resident Information</Text>
+                                <Text size="sm" c="dimmed">
+                                    Person who will be staying at the facility.
+                                </Text>
+                            </div>
+                            <Button 
+                                variant="light" 
+                                size="xs"
+                                onClick={handleCopyGuardianToResident}
+                            >
+                                Copy from Guardian
+                            </Button>
+                        </Group>
+
+                        <Stack gap="md">
+                            <Grid>
+                                <Grid.Col span={6}>
+                                    <TextInput
+                                        label="First Name"
+                                        placeholder="Enter first name"
+                                        required
+                                        {...residentForm.getInputProps('firstName')}
+                                    />
+                                </Grid.Col>
+                                <Grid.Col span={6}>
+                                    <TextInput
+                                        label="Last Name"
+                                        placeholder="Enter last name"
+                                        required
+                                        {...residentForm.getInputProps('lastName')}
+                                    />
+                                </Grid.Col>
+                            </Grid>
+                            <Grid>
+                                <Grid.Col span={4}>
+                                    <TextInput
+                                        label="Date of Birth"
+                                        type="date"
+                                        required
+                                        {...residentForm.getInputProps('dateOfBirth')}
+                                    />
+                                </Grid.Col>
+                                <Grid.Col span={4}>
+                                    <Select
+                                        label="Gender"
+                                        data={[
+                                            { value: 'male', label: 'Male' },
+                                            { value: 'female', label: 'Female' },
+                                            { value: 'other', label: 'Other' }
+                                        ]}
+                                        {...residentForm.getInputProps('gender')}
+                                    />
+                                </Grid.Col>
+                                <Grid.Col span={4}>
+                                    <TextInput
+                                        label="ID Number"
+                                        placeholder="National ID"
+                                        {...residentForm.getInputProps('idNumber')}
+                                    />
+                                </Grid.Col>
+                            </Grid>
                             <Textarea
                                 label="Medical Conditions"
                                 placeholder="List any medical conditions..."
                                 rows={2}
                                 {...residentForm.getInputProps('medicalConditions')}
                             />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="Allergies"
-                                placeholder="Known allergies"
-                                {...residentForm.getInputProps('allergies')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="Dietary Restrictions"
-                                placeholder="E.g., low sodium, vegetarian"
-                                {...residentForm.getInputProps('dietaryRestrictions')}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
+                            <Grid>
+                                <Grid.Col span={6}>
+                                    <TextInput
+                                        label="Allergies"
+                                        placeholder="Known allergies"
+                                        {...residentForm.getInputProps('allergies')}
+                                    />
+                                </Grid.Col>
+                                <Grid.Col span={6}>
+                                    <TextInput
+                                        label="Dietary Restrictions"
+                                        placeholder="E.g., low sodium, vegetarian"
+                                        {...residentForm.getInputProps('dietaryRestrictions')}
+                                    />
+                                </Grid.Col>
+                            </Grid>
                             <TextInput
                                 label="Emergency Contact"
                                 placeholder="Phone number"
                                 {...residentForm.getInputProps('emergencyContact')}
                             />
-                        </Grid.Col>
-                    </Grid>
+                        </Stack>
+                    </Card>
 
-                    <Group justify="space-between" mt="xl">
-                        <Button variant="subtle" onClick={() => setStep(1)}>Back</Button>
-                        <Button onClick={handleResidentSubmit} loading={processing}>
-                            Continue
+                    {/* Navigation */}
+                    <div className="contact-forms-actions">
+                        <Button variant="subtle" onClick={() => setStep(0)}>Back</Button>
+                        <Button onClick={handleContactSubmit} loading={processing}>
+                            Continue to Room Selection
                         </Button>
-                    </Group>
-                </Card>
+                    </div>
+                </div>
             )}
 
-            {/* Step 3: Room Selection */}
-            {step === 3 && (
-                <Card padding="lg" radius="md" withBorder>
-                    <Text fw={600} size="lg" mb="md">Select Room</Text>
-                    <Text size="sm" c="dimmed" mb="lg">
-                        Choose an available room for the resident.
-                    </Text>
+            {/* Step 2: Room Selection */}
+            {step === 2 && (
+                <Stack gap="md">
+                    <Card padding="lg" radius="md" withBorder>
+                        <Text fw={600} size="lg" mb="md">Select Room</Text>
+                        <Text size="sm" c="dimmed" mb="lg">
+                            Choose an available room for the resident.
+                        </Text>
 
-                    <div className="room-grid">
-                        {rooms.map(room => (
-                            <Card 
-                                key={room.id}
-                                padding="md"
-                                radius="md"
-                                withBorder
-                                className={`room-card ${checkoutData.room?.id === room.id ? 'selected' : ''}`}
-                                onClick={() => handleSelectRoom(room)}
-                            >
-                                <Group justify="space-between" mb="xs">
-                                    <Text fw={600} size="lg">Room {room.number}</Text>
-                                    <Badge color={room.type === 'suite' ? 'violet' : room.type === 'deluxe' ? 'blue' : 'gray'}>
-                                        {getRoomTypeLabel(room.type)}
-                                    </Badge>
+                        <div className="room-grid">
+                            {rooms.map(room => (
+                                <Card 
+                                    key={room.id}
+                                    padding="md"
+                                    radius="md"
+                                    withBorder
+                                    className={`room-card ${checkoutData.room?.id === room.id ? 'selected' : ''}`}
+                                    onClick={() => handleSelectRoom(room)}
+                                >
+                                    <Group justify="space-between" mb="xs">
+                                        <Text fw={600} size="lg">Room {room.number}</Text>
+                                        <Badge color={room.type === 'suite' ? 'violet' : room.type === 'deluxe' ? 'blue' : 'gray'}>
+                                            {getRoomTypeLabel(room.type)}
+                                        </Badge>
+                                    </Group>
+                                    <Text size="sm" c="dimmed">Floor {room.floor}</Text>
+                                    <Text size="lg" fw={600} c="blue" mt="xs">
+                                        +฿{formatCurrency(room.pricePerDay)}/day
+                                    </Text>
+                                    {checkoutData.room?.id === room.id && (
+                                        <Badge color="green" mt="xs" fullWidth>Selected</Badge>
+                                    )}
+                                </Card>
+                            ))}
+                        </div>
+                    </Card>
+
+                    {/* Additional Services */}
+                    <Card padding="lg" radius="md" withBorder>
+                        <Text fw={600} size="lg" mb="md">Additional Services</Text>
+                        <Text size="sm" c="dimmed" mb="lg">
+                            Select additional room equipment and services.
+                        </Text>
+
+                        <div className="additional-services-grid">
+                            {/* Additional Equipment */}
+                            <Paper p="md" withBorder>
+                                <Group gap="sm" mb="md">
+                                    <IconBed size={20} />
+                                    <Text fw={500}>Room Equipment</Text>
                                 </Group>
-                                <Text size="sm" c="dimmed">Floor {room.floor}</Text>
-                                <Text size="lg" fw={600} c="blue" mt="xs">
-                                    +฿{formatCurrency(room.pricePerDay)}/day
-                                </Text>
-                                {checkoutData.room?.id === room.id && (
-                                    <Badge color="green" mt="xs" fullWidth>Selected</Badge>
-                                )}
-                            </Card>
-                        ))}
-                    </div>
+                                <Checkbox
+                                    label="Additional Bed (+฿500/day)"
+                                    description="Extra bed for guardian overnight stay"
+                                    checked={checkoutData.additionalServices.additionalBed ?? false}
+                                    onChange={(e) => {
+                                        const checked = e.currentTarget.checked;
+                                        setCheckoutData(prev => ({
+                                            ...prev,
+                                            additionalServices: {
+                                                ...prev.additionalServices,
+                                                additionalBed: checked
+                                            }
+                                        }));
+                                    }}
+                                />
+                            </Paper>
 
-                    <Group justify="space-between" mt="xl">
-                        <Button variant="subtle" onClick={() => setStep(2)}>Back</Button>
+                            {/* Special Amenities */}
+                            <Paper p="md" withBorder>
+                                <Text fw={500} mb="md">Special Amenities</Text>
+                                <Checkbox.Group
+                                    value={checkoutData.additionalServices.specialAmenities}
+                                    onChange={(value) => setCheckoutData(prev => ({
+                                        ...prev,
+                                        additionalServices: {
+                                            ...prev.additionalServices,
+                                            specialAmenities: value
+                                        }
+                                    }))}
+                                >
+                                    <Stack gap="xs">
+                                        <Checkbox value="wheelchair" label="Wheelchair" />
+                                        <Checkbox value="oxygen_concentrator" label="Oxygen Concentrator (+฿300/day)" />
+                                        <Checkbox value="air_mattress" label="Air Mattress (+฿200/day)" />
+                                    </Stack>
+                                </Checkbox.Group>
+                            </Paper>
+
+                            {/* Self-Provided Items */}
+                            <Paper p="md" withBorder>
+                                <Text fw={500} mb="md">Self-Provided Items</Text>
+                                <Text size="xs" c="dimmed" mb="md">
+                                    Check items that guardian will provide themselves.
+                                </Text>
+                                <Stack gap="xs">
+                                    <Checkbox
+                                        label="Pampers / Adult Diapers"
+                                        description="Guardian will supply pampers for the elder"
+                                        checked={checkoutData.additionalServices.selfProvidePampers ?? false}
+                                        onChange={(e) => {
+                                            const checked = e.currentTarget.checked;
+                                            setCheckoutData(prev => ({
+                                                ...prev,
+                                                additionalServices: {
+                                                    ...prev.additionalServices,
+                                                    selfProvidePampers: checked
+                                                }
+                                            }));
+                                        }}
+                                    />
+                                    <Checkbox
+                                        label="Medications"
+                                        description="Guardian will supply medications for the elder"
+                                        checked={checkoutData.additionalServices.selfProvideMedications ?? false}
+                                        onChange={(e) => {
+                                            const checked = e.currentTarget.checked;
+                                            setCheckoutData(prev => ({
+                                                ...prev,
+                                                additionalServices: {
+                                                    ...prev.additionalServices,
+                                                    selfProvideMedications: checked
+                                                }
+                                            }));
+                                        }}
+                                    />
+                                </Stack>
+                            </Paper>
+
+                            {/* Primary Contact Selection */}
+                            <Paper p="md" withBorder>
+                                <Group gap="sm" mb="md">
+                                    <IconPhone size={20} />
+                                    <Text fw={500}>Primary Contact</Text>
+                                </Group>
+                                <Text size="xs" c="dimmed" mb="md">
+                                    Select guardian phone number for contacting.
+                                </Text>
+                                <Select
+                                    placeholder="Select primary contact"
+                                    data={checkoutData.guardians.map(g => ({
+                                        value: g.id,
+                                        label: `${g.firstName} ${g.lastName} - ${g.phone} (${g.relationship})`
+                                    }))}
+                                    value={checkoutData.primaryContactGuardianId}
+                                    onChange={(val) => setCheckoutData(prev => ({
+                                        ...prev,
+                                        primaryContactGuardianId: val
+                                    }))}
+                                />
+                            </Paper>
+                        </div>
+                    </Card>
+
+                    <Group justify="space-between">
+                        <Button variant="subtle" onClick={() => setStep(1)}>Back</Button>
                         <Button 
                             onClick={handleCreateOrder} 
                             loading={processing}
-                            disabled={!checkoutData.room}
+                            disabled={!checkoutData.room || !checkoutData.package || checkoutData.guardians.length === 0 || !checkoutData.resident || !checkoutData.checkIn}
                         >
                             Create Invoice
                         </Button>
                     </Group>
+                </Stack>
+            )}
+
+            {/* Step 3: Invoice */}
+            {step === 3 && checkoutData.invoice && (
+                <div className="invoice-step-container">
+                    {/* A4 Paper Invoice */}
+                    <div className="invoice-a4-paper">
+                        {/* Letterhead */}
+                        <div className="invoice-letterhead">
+                            <div className="letterhead-logo-placeholder">
+                                <Text size="xs" c="dimmed">Company Logo</Text>
+                            </div>
+                            <div className="letterhead-info">
+                                <Text fw={700} size="xl">Elderly Care Facility</Text>
+                                <Text size="sm" c="dimmed">123 Care Street, Bangkok 10110</Text>
+                                <Text size="sm" c="dimmed">Tel: 02-XXX-XXXX | Email: contact@elderlycare.co.th</Text>
+                                <Text size="sm" c="dimmed">Tax ID: 0-1234-56789-01-2</Text>
+                            </div>
+                        </div>
+
+                        <Divider my="lg" />
+
+                        {/* Invoice Header */}
+                        <Group justify="space-between" mb="xl">
+                            <div>
+                                <Text fw={700} size="xl" c="blue">INVOICE</Text>
+                                <Text size="sm" c="dimmed">{checkoutData.invoice.invoiceNumber}</Text>
+                            </div>
+                            <Badge size="lg" color={checkoutData.invoice.status === 'paid' ? 'green' : 'yellow'}>
+                                {checkoutData.invoice.status.toUpperCase()}
+                            </Badge>
+                        </Group>
+
+                        {/* Billing Info */}
+                        <Grid mb="xl">
+                            <Grid.Col span={6}>
+                                <Text size="sm" fw={600} c="dimmed" mb="xs">BILL TO (Paying Guardian)</Text>
+                                {guardianForms.filter(g => g.pays).length > 0 ? (
+                                    guardianForms.filter(g => g.pays).map((guardian, idx) => (
+                                        <Paper key={idx} p="sm" withBorder mb="xs" className="invoicee-card">
+                                            <Text fw={500}>{guardian.firstName} {guardian.lastName}</Text>
+                                            {guardian.address ? (
+                                                <Text size="sm" c="dimmed">{guardian.address}</Text>
+                                            ) : (
+                                                <Text size="sm" c="dimmed" fs="italic" className="placeholder-text">
+                                                    Address not provided
+                                                </Text>
+                                            )}
+                                            <Text size="sm" c="dimmed">{guardian.phone}</Text>
+                                            <Text size="sm" c="dimmed">{guardian.email}</Text>
+                                            <Badge size="xs" variant="light" mt="xs">{guardian.relationship}</Badge>
+                                        </Paper>
+                                    ))
+                                ) : (
+                                    <Paper p="md" withBorder className="placeholder-box">
+                                        <Text size="sm" c="dimmed" fs="italic">No paying guardian selected</Text>
+                                    </Paper>
+                                )}
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                                <Text size="sm" fw={600} c="dimmed" mb="xs">RESIDENT / CARE RECIPIENT</Text>
+                                <Paper p="sm" withBorder>
+                                    <Text fw={500}>{checkoutData.invoice.residentName}</Text>
+                                    <Text size="sm" c="dimmed">Room {checkoutData.room?.number}</Text>
+                                    <Group gap="xs" mt="xs">
+                                        <Badge size="xs" variant="light">
+                                            {checkoutData.checkIn?.toLocaleDateString()} - {
+                                                checkoutData.checkIn && checkoutData.adjustedDays 
+                                                    ? new Date(checkoutData.checkIn.getTime() + (checkoutData.adjustedDays - 1) * 24 * 60 * 60 * 1000).toLocaleDateString()
+                                                    : ''
+                                            }
+                                        </Badge>
+                                        <Badge size="xs" variant="outline">{checkoutData.adjustedDays} days</Badge>
+                                    </Group>
+                                </Paper>
+                            </Grid.Col>
+                        </Grid>
+
+                        {/* Package Details */}
+                        <Text size="sm" fw={600} c="dimmed" mb="xs">PACKAGE DETAILS</Text>
+                        <Paper p="md" withBorder mb="lg" className={!checkoutData.package ? 'placeholder-box' : ''}>
+                            {checkoutData.package ? (
+                                <>
+                                    <Group justify="space-between" mb="sm">
+                                        <Text fw={600}>{checkoutData.package.name}</Text>
+                                        <Badge color="blue">{checkoutData.package.duration} days base</Badge>
+                                    </Group>
+                                    {checkoutData.package.description ? (
+                                        <Text size="sm" c="dimmed" mb="md">{checkoutData.package.description}</Text>
+                                    ) : (
+                                        <Text size="sm" c="dimmed" fs="italic" mb="md" className="placeholder-text">
+                                            Package description not available
+                                        </Text>
+                                    )}
+                                    <Text size="xs" fw={600} c="dimmed" mb="xs">Included Services:</Text>
+                                    {checkoutData.package.services.length > 0 ? (
+                                        <Stack gap={4}>
+                                            {checkoutData.package.services.slice(0, 5).map((service, idx) => (
+                                                <Group key={idx} gap="xs">
+                                                    <Text size="xs">•</Text>
+                                                    <Text size="xs">{service.title}</Text>
+                                                    <Badge size="xs" variant="light">{service.interval}</Badge>
+                                                </Group>
+                                            ))}
+                                            {checkoutData.package.services.length > 5 && (
+                                                <Text size="xs" c="dimmed">+ {checkoutData.package.services.length - 5} more services</Text>
+                                            )}
+                                        </Stack>
+                                    ) : (
+                                        <Text size="xs" c="dimmed" fs="italic" className="placeholder-text">
+                                            No services defined
+                                        </Text>
+                                    )}
+                                </>
+                            ) : (
+                                <Text size="sm" c="dimmed" fs="italic">Package information not available</Text>
+                            )}
+                        </Paper>
+
+                        {/* Pricing Table */}
+                        <Table mb="xl" className="invoice-table">
+                            <Table.Thead>
+                                <Table.Tr>
+                                    <Table.Th>Description</Table.Th>
+                                    <Table.Th ta="center">Qty</Table.Th>
+                                    <Table.Th ta="right">Unit Price</Table.Th>
+                                    <Table.Th ta="right">Amount</Table.Th>
+                                </Table.Tr>
+                            </Table.Thead>
+                            <Table.Tbody>
+                                {checkoutData.invoice.items.map((item, idx) => (
+                                    <Table.Tr key={idx}>
+                                        <Table.Td>{item.description}</Table.Td>
+                                        <Table.Td ta="center">{item.quantity}</Table.Td>
+                                        <Table.Td ta="right">฿{formatCurrency(item.unitPrice)}</Table.Td>
+                                        <Table.Td ta="right">฿{formatCurrency(item.total)}</Table.Td>
+                                    </Table.Tr>
+                                ))}
+                                {checkoutData.additionalServices.additionalBed && (
+                                    <Table.Tr>
+                                        <Table.Td>Additional Bed ({checkoutData.adjustedDays} days)</Table.Td>
+                                        <Table.Td ta="center">1</Table.Td>
+                                        <Table.Td ta="right">฿{formatCurrency(500 * checkoutData.adjustedDays)}</Table.Td>
+                                        <Table.Td ta="right">฿{formatCurrency(500 * checkoutData.adjustedDays)}</Table.Td>
+                                    </Table.Tr>
+                                )}
+                            </Table.Tbody>
+                            <Table.Tfoot>
+                                <Table.Tr>
+                                    <Table.Td colSpan={3} ta="right"><Text fw={500}>Subtotal</Text></Table.Td>
+                                    <Table.Td ta="right">฿{formatCurrency(checkoutData.invoice.subtotal)}</Table.Td>
+                                </Table.Tr>
+                                <Table.Tr>
+                                    <Table.Td colSpan={3} ta="right"><Text fw={500}>VAT (7%)</Text></Table.Td>
+                                    <Table.Td ta="right">฿{formatCurrency(checkoutData.invoice.tax)}</Table.Td>
+                                </Table.Tr>
+                                <Table.Tr className="invoice-total-row">
+                                    <Table.Td colSpan={3} ta="right"><Text fw={700} size="lg">Total Due</Text></Table.Td>
+                                    <Table.Td ta="right"><Text fw={700} size="xl" c="blue">฿{formatCurrency(checkoutData.invoice.total)}</Text></Table.Td>
+                                </Table.Tr>
+                            </Table.Tfoot>
+                        </Table>
+
+                        {/* Signature Section */}
+                        <Grid mt="xl" className="invoice-signature-section">
+                            <Grid.Col span={6}>
+                                <Text size="xs" c="dimmed" mb="xs">Invoice Date</Text>
+                                <Text size="sm">{new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                                <Stack gap="xs" align="center" className="signature-block">
+                                    <img src="/signature.jpg" alt="Authorized Signature" className="owner-signature" />
+                                    <Divider w="100%" />
+                                    <Text size="xs" c="dimmed">Authorized Signature</Text>
+                                    <Text size="sm" fw={500}>S. Wattana</Text>
+                                    <Text size="xs" c="dimmed">Managing Director</Text>
+                                </Stack>
+                            </Grid.Col>
+                        </Grid>
+                    </div>
+
+                    {/* Payment Section - Outside A4 */}
+                    <Card padding="lg" radius="md" withBorder className="payment-section">
+                        <Text fw={600} size="lg" mb="md">Payment Channels</Text>
+                        
+                        <div className="payment-buttons-grid">
+                            {/* PromptPay */}
+                            <Button 
+                                variant="outline" 
+                                size="lg"
+                                className="payment-btn promptpay"
+                                onClick={() => setShowPromptPayModal(true)}
+                            >
+                                <Stack gap={4} align="center">
+                                    <Text size="sm" fw={600}>PromptPay</Text>
+                                    <Text size="xs" c="dimmed">QR Code</Text>
+                                </Stack>
+                            </Button>
+
+                            {/* Bank Transfer */}
+                            <Button 
+                                variant="outline" 
+                                size="lg"
+                                className="payment-btn bank"
+                                onClick={() => setShowBankModal(true)}
+                            >
+                                <Stack gap={4} align="center">
+                                    <Text size="sm" fw={600}>Bank Transfer</Text>
+                                    <Text size="xs" c="dimmed">4 Banks</Text>
+                                </Stack>
+                            </Button>
+
+                            {/* Cash */}
+                            <Button 
+                                variant="outline" 
+                                size="lg"
+                                className="payment-btn cash"
+                                onClick={() => handleMarkPaid('cash')}
+                                loading={processing}
+                            >
+                                <Stack gap={4} align="center">
+                                    <Text size="sm" fw={600}>Cash</Text>
+                                    <Text size="xs" c="dimmed">In Person</Text>
+                                </Stack>
+                            </Button>
+
+                            {/* Credit Card */}
+                            <Button 
+                                variant="outline" 
+                                size="lg"
+                                className="payment-btn credit-card"
+                                onClick={() => setShowCreditCardModal(true)}
+                            >
+                                <Stack gap={4} align="center">
+                                    <Text size="sm" fw={600}>Credit Card</Text>
+                                    <Text size="xs" c="dimmed">Visa / MC</Text>
+                                </Stack>
+                            </Button>
+                        </div>
+
+                        <Divider my="lg" />
+
+                        <Group justify="space-between">
+                            <Button variant="subtle" onClick={() => setStep(2)}>Back</Button>
+                            <Group gap="sm">
+                                <Button variant="light" onClick={handleSaveDraft}>Save as Draft</Button>
+                                <Button 
+                                    variant="outline" 
+                                    leftSection={<IconPrinter size={18} />}
+                                    onClick={() => {
+                                        // Sync current data to context before navigating
+                                        syncToContext();
+                                        navigate('/sales/order/invoice', {
+                                            state: {
+                                                draftId: currentDraft?.id,
+                                                package: checkoutData.package,
+                                                adjustedDays: checkoutData.adjustedDays,
+                                                checkIn: checkoutData.checkIn,
+                                                guardians: checkoutData.guardians,
+                                                payingGuardians: guardianForms.filter(g => g.pays),
+                                                primaryContactGuardianId: checkoutData.primaryContactGuardianId,
+                                                resident: checkoutData.resident,
+                                                room: checkoutData.room,
+                                                additionalServices: checkoutData.additionalServices,
+                                                invoice: checkoutData.invoice
+                                            }
+                                        });
+                                    }}
+                                >
+                                    View Full Invoice
+                                </Button>
+                            </Group>
+                        </Group>
+                    </Card>
+
+                    {/* PromptPay Modal */}
+                    <Modal 
+                        opened={showPromptPayModal} 
+                        onClose={() => setShowPromptPayModal(false)}
+                        title="PromptPay QR Code"
+                        centered
+                    >
+                        <Stack align="center" gap="md">
+                            <Paper p="lg" withBorder className="qr-placeholder">
+                                <Stack align="center" gap="xs">
+                                    <div className="qr-code-box">
+                                        <Text size="xs" c="dimmed">QR Code</Text>
+                                    </div>
+                                    <Text size="sm" c="dimmed">Scan to pay ฿{formatCurrency(checkoutData.invoice.total)}</Text>
+                                </Stack>
+                            </Paper>
+                            <Text size="sm" c="dimmed">PromptPay ID: 0-1234-56789-01-2</Text>
+                            <Text size="sm" c="dimmed">Elderly Care Facility Co., Ltd.</Text>
+                            <Divider w="100%" />
+                            <Button 
+                                fullWidth 
+                                onClick={() => {
+                                    setShowPromptPayModal(false);
+                                    handleMarkPaid('transfer');
+                                }}
+                                loading={processing}
+                            >
+                                Confirm Payment Received
+                            </Button>
+                        </Stack>
+                    </Modal>
+
+                    {/* Bank Transfer Modal */}
+                    <Modal 
+                        opened={showBankModal} 
+                        onClose={() => setShowBankModal(false)}
+                        title="Bank Transfer Details"
+                        centered
+                        size="md"
+                    >
+                        <Stack gap="md">
+                            <Text size="sm" c="dimmed">Select bank and confirm payment:</Text>
+                            
+                            <Radio.Group value={selectedBank || ''} onChange={setSelectedBank}>
+                                <Stack gap="sm">
+                                    <Paper p="md" withBorder className={`bank-option ${selectedBank === 'kbank' ? 'selected' : ''}`}>
+                                        <Radio value="kbank" label={
+                                            <Group gap="md">
+                                                <div className="bank-logo kbank">K</div>
+                                                <div>
+                                                    <Text size="sm" fw={500}>Kasikorn Bank (KBank)</Text>
+                                                    <Text size="xs" c="dimmed">Acc: 123-4-56789-0</Text>
+                                                </div>
+                                            </Group>
+                                        } />
+                                    </Paper>
+                                    <Paper p="md" withBorder className={`bank-option ${selectedBank === 'scb' ? 'selected' : ''}`}>
+                                        <Radio value="scb" label={
+                                            <Group gap="md">
+                                                <div className="bank-logo scb">S</div>
+                                                <div>
+                                                    <Text size="sm" fw={500}>Siam Commercial Bank (SCB)</Text>
+                                                    <Text size="xs" c="dimmed">Acc: 234-5-67890-1</Text>
+                                                </div>
+                                            </Group>
+                                        } />
+                                    </Paper>
+                                    <Paper p="md" withBorder className={`bank-option ${selectedBank === 'bbl' ? 'selected' : ''}`}>
+                                        <Radio value="bbl" label={
+                                            <Group gap="md">
+                                                <div className="bank-logo bbl">B</div>
+                                                <div>
+                                                    <Text size="sm" fw={500}>Bangkok Bank</Text>
+                                                    <Text size="xs" c="dimmed">Acc: 345-6-78901-2</Text>
+                                                </div>
+                                            </Group>
+                                        } />
+                                    </Paper>
+                                    <Paper p="md" withBorder className={`bank-option ${selectedBank === 'ktb' ? 'selected' : ''}`}>
+                                        <Radio value="ktb" label={
+                                            <Group gap="md">
+                                                <div className="bank-logo ktb">K</div>
+                                                <div>
+                                                    <Text size="sm" fw={500}>Krungthai Bank</Text>
+                                                    <Text size="xs" c="dimmed">Acc: 456-7-89012-3</Text>
+                                                </div>
+                                            </Group>
+                                        } />
+                                    </Paper>
+                                </Stack>
+                            </Radio.Group>
+
+                            <Divider />
+                            
+                            <Text size="sm" fw={500}>Amount: ฿{formatCurrency(checkoutData.invoice.total)}</Text>
+                            <Text size="sm" c="dimmed">Account Name: Elderly Care Facility Co., Ltd.</Text>
+
+                            <Button 
+                                fullWidth 
+                                disabled={!selectedBank}
+                                onClick={() => {
+                                    setShowBankModal(false);
+                                    handleMarkPaid('transfer');
+                                }}
+                                loading={processing}
+                            >
+                                Confirm Payment Received
+                            </Button>
+                        </Stack>
+                    </Modal>
+
+                    {/* Credit Card Modal */}
+                    <Modal 
+                        opened={showCreditCardModal} 
+                        onClose={() => setShowCreditCardModal(false)}
+                        title="Credit Card Payment"
+                        centered
+                    >
+                        <Stack gap="md">
+                            <Text size="sm" c="dimmed">
+                                Enter the last 4 digits of the card used for payment verification:
+                            </Text>
+                            
+                            <TextInput
+                                label="Last 4 digits of card"
+                                placeholder="XXXX"
+                                maxLength={4}
+                                value={creditCardLast4}
+                                onChange={(e) => setCreditCardLast4(e.target.value.replace(/\D/g, ''))}
+                                description="For record keeping purposes"
+                            />
+
+                            <Text size="sm" fw={500}>Amount: ฿{formatCurrency(checkoutData.invoice.total)}</Text>
+
+                            <Button 
+                                fullWidth 
+                                disabled={creditCardLast4.length !== 4}
+                                onClick={() => {
+                                    setShowCreditCardModal(false);
+                                    handleMarkPaid('credit_card');
+                                }}
+                                loading={processing}
+                            >
+                                Confirm Payment (Card ending {creditCardLast4 || '****'})
+                            </Button>
+                        </Stack>
+                    </Modal>
+                </div>
+            )}
+
+            {/* Step 3: Invoice - No data fallback */}
+            {step === 3 && !checkoutData.invoice && (
+                <Card padding="xl" radius="md" withBorder ta="center">
+                    <IconReceipt size={48} color="var(--mantine-color-gray-5)" style={{ marginBottom: 16 }} />
+                    <Title order={3} mb="sm" c="dimmed">No Invoice Available</Title>
+                    <Text size="sm" c="dimmed" mb="xl">
+                        Please complete the previous steps to generate an invoice.
+                    </Text>
+                    <Button variant="light" onClick={() => setStep(0)}>
+                        Start from Package Selection
+                    </Button>
                 </Card>
             )}
 
-            {/* Step 4: Invoice */}
-            {step === 4 && checkoutData.invoice && (
+            {/* Step 4: Contract */}
+            {step === 4 && checkoutData.contract && (
                 <Card padding="lg" radius="md" withBorder>
                     <Group justify="space-between" mb="lg">
                         <div>
-                            <Text fw={600} size="lg">Invoice</Text>
-                            <Text size="sm" c="dimmed">{checkoutData.invoice.invoiceNumber}</Text>
+                            <Text fw={600} size="lg">Service Agreement</Text>
+                            <Text size="sm" c="dimmed">Contract #{checkoutData.contract.contractNumber}</Text>
                         </div>
-                        <Badge size="lg" color={checkoutData.invoice.status === 'paid' ? 'green' : 'yellow'}>
-                            {checkoutData.invoice.status}
+                        <Badge size="lg" color={checkoutData.contract.status === 'signed' ? 'green' : 'yellow'}>
+                            {checkoutData.contract.status}
                         </Badge>
                     </Group>
 
-                    <Grid mb="lg">
-                        <Grid.Col span={6}>
-                            <Text size="sm" c="dimmed">Bill To</Text>
-                            <Text fw={500}>{checkoutData.invoice.guardianName}</Text>
-                            <Text size="sm">{checkoutData.guardian?.address}</Text>
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <Text size="sm" c="dimmed">Resident</Text>
-                            <Text fw={500}>{checkoutData.invoice.residentName}</Text>
-                            <Text size="sm">Room {checkoutData.room?.number}</Text>
-                        </Grid.Col>
-                    </Grid>
+                    <Card padding="md" withBorder mb="lg" bg="gray.0">
+                        <Text fw={600} mb="sm">Contract Terms</Text>
+                        <Text size="sm" mb="md">{checkoutData.contract.terms}</Text>
+                        
+                        <Divider my="sm" />
+                        
+                        <Grid>
+                            <Grid.Col span={6}>
+                                <Text size="sm" c="dimmed">Start Date</Text>
+                                <Text fw={500}>{checkoutData.contract.startDate}</Text>
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                                <Text size="sm" c="dimmed">End Date</Text>
+                                <Text fw={500}>{checkoutData.contract.endDate}</Text>
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                                <Text size="sm" c="dimmed">Guardian</Text>
+                                <Text fw={500}>
+                                    {(checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0])?.firstName}{' '}
+                                    {(checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0])?.lastName}
+                                </Text>
+                                {checkoutData.guardians.length > 1 && (
+                                    <Text size="xs" c="dimmed">+{checkoutData.guardians.length - 1} other guardian(s)</Text>
+                                )}
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                                <Text size="sm" c="dimmed">Resident</Text>
+                                <Text fw={500}>{checkoutData.resident?.firstName} {checkoutData.resident?.lastName}</Text>
+                            </Grid.Col>
+                        </Grid>
+                    </Card>
 
-                    <Table mb="lg">
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th>Description</Table.Th>
-                                <Table.Th ta="right">Qty</Table.Th>
-                                <Table.Th ta="right">Price</Table.Th>
-                                <Table.Th ta="right">Total</Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                            {checkoutData.invoice.items.map((item, idx) => (
-                                <Table.Tr key={idx}>
-                                    <Table.Td>{item.description}</Table.Td>
-                                    <Table.Td ta="right">{item.quantity}</Table.Td>
-                                    <Table.Td ta="right">฿{formatCurrency(item.unitPrice)}</Table.Td>
-                                    <Table.Td ta="right">฿{formatCurrency(item.total)}</Table.Td>
-                                </Table.Tr>
-                            ))}
-                        </Table.Tbody>
-                        <Table.Tfoot>
-                            <Table.Tr>
-                                <Table.Td colSpan={3} ta="right"><Text fw={500}>Subtotal</Text></Table.Td>
-                                <Table.Td ta="right">฿{formatCurrency(checkoutData.invoice.subtotal)}</Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Td colSpan={3} ta="right"><Text fw={500}>VAT (7%)</Text></Table.Td>
-                                <Table.Td ta="right">฿{formatCurrency(checkoutData.invoice.tax)}</Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Td colSpan={3} ta="right"><Text fw={700} size="lg">Total</Text></Table.Td>
-                                <Table.Td ta="right"><Text fw={700} size="lg" c="blue">฿{formatCurrency(checkoutData.invoice.total)}</Text></Table.Td>
-                            </Table.Tr>
-                        </Table.Tfoot>
-                    </Table>
-
-                    <Divider my="lg" label="Payment Method" labelPosition="center" />
-
-                    <Group justify="center" gap="md">
-                        <Button 
-                            variant="outline" 
-                            size="lg"
-                            onClick={() => handleMarkPaid('cash')}
-                            loading={processing}
-                        >
-                            Pay with Cash
-                        </Button>
-                        <Button 
-                            variant="outline" 
-                            size="lg"
-                            onClick={() => handleMarkPaid('transfer')}
-                            loading={processing}
-                        >
-                            Pay with Transfer
-                        </Button>
-                        <Button 
-                            variant="filled" 
-                            size="lg"
-                            onClick={() => handleMarkPaid('credit_card')}
-                            loading={processing}
-                        >
-                            Pay with Card
-                        </Button>
-                    </Group>
-
-                    <Divider my="lg" />
+                    <Card padding="md" withBorder mb="lg">
+                        <Checkbox
+                            label="I have read and agree to the terms and conditions of this service agreement"
+                            size="md"
+                        />
+                    </Card>
 
                     <Group justify="space-between">
                         <Button variant="subtle" onClick={() => setStep(3)}>Back</Button>
-                        <Button variant="light" onClick={handleSaveDraft}>Save as Draft</Button>
+                        <Group gap="sm">
+                            <Button 
+                                variant="outline" 
+                                leftSection={<IconPrinter size={18} />}
+                                onClick={() => window.print()}
+                            >
+                                Print Contract
+                            </Button>
+                            <Button onClick={() => setStep(5)}>
+                                Sign & Continue
+                            </Button>
+                        </Group>
                     </Group>
+                </Card>
+            )}
+
+            {/* Step 4: Contract - No data fallback */}
+            {step === 4 && !checkoutData.contract && (
+                <Card padding="xl" radius="md" withBorder ta="center">
+                    <IconFileText size={48} color="var(--mantine-color-gray-5)" style={{ marginBottom: 16 }} />
+                    <Title order={3} mb="sm" c="dimmed">No Contract Available</Title>
+                    <Text size="sm" c="dimmed" mb="xl">
+                        Please complete payment first to generate a contract.
+                    </Text>
+                    <Button variant="light" onClick={() => setStep(3)}>
+                        Go to Invoice
+                    </Button>
                 </Card>
             )}
 
@@ -765,17 +1713,17 @@ export function SalesOrderPage() {
             {step === 5 && (
                 <Card padding="xl" radius="md" withBorder ta="center">
                     <IconCheck size={64} color="var(--mantine-color-green-6)" style={{ marginBottom: 16 }} />
-                    <Title order={2} mb="sm">Payment Successful!</Title>
+                    <Title order={2} mb="sm">Order Complete!</Title>
                     <Text size="lg" c="dimmed" mb="xl">
                         The sales order has been completed successfully.
                     </Text>
 
                     <Card padding="lg" withBorder mb="xl" ta="left">
-                        <Text fw={600} mb="md">What's Next?</Text>
+                        <Text fw={600} mb="md">Summary</Text>
                         <Stack gap="sm">
                             <Group gap="sm">
                                 <IconFileText size={20} />
-                                <Text size="sm">Contract #{checkoutData.contract?.contractNumber} has been generated</Text>
+                                <Text size="sm">Contract #{checkoutData.contract?.contractNumber} has been signed</Text>
                             </Group>
                             <Group gap="sm">
                                 <IconReceipt size={20} />
@@ -796,8 +1744,7 @@ export function SalesOrderPage() {
                             <Text size="sm">1. Please arrive at the facility on the check-in date by 10:00 AM</Text>
                             <Text size="sm">2. Bring the resident's ID card and any relevant medical documents</Text>
                             <Text size="sm">3. Prepare personal belongings (clothes, toiletries, medications)</Text>
-                            <Text size="sm">4. Sign the contract upon arrival</Text>
-                            <Text size="sm">5. Our staff will provide a facility tour and introduction</Text>
+                            <Text size="sm">4. Our staff will provide a facility tour and introduction</Text>
                         </Stack>
                     </Card>
 

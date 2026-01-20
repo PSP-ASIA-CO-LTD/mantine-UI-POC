@@ -2,6 +2,50 @@
     --_gap: var(--mantine-spacing-md);
 }
 
+/* Stepper styling */
+.sales-order-page .mantine-Stepper-root {
+    padding-block: var(--mantine-spacing-md);
+    padding-inline: var(--mantine-spacing-xs);
+    background: var(--mantine-color-white);
+    border-radius: var(--mantine-radius-md);
+    border: 1px solid var(--mantine-color-gray-2);
+}
+
+.sales-order-page .mantine-Stepper-step[data-progress] .mantine-Stepper-stepIcon {
+    box-shadow: 0 0 0 3px var(--mantine-color-blue-1);
+}
+
+/* Center step label and description */
+.sales-order-page .mantine-Stepper-step {
+    align-items: center;
+}
+
+.sales-order-page .mantine-Stepper-stepBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.sales-order-page .mantine-Stepper-stepBody:has(.mantine-Stepper-stepDescription:empty),
+.sales-order-page .mantine-Stepper-stepBody:not(:has(.mantine-Stepper-stepDescription)) {
+    justify-content: center;
+}
+
+.sales-order-page .mantine-Stepper-stepLabel {
+    text-align: center;
+}
+
+.sales-order-page .mantine-Stepper-stepDescription {
+    text-align: center;
+    font-size: var(--mantine-font-size-xs);
+    color: var(--mantine-color-dimmed);
+    max-inline-size: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .package-list {
     display: flex;
     flex-direction: column;
@@ -14,6 +58,36 @@
 
 .package-card:hover {
     box-shadow: var(--mantine-shadow-sm);
+}
+
+.contact-forms-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--_gap);
+}
+
+/* Auto-fill bar for testing */
+.autofill-bar {
+    grid-column: 1 / -1;
+    padding: var(--mantine-spacing-sm);
+    background: linear-gradient(135deg, var(--mantine-color-grape-0), var(--mantine-color-violet-0));
+    border: 1px dashed var(--mantine-color-grape-4);
+    border-radius: var(--mantine-radius-md);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.contact-forms-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+}
+
+@media (max-width: 900px) {
+    .contact-forms-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .room-grid {
@@ -37,8 +111,220 @@
     background-color: var(--mantine-color-green-0);
 }
 
+/* Guardians form styling */
+.guardians-card {
+    grid-column: 1 / -1;
+}
+
+.guardian-form-block {
+    background-color: var(--mantine-color-gray-0);
+}
+
+/* Additional Services Grid */
+.additional-services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--_gap);
+}
+
+@media (max-width: 768px) {
+    .additional-services-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Hide NumberInput controls visually but keep them functional */
+.days-input-controls {
+    opacity: 0;
+    pointer-events: auto;
+}
+
+/* Invoice A4 Paper Styling */
+.invoice-step-container {
+    display: grid;
+    gap: var(--_gap);
+}
+
+.invoice-a4-paper {
+    --_a4-padding: 48px;
+    background: white;
+    border: 1px solid var(--mantine-color-gray-3);
+    border-radius: var(--mantine-radius-sm);
+    padding: var(--_a4-padding);
+    max-inline-size: 794px; /* A4 width in pixels at 96 DPI */
+    margin-inline: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.invoice-letterhead {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: var(--mantine-spacing-lg);
+    align-items: center;
+}
+
+.letterhead-logo-placeholder {
+    inline-size: 80px;
+    block-size: 80px;
+    border: 2px dashed var(--mantine-color-gray-4);
+    border-radius: var(--mantine-radius-md);
+    display: grid;
+    place-content: center;
+    background: var(--mantine-color-gray-0);
+}
+
+.letterhead-info {
+    text-align: right;
+}
+
+.invoicee-card {
+    background: var(--mantine-color-gray-0);
+}
+
+.placeholder-box {
+    background: var(--mantine-color-gray-1);
+    border-style: dashed;
+}
+
+.placeholder-text {
+    color: var(--mantine-color-gray-5);
+}
+
+.invoice-table {
+    border: 1px solid var(--mantine-color-gray-3);
+}
+
+.invoice-table thead {
+    background: var(--mantine-color-gray-1);
+}
+
+.invoice-total-row {
+    background: var(--mantine-color-blue-0);
+}
+
+.invoice-signature-section {
+    border-block-start: 1px solid var(--mantine-color-gray-3);
+    padding-block-start: var(--mantine-spacing-lg);
+}
+
+.signature-block {
+    max-inline-size: 200px;
+    margin-inline-start: auto;
+}
+
+.owner-signature {
+    max-inline-size: 150px;
+    block-size: auto;
+}
+
+/* Payment Section */
+.payment-section {
+    max-inline-size: 794px;
+    margin-inline: auto;
+}
+
+.payment-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--_gap);
+}
+
+@media (max-width: 768px) {
+    .payment-buttons-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.payment-btn {
+    min-block-size: 80px;
+}
+
+.payment-btn.promptpay {
+    border-color: var(--mantine-color-blue-5);
+    color: var(--mantine-color-blue-7);
+}
+
+.payment-btn.bank {
+    border-color: var(--mantine-color-teal-5);
+    color: var(--mantine-color-teal-7);
+}
+
+.payment-btn.cash {
+    border-color: var(--mantine-color-green-5);
+    color: var(--mantine-color-green-7);
+}
+
+.payment-btn.credit-card {
+    border-color: var(--mantine-color-violet-5);
+    color: var(--mantine-color-violet-7);
+}
+
+/* QR Code placeholder */
+.qr-placeholder {
+    background: var(--mantine-color-gray-0);
+}
+
+.qr-code-box {
+    inline-size: 180px;
+    block-size: 180px;
+    border: 2px dashed var(--mantine-color-gray-4);
+    border-radius: var(--mantine-radius-sm);
+    display: grid;
+    place-content: center;
+    background: white;
+}
+
+/* Bank Option Styling */
+.bank-option {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bank-option:hover {
+    border-color: var(--mantine-color-blue-4);
+}
+
+.bank-option.selected {
+    border-color: var(--mantine-color-blue-6);
+    background: var(--mantine-color-blue-0);
+}
+
+.bank-logo {
+    inline-size: 40px;
+    block-size: 40px;
+    border-radius: var(--mantine-radius-sm);
+    display: grid;
+    place-content: center;
+    font-weight: 700;
+    color: white;
+}
+
+.bank-logo.kbank {
+    background: #138f2d;
+}
+
+.bank-logo.scb {
+    background: #4e2a84;
+}
+
+.bank-logo.bbl {
+    background: #1e3c71;
+}
+
+.bank-logo.ktb {
+    background: #1ba5e0;
+}
+
 @media print {
-    .sales-order-page button {
+    .sales-order-page button,
+    .payment-section {
         display: none;
+    }
+    
+    .invoice-a4-paper {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        max-inline-size: none;
     }
 }

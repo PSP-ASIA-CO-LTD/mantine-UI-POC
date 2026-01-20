@@ -188,11 +188,23 @@ export const API = {
         await delay(400);
         const newGuardian: Guardian = {
             ...data,
-            id: 'gdn-' + Date.now(),
+            pays: data.pays ?? false,
+            id: 'gdn-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
             createdAt: new Date().toISOString()
         };
         guardians.push(newGuardian);
         return newGuardian;
+    },
+
+    updateGuardian: async (id: string, data: Partial<Guardian>): Promise<Guardian | null> => {
+        await loadAllJSON();
+        await delay(300);
+        const index = guardians.findIndex(g => g.id === id);
+        if (index !== -1) {
+            guardians[index] = { ...guardians[index], ...data };
+            return guardians[index];
+        }
+        return null;
     },
 
     getResidents: async (): Promise<Resident[]> => {
