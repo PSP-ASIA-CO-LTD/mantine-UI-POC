@@ -15,6 +15,7 @@ import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { buildLeftSection } from '../utils/sidesheetHelper';
+import { IconMinus } from '@tabler/icons-react';
 import type { Package, Service } from '../types';
 
 export function Packages() {
@@ -101,9 +102,26 @@ export function Packages() {
                                             e.stopPropagation();
                                             removeService(idx);
                                         }}
+                                        styles={{
+                                            root: {
+                                                width: 28,
+                                                height: 28,
+                                                borderRadius: '50%',
+                                                padding: 0,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                transition: 'background-color 0.2s ease',
+                                                '&:hover': {
+                                                    backgroundColor: '#ffe5e5',
+                                                },
+                                            },
+                                        }}
+
                                     >
-                                        Remove
+                                        <IconMinus size={16} />
                                     </Button>
+
                                 ) : (
                                     <Badge size="sm" data-er-field="TASK.department_id">{service.dept}</Badge>
                                 )}
