@@ -16,6 +16,7 @@ import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { buildLeftSection } from '../utils/sidesheetHelper';
+import { IconMinus } from '@tabler/icons-react';
 import type { Team, AssignmentType } from '../types';
 
 export function Teams() {
@@ -123,8 +124,24 @@ export function Teams() {
                                             e.stopPropagation();
                                             removeService(idx);
                                         }}
+                                        styles={{
+                                            root: {
+                                                width: 28,
+                                                height: 28,
+                                                borderRadius: '50%',
+                                                padding: 0,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                transition: 'background-color 0.2s ease',
+                                                '&:hover': {
+                                                    backgroundColor: '#ffe5e5',
+                                                },
+                                            },
+                                        }}
+
                                     >
-                                        Remove
+                                        <IconMinus size={16} />
                                     </Button>
                                 ) : (
                                     <Badge color="gray" data-er-field="TASK.department_id">{team.dept}</Badge>
