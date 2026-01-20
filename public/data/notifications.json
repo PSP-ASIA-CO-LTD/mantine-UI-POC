@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ntf-1",
+    "type": "sale",
+    "title": "New Sale Completed",
+    "message": "20-day Elder Recreation package sold to สมชาย ใจดี for resident คุณยาย สุขใจ. Total: ฿90,950",
+    "relatedId": "so-1",
+    "createdAt": "2025-12-15T12:00:00Z",
+    "readAt": "2025-12-15T12:05:00Z"
+  },
+  {
+    "id": "ntf-2",
+    "type": "sale",
+    "title": "New Sale Completed",
+    "message": "Golden Years Premium package sold to John Doe for resident Grandma Smith. Total: ฿128,400",
+    "relatedId": "so-2",
+    "createdAt": "2025-12-19T09:00:00Z",
+    "readAt": null
+  }
+]

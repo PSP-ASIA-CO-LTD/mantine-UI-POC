@@ -1,0 +1,23 @@
+.sales-dashboard {
+    --_gap: var(--mantine-spacing-md);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--_gap);
+}
+
+.stat-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--mantine-shadow-md);
+}
+
+.unread {
+    background-color: hsl(211, 100%, 97%);
+    border-color: hsl(211, 100%, 85%);
+}

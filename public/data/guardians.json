@@ -1,0 +1,22 @@
+[
+  {
+    "id": "gdn-1",
+    "firstName": "สมชาย",
+    "lastName": "ใจดี",
+    "phone": "081-234-5678",
+    "email": "somchai@email.com",
+    "address": "123 ถ.สุขุมวิท กรุงเทพฯ 10110",
+    "relationship": "son",
+    "createdAt": "2025-12-15T10:00:00Z"
+  },
+  {
+    "id": "gdn-2",
+    "firstName": "John",
+    "lastName": "Doe",
+    "phone": "089-999-8888",
+    "email": "john.doe@email.com",
+    "address": "456 Rama IV Road, Bangkok 10500",
+    "relationship": "son",
+    "createdAt": "2025-12-18T14:30:00Z"
+  }
+]

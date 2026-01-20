@@ -1,12 +1,13 @@
 .app-nav {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    block-size: 100%;
     padding: 1.5rem;
+    overflow-y: auto;
 }
 
 .app-nav-header {
-    margin-bottom: 2rem;
+    margin-block-end: 1.5rem;
 }
 
 .brand {
@@ -23,11 +24,30 @@
 .subtitle {
     font-size: 0.875rem;
     color: hsl(0, 0%, 60%);
-    margin-top: 0.25rem;
+    margin-block-start: 0.25rem;
 }
 
 .app-nav-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.nav-group-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(0, 0%, 50%);
+    padding-inline: 1rem;
+    padding-block-end: 0.5rem;
 }
 
 .nav-link {
@@ -52,7 +72,7 @@
 }
 
 .app-nav-footer {
-    margin-top: auto;
-    padding-top: 1rem;
-    border-top: 1px solid hsl(0, 0%, 93%);
+    margin-block-start: auto;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid hsl(0, 0%, 93%);
 }

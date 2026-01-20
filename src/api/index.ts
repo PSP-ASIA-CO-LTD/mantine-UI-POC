@@ -1,7 +1,24 @@
 import { buildDatabase } from '../utils/csvParser';
-import type { Database, Package, Staff, Team, DashboardStats } from '../types';
+import type { 
+    Database, Package, Staff, Team, DashboardStats,
+    Guardian, Resident, Room, SalesOrder, Invoice, Contract,
+    Notification, OperationTask, StaffShift, SalesDashboardStats
+} from '../types';
 
 let db: Database | null = null;
+
+// In-memory stores for JSON data
+let guardians: Guardian[] = [];
+let residents: Resident[] = [];
+let rooms: Room[] = [];
+let salesOrders: SalesOrder[] = [];
+let invoices: Invoice[] = [];
+let contracts: Contract[] = [];
+let notifications: Notification[] = [];
+let operationTasks: OperationTask[] = [];
+let staffShifts: StaffShift[] = [];
+
+let jsonLoaded = false;
 
 const loadDB = async (): Promise<Database> => {
     if (db) return db;
@@ -14,9 +31,47 @@ const loadDB = async (): Promise<Database> => {
     }
 };
 
+const loadJSON = async <T>(url: string): Promise<T[]> => {
+    try {
+        const response = await fetch(url);
+        return await response.json();
+    } catch (error) {
+        console.error(`Failed to load JSON: ${url}`, error);
+        return [];
+    }
+};
+
+const loadAllJSON = async () => {
+    if (jsonLoaded) return;
+    
+    const [g, r, rm, so, inv, ctr, ntf, ot, ss] = await Promise.all([
+        loadJSON<Guardian>('/data/guardians.json'),
+        loadJSON<Resident>('/data/residents.json'),
+        loadJSON<Room>('/data/rooms.json'),
+        loadJSON<SalesOrder>('/data/salesOrders.json'),
+        loadJSON<Invoice>('/data/invoices.json'),
+        loadJSON<Contract>('/data/contracts.json'),
+        loadJSON<Notification>('/data/notifications.json'),
+        loadJSON<OperationTask>('/data/operationTasks.json'),
+        loadJSON<StaffShift>('/data/staffShifts.json'),
+    ]);
+    
+    guardians = g;
+    residents = r;
+    rooms = rm;
+    salesOrders = so;
+    invoices = inv;
+    contracts = ctr;
+    notifications = ntf;
+    operationTasks = ot;
+    staffShifts = ss;
+    jsonLoaded = true;
+};
+
 const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const API = {
+    // ==================== EXISTING APIs ====================
     getPackages: async (): Promise<Package[]> => {
         await delay();
         const data = await loadDB();
@@ -40,7 +95,6 @@ export const API = {
         const data = await loadDB();
         return data.teams;
     },
-
 
     getOrders: async () => {
         await delay();
@@ -76,7 +130,6 @@ export const API = {
         return true;
     },
 
-
     saveTeam: async (teamData: Partial<Team> & { id: string }): Promise<Team | null> => {
         await delay(500);
         const data = await loadDB();
@@ -94,7 +147,6 @@ export const API = {
         data.teams = data.teams.filter(t => t.id !== id);
         return true;
     },
-
 
     saveStaff: async (staffData: Partial<Staff> & { id: string }): Promise<Staff | null> => {
         await delay(500);
@@ -118,10 +170,410 @@ export const API = {
         await delay();
         const data = await loadDB();
         return {
-            occupancy: Math.floor(Math.random() * 20) + 70, // 70-90%
+            occupancy: Math.floor(Math.random() * 20) + 70,
             pendingTasks: data.tasks.filter(t => t.status === 'Pending').length,
             totalStaff: data.staff.length,
             newPurchases: data.orders.length
         };
+    },
+
+    // ==================== SALES APIs ====================
+    getGuardians: async (): Promise<Guardian[]> => {
+        await loadAllJSON();
+        await delay();
+        return guardians;
+    },
+
+    getGuardianById: async (id: string): Promise<Guardian | undefined> => {
+        await loadAllJSON();
+        await delay();
+        return guardians.find(g => g.id === id);
+    },
+
+    saveGuardian: async (data: Omit<Guardian, 'id' | 'createdAt'>): Promise<Guardian> => {
+        await loadAllJSON();
+        await delay(400);
+        const newGuardian: Guardian = {
+            ...data,
+            pays: data.pays ?? false,
+            id: 'gdn-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+            createdAt: new Date().toISOString()
+        };
+        guardians.push(newGuardian);
+        return newGuardian;
+    },
+
+    updateGuardian: async (id: string, data: Partial<Guardian>): Promise<Guardian | null> => {
+        await loadAllJSON();
+        await delay(300);
+        const index = guardians.findIndex(g => g.id === id);
+        if (index !== -1) {
+            guardians[index] = { ...guardians[index], ...data };
+            return guardians[index];
+        }
+        return null;
+    },
+
+    getResidents: async (): Promise<Resident[]> => {
+        await loadAllJSON();
+        await delay();
+        return residents;
+    },
+
+    getResidentById: async (id: string): Promise<Resident | undefined> => {
+        await loadAllJSON();
+        await delay();
+        return residents.find(r => r.id === id);
+    },
+
+    saveResident: async (data: Omit<Resident, 'id' | 'createdAt'>): Promise<Resident> => {
+        await loadAllJSON();
+        await delay(400);
+        const newResident: Resident = {
+            ...data,
+            id: 'res-' + Date.now(),
+            createdAt: new Date().toISOString()
+        };
+        residents.push(newResident);
+        return newResident;
+    },
+
+    getRooms: async (): Promise<Room[]> => {
+        await loadAllJSON();
+        await delay();
+        return rooms;
+    },
+
+    getAvailableRooms: async (): Promise<Room[]> => {
+        await loadAllJSON();
+        await delay();
+        return rooms.filter(r => r.status === 'available');
+    },
+
+    updateRoomStatus: async (id: string, status: Room['status']): Promise<Room | null> => {
+        await loadAllJSON();
+        await delay();
+        const room = rooms.find(r => r.id === id);
+        if (room) {
+            room.status = status;
+            return room;
+        }
+        return null;
+    },
+
+    getSalesOrders: async (): Promise<SalesOrder[]> => {
+        await loadAllJSON();
+        await delay();
+        return salesOrders;
+    },
+
+    getSalesOrderById: async (id: string): Promise<SalesOrder | undefined> => {
+        await loadAllJSON();
+        await delay();
+        return salesOrders.find(so => so.id === id);
+    },
+
+    createSalesOrder: async (data: Omit<SalesOrder, 'id' | 'createdAt'>): Promise<SalesOrder> => {
+        await loadAllJSON();
+        await delay(500);
+        const newOrder: SalesOrder = {
+            ...data,
+            id: 'so-' + Date.now(),
+            createdAt: new Date().toISOString()
+        };
+        salesOrders.push(newOrder);
+        return newOrder;
+    },
+
+    updateSalesOrder: async (id: string, data: Partial<SalesOrder>): Promise<SalesOrder | null> => {
+        await loadAllJSON();
+        await delay(400);
+        const index = salesOrders.findIndex(so => so.id === id);
+        if (index !== -1) {
+            salesOrders[index] = { ...salesOrders[index], ...data };
+            return salesOrders[index];
+        }
+        return null;
+    },
+
+    getInvoices: async (): Promise<Invoice[]> => {
+        await loadAllJSON();
+        await delay();
+        return invoices;
+    },
+
+    getInvoiceById: async (id: string): Promise<Invoice | undefined> => {
+        await loadAllJSON();
+        await delay();
+        return invoices.find(inv => inv.id === id);
+    },
+
+    getInvoiceBySalesOrderId: async (salesOrderId: string): Promise<Invoice | undefined> => {
+        await loadAllJSON();
+        await delay();
+        return invoices.find(inv => inv.salesOrderId === salesOrderId);
+    },
+
+    createInvoice: async (data: Omit<Invoice, 'id' | 'invoiceNumber' | 'issuedAt'>): Promise<Invoice> => {
+        await loadAllJSON();
+        await delay(500);
+        const invoiceNumber = `INV-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(4, '0')}`;
+        const newInvoice: Invoice = {
+            ...data,
+            id: 'inv-' + Date.now(),
+            invoiceNumber,
+            issuedAt: new Date().toISOString()
+        };
+        invoices.push(newInvoice);
+        return newInvoice;
+    },
+
+    updateInvoice: async (id: string, data: Partial<Invoice>): Promise<Invoice | null> => {
+        await loadAllJSON();
+        await delay(400);
+        const index = invoices.findIndex(inv => inv.id === id);
+        if (index !== -1) {
+            invoices[index] = { ...invoices[index], ...data };
+            return invoices[index];
+        }
+        return null;
+    },
+
+    getContracts: async (): Promise<Contract[]> => {
+        await loadAllJSON();
+        await delay();
+        return contracts;
+    },
+
+    getContractBySalesOrderId: async (salesOrderId: string): Promise<Contract | undefined> => {
+        await loadAllJSON();
+        await delay();
+        return contracts.find(c => c.salesOrderId === salesOrderId);
+    },
+
+    createContract: async (data: Omit<Contract, 'id' | 'contractNumber'>): Promise<Contract> => {
+        await loadAllJSON();
+        await delay(500);
+        const contractNumber = `CTR-${new Date().getFullYear()}-${String(contracts.length + 1).padStart(4, '0')}`;
+        const newContract: Contract = {
+            ...data,
+            id: 'ctr-' + Date.now(),
+            contractNumber
+        };
+        contracts.push(newContract);
+        return newContract;
+    },
+
+    getNotifications: async (): Promise<Notification[]> => {
+        await loadAllJSON();
+        await delay();
+        return notifications.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+    },
+
+    getUnreadNotifications: async (): Promise<Notification[]> => {
+        await loadAllJSON();
+        await delay();
+        return notifications.filter(n => !n.readAt);
+    },
+
+    createNotification: async (data: Omit<Notification, 'id' | 'createdAt'>): Promise<Notification> => {
+        await loadAllJSON();
+        const newNotification: Notification = {
+            ...data,
+            id: 'ntf-' + Date.now(),
+            createdAt: new Date().toISOString()
+        };
+        notifications.unshift(newNotification);
+        return newNotification;
+    },
+
+    markNotificationRead: async (id: string): Promise<void> => {
+        await loadAllJSON();
+        const notification = notifications.find(n => n.id === id);
+        if (notification) {
+            notification.readAt = new Date().toISOString();
+        }
+    },
+
+    getSalesDashboardStats: async (): Promise<SalesDashboardStats> => {
+        await loadAllJSON();
+        await delay();
+        
+        const today = new Date().toISOString().split('T')[0];
+        const todayOrders = salesOrders.filter(so => 
+            so.createdAt.split('T')[0] === today && so.status === 'paid'
+        );
+        
+        return {
+            todaySales: todayOrders.length,
+            todayRevenue: todayOrders.reduce((sum, so) => sum + so.adjustedPrice, 0),
+            pendingPayments: salesOrders.filter(so => so.status === 'pending_payment').length,
+            activeResidents: salesOrders.filter(so => so.status === 'active').length,
+            recentSales: salesOrders
+                .filter(so => so.status === 'paid' || so.status === 'active')
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .slice(0, 5)
+        };
+    },
+
+    // ==================== OPERATION APIs ====================
+    getOperationTasks: async (): Promise<OperationTask[]> => {
+        await loadAllJSON();
+        await delay();
+        return operationTasks;
+    },
+
+    getTasksByDate: async (date: string): Promise<OperationTask[]> => {
+        await loadAllJSON();
+        await delay();
+        return operationTasks.filter(t => t.scheduledDate === date);
+    },
+
+    getTasksByStaff: async (staffId: string): Promise<OperationTask[]> => {
+        await loadAllJSON();
+        await delay();
+        return operationTasks.filter(t => t.assignedTo === staffId);
+    },
+
+    getTasksByDept: async (dept: string): Promise<OperationTask[]> => {
+        await loadAllJSON();
+        await delay();
+        return operationTasks.filter(t => t.serviceDept === dept);
+    },
+
+    updateTaskStatus: async (
+        id: string, 
+        status: OperationTask['status'], 
+        completedBy?: string,
+        notes?: string
+    ): Promise<OperationTask | null> => {
+        await loadAllJSON();
+        await delay(300);
+        const task = operationTasks.find(t => t.id === id);
+        if (task) {
+            task.status = status;
+            if (status === 'completed') {
+                task.completedAt = new Date().toISOString();
+                task.completedBy = completedBy;
+            }
+            if (notes) task.notes = notes;
+            return task;
+        }
+        return null;
+    },
+
+    reassignTask: async (id: string, staffId: string, staffName: string): Promise<OperationTask | null> => {
+        await loadAllJSON();
+        await delay(300);
+        const task = operationTasks.find(t => t.id === id);
+        if (task) {
+            task.assignedTo = staffId;
+            task.assignedToName = staffName;
+            return task;
+        }
+        return null;
+    },
+
+    generateTasksFromPackage: async (
+        salesOrder: SalesOrder,
+        pkg: Package,
+        resident: Resident,
+        roomNumber: string
+    ): Promise<OperationTask[]> => {
+        await loadAllJSON();
+        await delay(500);
+        
+        const newTasks: OperationTask[] = [];
+        const checkIn = new Date(salesOrder.checkIn);
+        const checkOut = new Date(salesOrder.checkOut);
+        
+        for (const service of pkg.services) {
+            let currentDate = new Date(checkIn);
+            
+            while (currentDate <= checkOut) {
+                const shouldAdd = (() => {
+                    if (service.interval === 'Daily') return true;
+                    if (service.interval.includes('Every')) {
+                        const days = parseInt(service.interval.match(/\d+/)?.[0] || '1');
+                        const diffDays = Math.floor((currentDate.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+                        return diffDays % days === 0;
+                    }
+                    return true;
+                })();
+                
+                if (shouldAdd) {
+                    const task: OperationTask = {
+                        id: 'opt-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                        salesOrderId: salesOrder.id,
+                        residentId: resident.id,
+                        residentName: `${resident.firstName} ${resident.lastName}`,
+                        roomNumber,
+                        serviceTitle: service.title,
+                        serviceDept: service.dept,
+                        description: service.description,
+                        scheduledDate: currentDate.toISOString().split('T')[0],
+                        status: 'pending',
+                        priority: 'normal'
+                    };
+                    newTasks.push(task);
+                }
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        
+        operationTasks.push(...newTasks);
+        return newTasks;
+    },
+
+    getStaffShifts: async (): Promise<StaffShift[]> => {
+        await loadAllJSON();
+        await delay();
+        return staffShifts;
+    },
+
+    getShiftsByDate: async (date: string): Promise<StaffShift[]> => {
+        await loadAllJSON();
+        await delay();
+        return staffShifts.filter(s => s.date === date);
+    },
+
+    getShiftsByStaff: async (staffId: string): Promise<StaffShift[]> => {
+        await loadAllJSON();
+        await delay();
+        return staffShifts.filter(s => s.staffId === staffId);
+    },
+
+    getStaffAvailability: async (startDate: string, endDate: string): Promise<{
+        date: string;
+        totalStaff: number;
+        scheduledStaff: number;
+        taskCount: number;
+    }[]> => {
+        await loadAllJSON();
+        await delay();
+        
+        const result: { date: string; totalStaff: number; scheduledStaff: number; taskCount: number }[] = [];
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        const allStaff = (await API.getStaff()).length;
+        
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0];
+            const dayShifts = staffShifts.filter(s => s.date === dateStr);
+            const dayTasks = operationTasks.filter(t => t.scheduledDate === dateStr && t.status === 'pending');
+            
+            result.push({
+                date: dateStr,
+                totalStaff: allStaff,
+                scheduledStaff: dayShifts.length,
+                taskCount: dayTasks.length
+            });
+        }
+        
+        return result;
     }
 };

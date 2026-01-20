@@ -1,0 +1,30 @@
+[
+  {
+    "id": "res-1",
+    "firstName": "คุณยาย",
+    "lastName": "สุขใจ",
+    "dateOfBirth": "1945-03-15",
+    "gender": "female",
+    "idNumber": "1-1001-00001-00-1",
+    "medicalConditions": "Diabetes Type 2, Hypertension",
+    "allergies": "Penicillin",
+    "dietaryRestrictions": "Low sodium, Low sugar",
+    "emergencyContact": "081-234-5678",
+    "guardianId": "gdn-1",
+    "createdAt": "2025-12-15T10:30:00Z"
+  },
+  {
+    "id": "res-2",
+    "firstName": "Grandma",
+    "lastName": "Smith",
+    "dateOfBirth": "1940-08-22",
+    "gender": "female",
+    "idNumber": "1-1001-00002-00-2",
+    "medicalConditions": "Arthritis",
+    "allergies": "None",
+    "dietaryRestrictions": "None",
+    "emergencyContact": "089-999-8888",
+    "guardianId": "gdn-2",
+    "createdAt": "2025-12-18T15:00:00Z"
+  }
+]

@@ -1,0 +1,260 @@
+.invoice-page {
+    --_gap: var(--mantine-spacing-md);
+    --_a4-width: 794px;
+    --_a4-padding: 48px;
+}
+
+/* Header Actions - Hidden when printing */
+.invoice-header {
+    max-inline-size: var(--_a4-width);
+    margin-inline: auto;
+}
+
+/* A4 Paper Container */
+.invoice-a4-paper {
+    background: white;
+    border: 1px solid var(--mantine-color-gray-3);
+    border-radius: var(--mantine-radius-sm);
+    padding: var(--_a4-padding);
+    max-inline-size: var(--_a4-width);
+    min-block-size: 1123px; /* A4 height at 96 DPI */
+    margin-inline: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+}
+
+/* Letterhead */
+.invoice-letterhead {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: var(--mantine-spacing-lg);
+    align-items: center;
+}
+
+.letterhead-logo {
+    justify-self: start;
+}
+
+.logo-placeholder {
+    inline-size: 80px;
+    block-size: 80px;
+    border: 2px dashed var(--mantine-color-gray-4);
+    border-radius: var(--mantine-radius-md);
+    display: grid;
+    place-content: center;
+    background: var(--mantine-color-gray-0);
+}
+
+.letterhead-company {
+    text-align: right;
+}
+
+.company-name {
+    color: var(--mantine-color-blue-7);
+    letter-spacing: 0.5px;
+}
+
+.letterhead-divider {
+    border-color: var(--mantine-color-blue-3);
+    border-width: 2px;
+}
+
+/* Invoice Title Section */
+.invoice-title-section {
+    align-items: flex-start;
+}
+
+.invoice-title {
+    font-size: 2rem;
+    letter-spacing: 2px;
+}
+
+.invoice-number {
+    font-family: monospace;
+    font-size: var(--mantine-font-size-sm);
+}
+
+/* Billing Section */
+.billing-section {
+    gap: var(--_gap);
+}
+
+.section-label {
+    letter-spacing: 1px;
+    font-size: 0.75rem;
+}
+
+.contact-card {
+    background: var(--mantine-color-gray-0);
+}
+
+.placeholder-card {
+    background: var(--mantine-color-gray-1);
+    border-style: dashed;
+}
+
+/* Stay Period Card */
+.stay-period-card {
+    background: linear-gradient(135deg, var(--mantine-color-blue-0), var(--mantine-color-cyan-0));
+    border-color: var(--mantine-color-blue-2);
+}
+
+.stay-arrow {
+    font-size: 1.5rem;
+    color: var(--mantine-color-blue-5);
+}
+
+/* Package Card */
+.package-card {
+    border-color: var(--mantine-color-blue-2);
+}
+
+.services-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--mantine-spacing-xs);
+}
+
+.service-item {
+    display: flex;
+    align-items: center;
+    gap: var(--mantine-spacing-xs);
+}
+
+/* Room Card */
+.room-card {
+    background: var(--mantine-color-gray-0);
+}
+
+/* Options Card */
+.options-card {
+    background: var(--mantine-color-yellow-0);
+    border-color: var(--mantine-color-yellow-3);
+}
+
+/* Invoice Table */
+.invoice-table {
+    border: 1px solid var(--mantine-color-gray-3);
+    border-radius: var(--mantine-radius-sm);
+    overflow: hidden;
+}
+
+.invoice-table thead {
+    background: var(--mantine-color-gray-1);
+}
+
+.invoice-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: var(--mantine-color-gray-7);
+}
+
+.invoice-table tbody tr:hover {
+    background: var(--mantine-color-gray-0);
+}
+
+.invoice-table tfoot tr:not(.total-row) {
+    background: var(--mantine-color-gray-0);
+}
+
+.total-row {
+    background: var(--mantine-color-blue-0);
+}
+
+.total-row td {
+    border-block-start: 2px solid var(--mantine-color-blue-3);
+}
+
+/* Notes Section */
+.notes-section {
+    background: var(--mantine-color-gray-0);
+    border-style: dashed;
+}
+
+/* Signature Section */
+.signature-section {
+    border-block-start: 1px solid var(--mantine-color-gray-3);
+    padding-block-start: var(--mantine-spacing-lg);
+    margin-block-start: var(--mantine-spacing-xl);
+}
+
+.signature-block {
+    max-inline-size: 200px;
+    margin-inline-start: auto;
+}
+
+.signature-image {
+    max-inline-size: 150px;
+    block-size: auto;
+}
+
+/* Footer */
+.invoice-footer {
+    position: absolute;
+    inset-block-end: var(--_a4-padding);
+    inset-inline: var(--_a4-padding);
+    padding-block-start: var(--mantine-spacing-md);
+    border-block-start: 1px solid var(--mantine-color-gray-2);
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .invoice-page {
+        padding: 0;
+        background: white;
+    }
+
+    .invoice-a4-paper {
+        box-shadow: none;
+        border: none;
+        padding: 20mm;
+        max-inline-size: none;
+        min-block-size: auto;
+        margin: 0;
+    }
+
+    .invoice-footer {
+        position: relative;
+        inset: auto;
+        margin-block-start: var(--mantine-spacing-xl);
+    }
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+    .invoice-a4-paper {
+        --_a4-padding: 24px;
+        max-inline-size: 100%;
+        min-block-size: auto;
+        margin-inline: var(--mantine-spacing-sm);
+    }
+
+    .services-list {
+        grid-template-columns: 1fr;
+    }
+
+    .invoice-letterhead {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: var(--mantine-spacing-md);
+    }
+
+    .letterhead-logo {
+        justify-self: center;
+    }
+
+    .letterhead-company {
+        text-align: center;
+    }
+}
