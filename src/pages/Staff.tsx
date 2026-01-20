@@ -9,6 +9,7 @@ import {
     ActionIcon,
     Text,
     Divider,
+    Card ,
     Stack,
 } from '@mantine/core';
 import { IconPlus, IconDotsVertical, IconMinus } from '@tabler/icons-react';
@@ -81,54 +82,52 @@ export function Staff() {
         );
 
         const rightPane = (
-            <Stack gap="md">
-                <Group justify="space-between" align="flex-start">
-                    <div>
-                        <Text fw={600} mb="xs" size="sm" c="dimmed">
-                            Role
-                        </Text>
-                        <Text size="md" data-er-field="STAFF.role">
+            <Card padding="md" withBorder>
+                <Stack gap="xs">
+                    <Group justify="space-between">
+                        <Text fw={500} data-er-field="STAFF.role">
                             {member.role}
                         </Text>
-                    </div>
 
-                    {isEditing && (
-                        <Button
-                            size="xs"
-                            color="red"
-                            variant="light"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteStaff(member.id);
-                            }}
-                            styles={{
-                                root: {
-                                    width: 28,
-                                    height: 28,
-                                    borderRadius: '50%',
-                                    padding: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                },
-                            }}
-                        >
-                            <IconMinus size={16} />
-                        </Button>
-                    )}
-                </Group>
+                        {isEditing ? (
+                            <Button
+                                size="xs"
+                                color="red"
+                                variant="light"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteStaff(member.id);
+                                }}
+                                styles={{
+                                    root: {
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: '50%',
+                                        padding: 0,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'background-color 0.2s ease',
+                                        '&:hover': {
+                                            backgroundColor: '#ffe5e5',
+                                        },
+                                    },
+                                }}
+                            >
+                                <IconMinus size={16} />
+                            </Button>
+                        ) : (
+                            <Badge size="sm" data-er-field="STAFF.department_id">
+                                {member.dept}
+                            </Badge>
+                        )}
+                    </Group>
 
-                <div>
-                    <Text fw={600} mb="xs" size="sm" c="dimmed">
-                        Department
+                    <Text size="sm" c="dimmed" data-er-field="STAFF.department_id">
+                        Department: {member.dept}
                     </Text>
-                    <Text size="md" data-er-field="STAFF.department_id">
-                        {member.dept}
-                    </Text>
-                </div>
-
-                <Divider />
-            </Stack>
+                </Stack>
+            </Card>
         );
 
         const footer = (
@@ -167,7 +166,6 @@ export function Staff() {
         openStaffSidesheet(member);
     };
 
-    // 🔥 สำคัญมาก: ทำให้เร็วเหมือน Package
     useEffect(() => {
         if (!activeStaff) return;
         openStaffSidesheet(activeStaff);
