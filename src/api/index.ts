@@ -158,7 +158,14 @@ export const API = {
         }
         return null;
     },
-    
+
+    deleteStaff: async (id: string): Promise<boolean> => {
+        await delay(400);
+        const data = await loadDB();
+        data.staff = data.staff.filter(s => s.id !== id);
+        return true;
+    },
+
     getDashboardStats: async (): Promise<DashboardStats> => {
         await delay();
         const data = await loadDB();
