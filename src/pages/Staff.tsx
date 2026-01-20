@@ -24,6 +24,7 @@ export function Staff() {
     const [loading, setLoading] = useState(true);
     const [activeStaff, setActiveStaff] = useState<Staff | null>(null);
     const [isEditing, setIsEditing] = useState(false);
+    const departments = Array.from(new Set(staff.map((s) => s.dept)));
 
     const { open, close } = useSidesheet();
 
@@ -52,6 +53,7 @@ export function Staff() {
     };
 
     const openStaffSidesheet = (member: Staff) => {
+
         const leftPane = (
             <div>
                 {buildLeftSection(
@@ -82,6 +84,10 @@ export function Staff() {
         );
 
         const rightPane = (
+            <Stack>
+                <Text fw={600} mb="md">
+                    Departments ({departments.length})
+                </Text>
             <Card padding="md" withBorder>
                 <Stack gap="xs">
                     <Group justify="space-between">
@@ -128,8 +134,9 @@ export function Staff() {
                     </Text>
                 </Stack>
             </Card>
-        );
 
+            </Stack>
+        );
         const footer = (
             <AppSidesheetFooter
                 onCancel={() => {
@@ -142,7 +149,6 @@ export function Staff() {
                         return;
                     }
 
-                    // TODO: Save staff changes API here
                     close();
                     setIsEditing(false);
                 }}
