@@ -18,7 +18,8 @@ flowchart TB
     string <b>phone</b>
     string <b>timezone</b>
     string <b>currency</b>
-    string <b>language</b>"]
+    string <b>language</b>
+    int <b>deposit_months</b>"]
 
     %% ==========================================
     %% VENUE (Building/Facility)
@@ -42,8 +43,10 @@ flowchart TB
         uuid <b>id</b> PK
         uuid <b>venue_id</b> FK
         string <b>room_number</b>
+        int <b>floor</b>
         string <b>room_type</b>
-        string <b>occupancy_status</b>"]
+        string <b>occupancy_status</b>
+        decimal <b>price_per_day</b>"]
     end
 
     %% ==========================================
@@ -71,6 +74,17 @@ flowchart TB
         uuid <b>staff_id</b> FK
         uuid <b>venue_id</b> FK
         string <b>role_in_venue</b>"]
+
+        STAFF_SHIFT["<b>STAFF_SHIFT</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>staff_id</b> FK
+        string <b>staff_name</b>
+        string <b>dept</b>
+        date <b>date</b>
+        time <b>start_time</b>
+        time <b>end_time</b>
+        string <b>status</b>"]
     end
 
     %% ==========================================
@@ -88,6 +102,27 @@ flowchart TB
         string <b>unit_type</b> (per room/bed/visit)
         string <b>interval</b> (frequency)
         int <b>duration_minutes</b>"]
+
+        OPERATION_TASK["<b>OPERATION_TASK</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>sales_order_id</b> FK
+        uuid <b>resident_id</b> FK
+        string <b>resident_name</b>
+        string <b>room_number</b>
+        string <b>service_title</b>
+        string <b>service_dept</b>
+        text <b>description</b>
+        date <b>scheduled_date</b>
+        time <b>scheduled_time</b>
+        uuid <b>assigned_to</b> FK
+        string <b>assigned_to_name</b>
+        uuid <b>team_id</b> FK
+        string <b>status</b>
+        datetime <b>completed_at</b>
+        uuid <b>completed_by</b> FK
+        text <b>notes</b>
+        string <b>priority</b>"]
     end
 
     %% ==========================================
@@ -119,6 +154,115 @@ flowchart TB
     end
 
     %% ==========================================
+    %% RESIDENT & GUARDIAN SYSTEM
+    %% ==========================================
+    subgraph ResidentDomain["👤 Resident Domain"]
+        direction TB
+        GUARDIAN["<b>GUARDIAN</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        string <b>first_name</b>
+        string <b>last_name</b>
+        string <b>phone</b>
+        string <b>email</b>
+        string <b>address</b>
+        string <b>relationship</b>
+        boolean <b>pays</b>
+        datetime <b>created_at</b>"]
+
+        RESIDENT["<b>RESIDENT</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>guardian_id</b> FK
+        string <b>first_name</b>
+        string <b>last_name</b>
+        date <b>date_of_birth</b>
+        string <b>gender</b>
+        string <b>id_number</b>
+        text <b>medical_conditions</b>
+        text <b>allergies</b>
+        text <b>dietary_restrictions</b>
+        string <b>emergency_contact</b>
+        datetime <b>created_at</b>"]
+    end
+
+    %% ==========================================
+    %% SALES ORDER & BILLING SYSTEM
+    %% ==========================================
+    subgraph BillingDomain["💳 Billing Domain"]
+        direction TB
+        SALES_ORDER["<b>SALES_ORDER</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>package_id</b> FK
+        string <b>package_name</b>
+        uuid <b>resident_id</b> FK
+        uuid <b>guardian_id</b> FK
+        uuid <b>room_id</b> FK
+        date <b>check_in</b>
+        date <b>check_out</b>
+        int <b>adjusted_days</b>
+        decimal <b>base_price</b>
+        decimal <b>adjusted_price</b>
+        string <b>status</b>
+        datetime <b>created_at</b>
+        uuid <b>created_by</b> FK
+        datetime <b>paid_at</b>
+        text <b>notes</b>"]
+
+        ADDITIONAL_SERVICES["<b>ADDITIONAL_SERVICES</b>
+        ─────────────────
+        uuid <b>sales_order_id</b> FK
+        boolean <b>additional_bed</b>
+        json <b>special_amenities</b>
+        boolean <b>self_provide_pampers</b>
+        boolean <b>self_provide_medications</b>"]
+
+        INVOICE["<b>INVOICE</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>sales_order_id</b> FK
+        string <b>invoice_number</b>
+        uuid <b>guardian_id</b> FK
+        string <b>guardian_name</b>
+        string <b>resident_name</b>
+        decimal <b>subtotal</b>
+        decimal <b>tax</b>
+        decimal <b>total</b>
+        string <b>status</b>
+        datetime <b>issued_at</b>
+        datetime <b>paid_at</b>
+        string <b>payment_method</b>
+        text <b>notes</b>"]
+
+        INVOICE_ITEM["<b>INVOICE_ITEM</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>invoice_id</b> FK
+        string <b>description</b>
+        int <b>quantity</b>
+        decimal <b>unit_price</b>
+        decimal <b>total</b>"]
+
+        CONTRACT["<b>CONTRACT</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>sales_order_id</b> FK
+        string <b>contract_number</b>
+        uuid <b>guardian_id</b> FK
+        uuid <b>resident_id</b> FK
+        date <b>start_date</b>
+        date <b>end_date</b>
+        text <b>terms</b>
+        datetime <b>signed_at</b>
+        string <b>signed_by</b>
+        string <b>status</b>
+        string <b>language</b>
+        datetime <b>created_at</b>
+        datetime <b>updated_at</b>"]
+    end
+
+    %% ==========================================
     %% RELATIONSHIPS
     %% ==========================================
     
@@ -133,11 +277,33 @@ flowchart TB
     
     STAFF -->|N:N| STAFF_VENUE
     VENUE -->|N:N| STAFF_VENUE
+    STAFF -->|1:N| STAFF_SHIFT
     
     SALE_PACKAGE -->|1:N| PACKAGE_ITEM
     PACKAGE_ITEM -->|N:1| TASK
     
-    STAFF -->|Calculates| SALE_PACKAGE
+    STAFF -->|Creates| SALE_PACKAGE
+    
+    GUARDIAN -->|1:N| RESIDENT
+    
+    RESIDENT -->|1:N| SALES_ORDER
+    GUARDIAN -->|1:N| SALES_ORDER
+    ROOM -->|1:N| SALES_ORDER
+    SALE_PACKAGE -->|1:N| SALES_ORDER
+    STAFF -->|Creates| SALES_ORDER
+    
+    SALES_ORDER -->|1:1| ADDITIONAL_SERVICES
+    SALES_ORDER -->|1:N| INVOICE
+    SALES_ORDER -->|1:N| CONTRACT
+    
+    INVOICE -->|1:N| INVOICE_ITEM
+    GUARDIAN -->|1:N| INVOICE
+    RESIDENT -->|1:N| CONTRACT
+    GUARDIAN -->|1:N| CONTRACT
+    
+    SALES_ORDER -->|1:N| OPERATION_TASK
+    RESIDENT -->|1:N| OPERATION_TASK
+    STAFF -->|1:N| OPERATION_TASK
     
     %% ==========================================
     %% STYLING
@@ -148,10 +314,13 @@ flowchart TB
     classDef orgStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     classDef serviceStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
     classDef saleStyle fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    classDef residentStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef billingStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     
-    class CLIENT clientStyle
-    class BUSINESS clientStyle
+    class CLIENT,BUSINESS clientStyle
     class VENUE,ROOM venueStyle
-    class DEPARTMENT,STAFF,STAFF_VENUE orgStyle
-    class TASK serviceStyle
+    class DEPARTMENT,STAFF,STAFF_VENUE,STAFF_SHIFT orgStyle
+    class TASK,OPERATION_TASK serviceStyle
     class SALE_PACKAGE,PACKAGE_ITEM saleStyle
+    class GUARDIAN,RESIDENT residentStyle
+    class SALES_ORDER,ADDITIONAL_SERVICES,INVOICE,INVOICE_ITEM,CONTRACT billingStyle
