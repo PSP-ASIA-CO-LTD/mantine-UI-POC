@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { TextInput, Textarea, Button, Paper, Title, Text, Stack, Progress, Group } from '@mantine/core';
+import { TextInput, Textarea, Button, Paper, Title, Text, Stack, Progress, Group, NumberInput } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight, IconCheck } from '@tabler/icons-react';
+import { getBusinessSettings, saveBusinessSettings } from '../utils/businessSettings';
 
 interface BusinessSetupFlowProps {
   onBack?: () => void;
@@ -9,6 +10,7 @@ interface BusinessSetupFlowProps {
 
 export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [depositMonths, setDepositMonths] = useState(() => getBusinessSettings().depositMonths);
 
   // Form state
   const [businessInfo, setBusinessInfo] = useState({
@@ -54,6 +56,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
   const handleComplete = () => {
     // Mock completion logic
     console.log('Setup complete:', { businessInfo, adminInfo, facilityInfo, preferences });
+    saveBusinessSettings({ depositMonths });
     if (onComplete) {
       onComplete();
     }
@@ -273,6 +276,22 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
                 onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
                 required
                 data-er-field="BUSINESS.language"
+              />
+
+              <NumberInput
+                label="Deposit policy (months)"
+                description="Invoice deposit will be calculated as +N month(s) and added as a line item"
+                value={depositMonths}
+                onChange={(val) => {
+                  const parsed = typeof val === 'number' ? val : Number(val);
+                  const next = Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 1;
+                  setDepositMonths(next);
+                  saveBusinessSettings({ depositMonths: next });
+                }}
+                min={0}
+                step={1}
+                allowDecimal={false}
+                data-er-field="BUSINESS.deposit_months"
               />
 
               <Paper

@@ -9,6 +9,8 @@ import { Staff } from './pages/Staff';
 import { SalesDashboard } from './pages/SalesDashboard';
 import { SalesOrderPage } from './pages/SalesOrder';
 import { SalesOrderInvoice } from './pages/SalesOrderInvoice';
+import { SalesOrderContract } from './pages/SalesOrderContract';
+import { PublicContractView } from './pages/PublicContractView';
 import { StaffTasks } from './pages/StaffTasks';
 import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
@@ -37,7 +39,7 @@ function AppLayout() {
 
     return (
         <AppShell
-            navbar={{ width: 280, breakpoint: 'sm' }}
+            navbar={{ width: 280, breakpoint: 'sm', collapsed: { mobile: true } }}
             padding="md"
         >
             <AppShell.Navbar p={0}>
@@ -49,6 +51,8 @@ function AppLayout() {
                     <Route path="/sales" element={<SalesDashboard />} />
                     <Route path="/sales/order" element={<SalesOrderPage />} />
                     <Route path="/sales/order/invoice" element={<SalesOrderInvoice />} />
+                    <Route path="/sales/order/contract" element={<SalesOrderContract />} />
+                    <Route path="/contract/:id" element={<PublicContractView />} />
                     <Route path="/business-setup" element={<BusinessSetup />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/packages" element={<Packages />} />

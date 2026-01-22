@@ -28,8 +28,6 @@ import {
     IconChevronLeft,
     IconChevronRight,
     IconCheck,
-    IconClock,
-    IconAlertCircle,
     IconUser,
     IconCalendar,
     IconUsers
@@ -215,16 +213,6 @@ export function StaffTasks() {
         return colors[priority];
     };
 
-    const getStatusIcon = (status: OperationTask['status']) => {
-        const icons = {
-            pending: <IconClock size={16} />,
-            in_progress: <IconAlertCircle size={16} />,
-            completed: <IconCheck size={16} />,
-            skipped: <IconAlertCircle size={16} />
-        };
-        return icons[status];
-    };
-
     const departments = [...new Set(tasks.map(t => t.serviceDept))];
 
     if (loading) {
@@ -264,14 +252,14 @@ export function StaffTasks() {
             </Group>
 
             {/* Date Navigation */}
-            <Card padding="md" radius="md" withBorder mb="md">
-                <Group justify="space-between">
+            <Card padding="sm" radius="md" withBorder mb="md" className="date-nav">
+                <Group justify="space-between" gap={0} wrap="nowrap" className="date-nav-group">
                     <ActionIcon variant="subtle" size="lg" onClick={handlePrevDay}>
                         <IconChevronLeft size={20} />
                     </ActionIcon>
-                    <Group gap="md">
-                        <IconCalendar size={20} />
-                        <Text fw={600}>{formatDate(selectedDate)}</Text>
+                    <Group gap="xs" wrap="nowrap" className="date-nav-center">
+                        <IconCalendar size={18} />
+                        <Text fw={600} size="sm">{formatDate(selectedDate)}</Text>
                         {selectedDate !== new Date().toISOString().split('T')[0] && (
                             <Button variant="subtle" size="xs" onClick={handleToday}>Today</Button>
                         )}

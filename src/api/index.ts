@@ -2,7 +2,8 @@ import { buildDatabase } from '../utils/csvParser';
 import type { 
     Database, Package, Staff, Team, DashboardStats,
     Guardian, Resident, Room, SalesOrder, Invoice, Contract,
-    Notification, OperationTask, StaffShift, SalesDashboardStats
+    Notification, OperationTask, StaffShift, SalesDashboardStats,
+    StoredContract, ContractEmailLogEntry
 } from '../types';
 
 let db: Database | null = null;
@@ -19,6 +20,29 @@ let operationTasks: OperationTask[] = [];
 let staffShifts: StaffShift[] = [];
 
 let jsonLoaded = false;
+
+// Stored “compiled paper” contracts (localStorage-backed)
+const STORED_CONTRACTS_KEY = 'bourbon44_contracts';
+
+const loadStoredContractsFromStorage = (): StoredContract[] => {
+    try {
+        const raw = localStorage.getItem(STORED_CONTRACTS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? (parsed as StoredContract[]) : [];
+    } catch (error) {
+        console.error('Failed to load stored contracts:', error);
+        return [];
+    }
+};
+
+const saveStoredContractsToStorage = (items: StoredContract[]) => {
+    try {
+        localStorage.setItem(STORED_CONTRACTS_KEY, JSON.stringify(items));
+    } catch (error) {
+        console.error('Failed to save stored contracts:', error);
+    }
+};
 
 const loadDB = async (): Promise<Database> => {
     if (db) return db;
@@ -171,7 +195,7 @@ export const API = {
         const data = await loadDB();
         return {
             occupancy: Math.floor(Math.random() * 20) + 70,
-            pendingTasks: data.tasks.filter(t => t.status === 'Pending').length,
+            pendingTasks: data.tasks.filter(t => t.status === 'pending').length,
             totalStaff: data.staff.length,
             newPurchases: data.orders.length
         };
@@ -362,6 +386,79 @@ export const API = {
         };
         contracts.push(newContract);
         return newContract;
+    },
+
+    // ==================== STORED (COMPILED) CONTRACTS ====================
+    getStoredContracts: async (): Promise<StoredContract[]> => {
+        await delay(120);
+        return loadStoredContractsFromStorage().sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+    },
+
+    getStoredContractById: async (id: string): Promise<StoredContract | undefined> => {
+        await delay(120);
+        return loadStoredContractsFromStorage().find(c => c.id === id);
+    },
+
+    getStoredContractBySalesOrderId: async (salesOrderId: string): Promise<StoredContract | undefined> => {
+        await delay(120);
+        return loadStoredContractsFromStorage().find(c => c.source.salesOrder?.id === salesOrderId);
+    },
+
+    upsertStoredContract: async (contract: StoredContract): Promise<StoredContract> => {
+        await delay(200);
+        const all = loadStoredContractsFromStorage();
+        const idx = all.findIndex(c => c.id === contract.id);
+        const updated: StoredContract = { ...contract, updatedAt: new Date().toISOString() };
+        if (idx >= 0) {
+            all[idx] = updated;
+        } else {
+            all.unshift(updated);
+        }
+        saveStoredContractsToStorage(all);
+        return updated;
+    },
+
+    signStoredContract: async (id: string, signedByEmail: string): Promise<StoredContract | null> => {
+        await delay(200);
+        const all = loadStoredContractsFromStorage();
+        const idx = all.findIndex(c => c.id === id);
+        if (idx < 0) return null;
+
+        const now = new Date().toISOString();
+        all[idx] = {
+            ...all[idx],
+            status: 'signed',
+            signedAt: now,
+            signedByEmail,
+            updatedAt: now
+        };
+        saveStoredContractsToStorage(all);
+        return all[idx];
+    },
+
+    logStoredContractEmail: async (
+        id: string,
+        entry: Omit<ContractEmailLogEntry, 'id' | 'sentAt'>
+    ): Promise<StoredContract | null> => {
+        await delay(200);
+        const all = loadStoredContractsFromStorage();
+        const idx = all.findIndex(c => c.id === id);
+        if (idx < 0) return null;
+
+        const logEntry: ContractEmailLogEntry = {
+            ...entry,
+            id: 'eml-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+            sentAt: new Date().toISOString()
+        };
+        all[idx] = {
+            ...all[idx],
+            emailLog: [...(all[idx].emailLog || []), logEntry],
+            updatedAt: new Date().toISOString()
+        };
+        saveStoredContractsToStorage(all);
+        return all[idx];
     },
 
     getNotifications: async (): Promise<Notification[]> => {

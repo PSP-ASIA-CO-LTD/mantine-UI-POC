@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Title,
@@ -20,6 +21,9 @@ import {
 } from '@tabler/icons-react';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
 import type { Package, Room, Guardian, Resident, Invoice, AdditionalServices } from '../types';
+import { buildInvoiceItems, calculateInvoiceTotals } from '../utils/invoiceCalculator';
+import { getBusinessSettings } from '../utils/businessSettings';
+import { PageActionBar } from '../components/PageActionBar';
 import './SalesOrderInvoice.css';
 
 interface InvoiceLocationState {
@@ -91,6 +95,14 @@ export function SalesOrderInvoice() {
     
     const state = getStateData();
 
+    const handleBackToOrderInvoiceStep = useCallback(() => {
+        const draftId = state?.draftId || currentDraft?.id;
+        navigate('/sales/order', {
+            state: { draftId, forceStep: 3 },
+            replace: true,
+        });
+    }, [navigate, state?.draftId, currentDraft?.id]);
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('th-TH').format(amount);
     };
@@ -113,38 +125,17 @@ export function SalesOrderInvoice() {
         return checkOut;
     };
 
-    const calculateSubtotal = () => {
-        let total = 0;
-
-        // Package price
-        if (state?.invoice?.subtotal) {
-            total = state.invoice.subtotal;
-        }
-
-        // Additional bed
-        if (state?.additionalServices?.additionalBed && state?.adjustedDays) {
-            total += 500 * state.adjustedDays;
-        }
-
-        // Special amenities
-        if (state?.additionalServices?.specialAmenities) {
-            state.additionalServices.specialAmenities.forEach(amenity => {
-                if (amenity === 'oxygen_concentrator') total += 300 * (state.adjustedDays || 0);
-                if (amenity === 'air_mattress') total += 200 * (state.adjustedDays || 0);
-            });
-        }
-
-        // Room price
-        if (state?.room?.pricePerDay && state?.adjustedDays) {
-            total += state.room.pricePerDay * state.adjustedDays;
-        }
-
-        return total;
-    };
-
-    const subtotal = calculateSubtotal();
-    const tax = subtotal * 0.07;
-    const grandTotal = subtotal + tax;
+    const { depositMonths } = getBusinessSettings();
+    const items = state?.package
+        ? buildInvoiceItems({
+            pkg: state.package,
+            adjustedDays: state.adjustedDays,
+            room: state.room,
+            additionalServices: state.additionalServices,
+            depositMonths,
+        })
+        : [];
+    const { subtotal, tax, total: grandTotal } = calculateInvoiceTotals(items);
 
     const getRoomTypeLabel = (type: Room['type']) => {
         const labels = { standard: 'Standard', deluxe: 'Deluxe', suite: 'Suite' };
@@ -173,12 +164,17 @@ export function SalesOrderInvoice() {
     if (!state || !state.package) {
         return (
             <div className="invoice-page">
-                <Group mb="xl">
-                    <ActionIcon variant="subtle" size="lg" onClick={() => navigate('/sales/order')}>
-                        <IconArrowLeft size={20} />
-                    </ActionIcon>
-                    <Title order={2}>Invoice</Title>
-                </Group>
+                <PageActionBar
+                    className="invoice-header"
+                    left={
+                        <>
+                            <ActionIcon variant="subtle" size="lg" onClick={() => navigate('/sales/order')}>
+                                <IconArrowLeft size={20} />
+                            </ActionIcon>
+                            <Title order={2}>Invoice</Title>
+                        </>
+                    }
+                />
                 <Paper p="xl" withBorder ta="center">
                     <Text size="lg" c="dimmed" mb="md">No invoice data available</Text>
                     <Text size="sm" c="dimmed" mb="xl">
@@ -198,34 +194,30 @@ export function SalesOrderInvoice() {
     return (
         <div className="invoice-page">
             {/* Header Actions */}
-            <Group justify="space-between" mb="xl" className="invoice-header no-print">
-                <Group>
-                    <ActionIcon variant="subtle" size="lg" onClick={() => navigate(-1)}>
-                        <IconArrowLeft size={20} />
-                    </ActionIcon>
-                    <Title order={2}>Invoice</Title>
-                </Group>
-                <Group gap="sm">
-                    <Button
-                        variant="light"
-                        leftSection={<IconDownload size={18} />}
-                    >
-                        Download PDF
-                    </Button>
-                    <Button
-                        variant="light"
-                        leftSection={<IconMail size={18} />}
-                    >
-                        Send Email
-                    </Button>
-                    <Button
-                        leftSection={<IconPrinter size={18} />}
-                        onClick={() => window.print()}
-                    >
-                        Print
-                    </Button>
-                </Group>
-            </Group>
+            <PageActionBar
+                className="invoice-header"
+                left={
+                    <>
+                        <ActionIcon variant="subtle" size="lg" onClick={handleBackToOrderInvoiceStep}>
+                            <IconArrowLeft size={20} />
+                        </ActionIcon>
+                        <Title order={2}>Invoice</Title>
+                    </>
+                }
+                right={
+                    <>
+                        <Button variant="light" leftSection={<IconDownload size={18} />}>
+                            Download PDF
+                        </Button>
+                        <Button variant="light" leftSection={<IconMail size={18} />}>
+                            Send Email
+                        </Button>
+                        <Button leftSection={<IconPrinter size={18} />} onClick={() => window.print()}>
+                            Print
+                        </Button>
+                    </>
+                }
+            />
 
             {/* A4 Paper Invoice */}
             <div className="invoice-a4-paper">
@@ -431,53 +423,20 @@ export function SalesOrderInvoice() {
                     <Table.Thead>
                         <Table.Tr>
                             <Table.Th>Description</Table.Th>
-                            <Table.Th ta="center">Days</Table.Th>
-                            <Table.Th ta="right">Rate</Table.Th>
+                            <Table.Th ta="center">Qty</Table.Th>
+                            <Table.Th ta="right">Unit Price</Table.Th>
                             <Table.Th ta="right">Amount</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
-                        {/* Package */}
-                        <Table.Tr>
-                            <Table.Td>
-                                <Text fw={500}>{state.package.name}</Text>
-                                <Text size="xs" c="dimmed">Care package with {state.package.services.length} services</Text>
-                            </Table.Td>
-                            <Table.Td ta="center">{state.adjustedDays}</Table.Td>
-                            <Table.Td ta="right">฿{formatCurrency(state.package.price / state.package.duration)}</Table.Td>
-                            <Table.Td ta="right">฿{formatCurrency(state.invoice?.subtotal || state.package.price)}</Table.Td>
-                        </Table.Tr>
-
-                        {/* Room */}
-                        {state.room && (
-                            <Table.Tr>
-                                <Table.Td>
-                                    <Text fw={500}>Room {state.room.number} ({getRoomTypeLabel(state.room.type)})</Text>
-                                    <Text size="xs" c="dimmed">Floor {state.room.floor}</Text>
-                                </Table.Td>
-                                <Table.Td ta="center">{state.adjustedDays}</Table.Td>
-                                <Table.Td ta="right">฿{formatCurrency(state.room.pricePerDay)}</Table.Td>
-                                <Table.Td ta="right">฿{formatCurrency(state.room.pricePerDay * state.adjustedDays)}</Table.Td>
-                            </Table.Tr>
-                        )}
-
-                        {/* Additional Bed */}
-                        {state.additionalServices?.additionalBed && (
-                            <Table.Tr>
-                                <Table.Td>Additional Bed</Table.Td>
-                                <Table.Td ta="center">{state.adjustedDays}</Table.Td>
-                                <Table.Td ta="right">฿500</Table.Td>
-                                <Table.Td ta="right">฿{formatCurrency(500 * state.adjustedDays)}</Table.Td>
-                            </Table.Tr>
-                        )}
-
-                        {/* Special Amenities */}
-                        {state.additionalServices?.specialAmenities?.filter(a => getAmenityPrice(a) > 0).map((amenity, idx) => (
+                        {items.map((item, idx) => (
                             <Table.Tr key={idx}>
-                                <Table.Td>{getAmenityLabel(amenity)}</Table.Td>
-                                <Table.Td ta="center">{state.adjustedDays}</Table.Td>
-                                <Table.Td ta="right">฿{formatCurrency(getAmenityPrice(amenity))}</Table.Td>
-                                <Table.Td ta="right">฿{formatCurrency(getAmenityPrice(amenity) * state.adjustedDays)}</Table.Td>
+                                <Table.Td>
+                                    <Text fw={500}>{item.description}</Text>
+                                </Table.Td>
+                                <Table.Td ta="center">{item.quantity}</Table.Td>
+                                <Table.Td ta="right">฿{formatCurrency(item.unitPrice)}</Table.Td>
+                                <Table.Td ta="right">฿{formatCurrency(item.total)}</Table.Td>
                             </Table.Tr>
                         ))}
                     </Table.Tbody>

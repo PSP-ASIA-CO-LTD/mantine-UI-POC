@@ -46,24 +46,47 @@
     white-space: nowrap;
 }
 
-.package-list {
-    display: flex;
-    flex-direction: column;
+.sales-order-page .package-list {
+    --_cols: 3;
+    display: grid;
+    grid-template-columns: repeat(var(--_cols), minmax(0, 1fr));
     gap: var(--_gap);
+    align-items: start;
 }
 
-.package-card {
+.sales-order-page .package-list > .package-card {
     transition: box-shadow 0.2s;
+    min-inline-size: 0;
+    grid-column: auto;
+}
+
+.package-card--expanded {
 }
 
 .package-card:hover {
     box-shadow: var(--mantine-shadow-sm);
 }
 
+@media (max-width: 1100px) {
+    .sales-order-page .package-list {
+        --_cols: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .sales-order-page .package-list {
+        --_cols: 1;
+    }
+}
+
 .contact-forms-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
     gap: var(--_gap);
+}
+
+.contact-form-card {
+    min-inline-size: 0;
 }
 
 /* Auto-fill bar for testing */
@@ -113,7 +136,6 @@
 
 /* Guardians form styling */
 .guardians-card {
-    grid-column: 1 / -1;
 }
 
 .guardian-form-block {

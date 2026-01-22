@@ -1,0 +1,46 @@
+.contract-page {
+    --_page-paper-inline-size: 794px;
+    --_gap: var(--mantine-spacing-md);
+    display: grid;
+    gap: var(--_gap);
+}
+
+.contract-actions {
+}
+
+.contract-a4-paper {
+    --_a4-padding: 48px;
+    background: var(--mantine-color-white);
+    border: 1px solid var(--mantine-color-gray-3);
+    border-radius: var(--mantine-radius-sm);
+    padding: var(--_a4-padding);
+    max-inline-size: var(--_page-paper-inline-size);
+    margin-inline: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.contract-letterhead {
+    min-inline-size: 0;
+}
+
+.contract-title {
+    min-inline-size: 0;
+}
+
+.contract-meta {
+    text-align: right;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .contract-a4-paper {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        max-inline-size: none;
+    }
+}
+

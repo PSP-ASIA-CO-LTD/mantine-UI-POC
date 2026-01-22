@@ -1,5 +1,4 @@
 import React from 'react';
-import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 
 /**
  * Escape HTML to prevent XSS

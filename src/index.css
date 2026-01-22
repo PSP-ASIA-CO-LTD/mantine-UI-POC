@@ -38,6 +38,20 @@ h2 {
   background-color: var(--surface);
 }
 
+@media print {
+  /* Hide AppShell navigation/sidebar when printing (e.g. full invoice view) */
+  .mantine-AppShell-navbar,
+  .mantine-AppShell-header,
+  .mantine-AppShell-aside,
+  nav[role="navigation"] {
+    display: none !important;
+  }
+
+  .mantine-AppShell-main {
+    padding: 0 !important;
+  }
+}
+
 /* Table styling - matching original bourbon project */
 .mantine-Table-root {
   background: var(--white);
