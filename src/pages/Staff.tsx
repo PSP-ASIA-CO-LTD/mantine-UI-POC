@@ -85,56 +85,86 @@ export function Staff() {
 
         const rightPane = (
             <Stack>
-                <Text fw={600} mb="md">
-                    Departments ({departments.length})
-                </Text>
-            <Card padding="md" withBorder>
-                <Stack gap="xs">
-                    <Group justify="space-between">
-                        <Text fw={500} data-er-field="STAFF.role">
-                            {member.role}
-                        </Text>
-
-                        {isEditing ? (
-                            <Button
-                                size="xs"
-                                color="red"
-                                variant="light"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteStaff(member.id);
-                                }}
-                                styles={{
-                                    root: {
-                                        width: 28,
-                                        height: 28,
-                                        borderRadius: '50%',
-                                        padding: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transition: 'background-color 0.2s ease',
-                                        '&:hover': {
-                                            backgroundColor: '#ffe5e5',
-                                        },
-                                    },
-                                }}
-                            >
-                                <IconMinus size={16} />
-                            </Button>
-                        ) : (
-                            <Badge size="sm" data-er-field="STAFF.department_id">
-                                {member.dept}
-                            </Badge>
-                        )}
-                    </Group>
-
-                    <Text size="sm" c="dimmed" data-er-field="STAFF.department_id">
-                        Department: {member.dept}
+                <Group justify="space-between" mb="md">
+                    <Text fw={600}>
+                        Departments ({departments.length})
                     </Text>
-                </Stack>
-            </Card>
 
+                    {isEditing && (
+                        <Button
+                            size="xs"
+                            variant="light"
+                            color="green"
+                            styles={{
+                                root: {
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: '50%',
+                                    padding: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'background-color 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: '#e6f4ea',
+                                    },
+                                },
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                            }}
+                        >
+                            <IconPlus size={16} />
+                        </Button>
+                    )}
+                </Group>
+
+                <Card padding="md" withBorder>
+                    <Stack gap="xs">
+                        <Group justify="space-between">
+                            <Text fw={500} data-er-field="STAFF.role">
+                                {member.role}
+                            </Text>
+
+                            {isEditing ? (
+                                <Button
+                                    size="xs"
+                                    color="red"
+                                    variant="light"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteStaff(member.id);
+                                    }}
+                                    styles={{
+                                        root: {
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: '50%',
+                                            padding: 0,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            transition: 'background-color 0.2s ease',
+                                            '&:hover': {
+                                                backgroundColor: '#ffe5e5',
+                                            },
+                                        },
+                                    }}
+                                >
+                                    <IconMinus size={16} />
+                                </Button>
+                            ) : (
+                                <Badge size="sm" data-er-field="STAFF.department_id">
+                                    {member.dept}
+                                </Badge>
+                            )}
+                        </Group>
+
+                        <Text size="sm" c="dimmed" data-er-field="STAFF.department_id">
+                            Department: {member.dept}
+                        </Text>
+                    </Stack>
+                </Card>
             </Stack>
         );
         const footer = (
