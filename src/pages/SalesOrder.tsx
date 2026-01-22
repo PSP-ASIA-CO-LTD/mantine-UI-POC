@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Title,
     Group,
@@ -46,6 +46,8 @@ import {
 import { API } from '../api';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
 import type { Package, Room, Guardian, Resident, SalesOrder, Invoice, Contract, AdditionalServices } from '../types';
+import { getBusinessSettings } from '../utils/businessSettings';
+import { buildInvoiceItems, calculateInvoiceTotals } from '../utils/invoiceCalculator';
 import './SalesOrder.css';
 
 interface GuardianFormValues {
@@ -75,7 +77,11 @@ interface CheckoutData {
 
 export function SalesOrderPage() {
     const navigate = useNavigate();
-    const { currentDraft, initNewDraft, updateDraft, saveDraft } = useSalesOrder();
+    const location = useLocation();
+    const navState = location.state as { draftId?: string; forceStep?: number } | null;
+
+    const { currentDraft, initNewDraft, loadDraft, updateDraft, saveDraft } = useSalesOrder();
+    const depositMonths = getBusinessSettings().depositMonths;
     
     const [packages, setPackages] = useState<Package[]>([]);
     const [rooms, setRooms] = useState<Room[]>([]);
@@ -119,6 +125,8 @@ export function SalesOrderPage() {
     const [creditCardLast4, setCreditCardLast4] = useState('');
     const [showPromptPayModal, setShowPromptPayModal] = useState(false);
     const [guardianErrors, setGuardianErrors] = useState<Record<number, Record<string, string>>>({});
+    const restoredDraftIdRef = useRef<string | null>(null);
+    const appliedForceStepRef = useRef<string | null>(null);
 
     // Sync local state with context for persistence
     const syncToContext = useCallback(() => {
@@ -145,9 +153,20 @@ export function SalesOrderPage() {
 
     // Initialize draft on mount or restore from context
     useEffect(() => {
+        // If draft isn't ready yet, ensure we have one.
         if (!currentDraft) {
-            initNewDraft();
-        } else if (currentDraft.package) {
+            // If navigation requests a specific draft, wait for it to load.
+            if (navState?.draftId) return;
+            // Avoid re-initializing endlessly if something clears the draft.
+            if (!restoredDraftIdRef.current) initNewDraft();
+            return;
+        }
+
+        // Restore only once per draft id to avoid clobbering local edits as we auto-sync.
+        if (restoredDraftIdRef.current === currentDraft.id) return;
+
+        if (currentDraft.package) {
+            restoredDraftIdRef.current = currentDraft.id;
             // Restore state from existing draft
             setCheckoutData({
                 package: currentDraft.package,
@@ -181,7 +200,26 @@ export function SalesOrderPage() {
             else if (currentDraft.room) setStep(2);
             else if (currentDraft.guardians.length > 0) setStep(1);
         }
-    }, []);
+    }, [currentDraft, initNewDraft, navState?.draftId]);
+
+    // If we were navigated here with a draftId, ensure it is loaded.
+    useEffect(() => {
+        const draftId = navState?.draftId;
+        if (!draftId) return;
+        if (currentDraft?.id === draftId) return;
+        loadDraft(draftId);
+    }, [navState?.draftId, currentDraft?.id, loadDraft]);
+
+    // Optionally force the visible step (e.g. coming back from "View Full Invoice").
+    useEffect(() => {
+        const forceStep = navState?.forceStep;
+        if (typeof forceStep !== 'number') return;
+
+        const key = `${navState?.draftId || currentDraft?.id || 'none'}:${forceStep}`;
+        if (appliedForceStepRef.current === key) return;
+        appliedForceStepRef.current = key;
+        setStep(forceStep);
+    }, [navState?.forceStep, navState?.draftId, currentDraft?.id]);
 
     const validateGuardian = (guardian: GuardianFormValues): Record<string, string> => {
         const errors: Record<string, string> = {};
@@ -271,6 +309,19 @@ export function SalesOrderPage() {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('th-TH').format(amount);
     };
+
+    const invoiceItemsForDisplay =
+        checkoutData.invoice && checkoutData.package
+            ? buildInvoiceItems({
+                pkg: checkoutData.package,
+                adjustedDays: checkoutData.adjustedDays,
+                room: checkoutData.room,
+                additionalServices: checkoutData.additionalServices,
+                depositMonths,
+            })
+            : (checkoutData.invoice?.items ?? []);
+
+    const invoiceTotalsForDisplay = calculateInvoiceTotals(invoiceItemsForDisplay);
 
     const calculatePrice = (pkg: Package, days: number) => {
         const basePrice = pkg.price;
@@ -459,6 +510,15 @@ export function SalesOrderPage() {
             checkOut.setDate(checkOut.getDate() + checkoutData.adjustedDays - 1);
             
             const adjustedPrice = calculatePrice(checkoutData.package, checkoutData.adjustedDays);
+            const { depositMonths } = getBusinessSettings();
+            const items = buildInvoiceItems({
+                pkg: checkoutData.package,
+                adjustedDays: checkoutData.adjustedDays,
+                room: checkoutData.room,
+                additionalServices: checkoutData.additionalServices,
+                depositMonths,
+            });
+            const { subtotal, tax, total } = calculateInvoiceTotals(items);
             
             const salesOrder = await API.createSalesOrder({
                 packageId: checkoutData.package.id,
@@ -480,15 +540,10 @@ export function SalesOrderPage() {
                 guardianId: primaryGuardian.id,
                 guardianName: `${primaryGuardian.firstName} ${primaryGuardian.lastName}`,
                 residentName: `${checkoutData.resident.firstName} ${checkoutData.resident.lastName}`,
-                items: [{
-                    description: `${checkoutData.package.name} (${checkoutData.adjustedDays} days)`,
-                    quantity: 1,
-                    unitPrice: adjustedPrice,
-                    total: adjustedPrice
-                }],
-                subtotal: adjustedPrice,
-                tax: adjustedPrice * 0.07,
-                total: adjustedPrice * 1.07,
+                items,
+                subtotal,
+                tax,
+                total,
                 status: 'issued'
             });
 
@@ -511,10 +566,25 @@ export function SalesOrderPage() {
     const handleMarkPaid = async (method: 'cash' | 'transfer' | 'credit_card') => {
         const primaryGuardian = checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0];
         if (!checkoutData.invoice || !checkoutData.salesOrder || !primaryGuardian || !checkoutData.resident) return;
+
+        const computedItems = checkoutData.package
+            ? buildInvoiceItems({
+                pkg: checkoutData.package,
+                adjustedDays: checkoutData.adjustedDays,
+                room: checkoutData.room,
+                additionalServices: checkoutData.additionalServices,
+                depositMonths,
+            })
+            : checkoutData.invoice.items;
+        const computedTotals = calculateInvoiceTotals(computedItems);
         
         setProcessing(true);
         try {
             await API.updateInvoice(checkoutData.invoice.id, {
+                items: computedItems,
+                subtotal: computedTotals.subtotal,
+                tax: computedTotals.tax,
+                total: computedTotals.total,
                 status: 'paid',
                 paidAt: new Date().toISOString(),
                 paymentMethod: method
@@ -549,14 +619,23 @@ export function SalesOrderPage() {
             await API.createNotification({
                 type: 'sale',
                 title: 'New Sale Completed',
-                message: `${checkoutData.package?.name} sold to ${primaryGuardian.firstName} ${primaryGuardian.lastName} for resident ${checkoutData.resident.firstName} ${checkoutData.resident.lastName}. Total: ฿${formatCurrency(checkoutData.invoice.total)}`,
+                message: `${checkoutData.package?.name} sold to ${primaryGuardian.firstName} ${primaryGuardian.lastName} for resident ${checkoutData.resident.firstName} ${checkoutData.resident.lastName}. Total: ฿${formatCurrency(computedTotals.total)}`,
                 relatedId: checkoutData.salesOrder.id
             });
 
             setCheckoutData(prev => ({ 
                 ...prev, 
                 contract,
-                invoice: { ...prev.invoice!, status: 'paid', paidAt: new Date().toISOString(), paymentMethod: method },
+                invoice: {
+                    ...prev.invoice!,
+                    items: computedItems,
+                    subtotal: computedTotals.subtotal,
+                    tax: computedTotals.tax,
+                    total: computedTotals.total,
+                    status: 'paid',
+                    paidAt: new Date().toISOString(),
+                    paymentMethod: method
+                },
                 salesOrder: { ...prev.salesOrder!, status: 'paid', paidAt: new Date().toISOString() }
             }));
             // Save completed order to persistent storage
@@ -688,17 +767,17 @@ export function SalesOrderPage() {
                             padding="lg" 
                             radius="md" 
                             withBorder 
-                            className="package-card"
+                            className={`package-card ${expandedPackage === pkg.id ? 'package-card--expanded' : ''}`}
                         >
                             <Group justify="space-between" onClick={() => setExpandedPackage(
                                 expandedPackage === pkg.id ? null : pkg.id
                             )} style={{ cursor: 'pointer' }}>
                                 <div>
-                                    <Text fw={600} size="lg">{pkg.name}</Text>
-                                    <Text size="sm" c="dimmed">{pkg.duration} days • {pkg.services.length} services</Text>
+                                    <Text fw={600} size="lg" data-er-field="SALE_PACKAGE.name">{pkg.name}</Text>
+                                    <Text size="sm" c="dimmed" data-er-field="SALE_PACKAGE.duration_days">{pkg.duration} days • {pkg.services.length} services</Text>
                                 </div>
                                 <Group gap="md">
-                                    <Badge size="lg" color="blue">฿{formatCurrency(pkg.price)}</Badge>
+                                    <Badge size="lg" color="blue" data-er-field="SALE_PACKAGE.price">฿{formatCurrency(pkg.price)}</Badge>
                                     <ActionIcon variant="subtle">
                                         {expandedPackage === pkg.id ? <IconChevronUp /> : <IconChevronDown />}
                                     </ActionIcon>
@@ -707,7 +786,7 @@ export function SalesOrderPage() {
 
                             <Collapse in={expandedPackage === pkg.id}>
                                 <Divider my="md" />
-                                <Text size="sm" c="dimmed" mb="md">{pkg.description}</Text>
+                                <Text size="sm" c="dimmed" mb="md" data-er-field="SALE_PACKAGE.description">{pkg.description}</Text>
                                 
                                 <Text fw={600} size="sm" mb="xs">Included Services:</Text>
                                 <Stack gap="xs" mb="lg">
@@ -745,6 +824,7 @@ export function SalesOrderPage() {
                                             max={365}
                                             suffix=" days"
                                             classNames={{ controls: 'days-input-controls' }}
+                                            data-er-field="SALES_ORDER.adjusted_days"
                                         />
                                     </Grid.Col>
                                     <Grid.Col span={4}>
@@ -755,12 +835,13 @@ export function SalesOrderPage() {
                                             onChange={handleSetCheckIn}
                                             minDate={new Date()}
                                             leftSection={<IconCalendar size={16} />}
+                                            data-er-field="SALES_ORDER.check_in"
                                         />
                                     </Grid.Col>
                                     <Grid.Col span={4}>
                                         <Stack gap={4}>
                                             <Text size="sm" c="dimmed">Total Price</Text>
-                                            <Text size="xl" fw={700} c="blue">
+                                            <Text size="xl" fw={700} c="blue" data-er-field="SALES_ORDER.adjusted_price">
                                                 ฿{formatCurrency(calculatePrice(
                                                     pkg, 
                                                     checkoutData.package?.id === pkg.id ? checkoutData.adjustedDays : pkg.duration
@@ -800,7 +881,7 @@ export function SalesOrderPage() {
                     </div>
 
                     {/* Guardian Block */}
-                    <Card padding="lg" radius="md" withBorder className="guardians-card">
+                    <Card padding="lg" radius="md" withBorder className="contact-form-card guardians-card">
                         <Group justify="space-between" mb="md">
                             <div>
                                 <Text fw={600} size="lg">Guardian Information</Text>
@@ -846,6 +927,7 @@ export function SalesOrderPage() {
                                                     value={guardian.firstName}
                                                     onChange={(e) => updateGuardianField(index, 'firstName', e.target.value)}
                                                     error={guardianErrors[index]?.firstName}
+                                                    data-er-field="GUARDIAN.first_name"
                                                 />
                                             </Grid.Col>
                                             <Grid.Col span={6}>
@@ -856,6 +938,7 @@ export function SalesOrderPage() {
                                                     value={guardian.lastName}
                                                     onChange={(e) => updateGuardianField(index, 'lastName', e.target.value)}
                                                     error={guardianErrors[index]?.lastName}
+                                                    data-er-field="GUARDIAN.last_name"
                                                 />
                                             </Grid.Col>
                                         </Grid>
@@ -868,6 +951,7 @@ export function SalesOrderPage() {
                                                     value={guardian.phone}
                                                     onChange={(e) => updateGuardianField(index, 'phone', e.target.value)}
                                                     error={guardianErrors[index]?.phone}
+                                                    data-er-field="GUARDIAN.phone"
                                                 />
                                             </Grid.Col>
                                             <Grid.Col span={6}>
@@ -878,6 +962,7 @@ export function SalesOrderPage() {
                                                     value={guardian.email}
                                                     onChange={(e) => updateGuardianField(index, 'email', e.target.value)}
                                                     error={guardianErrors[index]?.email}
+                                                    data-er-field="GUARDIAN.email"
                                                 />
                                             </Grid.Col>
                                         </Grid>
@@ -886,6 +971,7 @@ export function SalesOrderPage() {
                                             placeholder="Full address"
                                             value={guardian.address}
                                             onChange={(e) => updateGuardianField(index, 'address', e.target.value)}
+                                            data-er-field="GUARDIAN.address"
                                         />
                                         <Select
                                             label="Relationship to Resident"
@@ -898,6 +984,7 @@ export function SalesOrderPage() {
                                             ]}
                                             value={guardian.relationship}
                                             onChange={(val) => updateGuardianField(index, 'relationship', val || 'other')}
+                                            data-er-field="GUARDIAN.relationship"
                                         />
                                         <Checkbox
                                             label="This guardian pays for care"
@@ -909,6 +996,7 @@ export function SalesOrderPage() {
                                                     i === index ? { ...g, pays: checked } : g
                                                  ));
                                             }}
+                                            data-er-field="GUARDIAN.pays"
                                         />
                                     </Stack>
                                 </Paper>
@@ -917,7 +1005,7 @@ export function SalesOrderPage() {
                     </Card>
 
                     {/* Resident Block */}
-                    <Card padding="lg" radius="md" withBorder>
+                    <Card padding="lg" radius="md" withBorder className="contact-form-card">
                         <Group justify="space-between" mb="md">
                             <div>
                                 <Text fw={600} size="lg">Resident Information</Text>
@@ -942,6 +1030,7 @@ export function SalesOrderPage() {
                                         placeholder="Enter first name"
                                         required
                                         {...residentForm.getInputProps('firstName')}
+                                        data-er-field="RESIDENT.first_name"
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={6}>
@@ -950,6 +1039,7 @@ export function SalesOrderPage() {
                                         placeholder="Enter last name"
                                         required
                                         {...residentForm.getInputProps('lastName')}
+                                        data-er-field="RESIDENT.last_name"
                                     />
                                 </Grid.Col>
                             </Grid>
@@ -960,6 +1050,7 @@ export function SalesOrderPage() {
                                         type="date"
                                         required
                                         {...residentForm.getInputProps('dateOfBirth')}
+                                        data-er-field="RESIDENT.date_of_birth"
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={4}>
@@ -971,6 +1062,7 @@ export function SalesOrderPage() {
                                             { value: 'other', label: 'Other' }
                                         ]}
                                         {...residentForm.getInputProps('gender')}
+                                        data-er-field="RESIDENT.gender"
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={4}>
@@ -978,6 +1070,7 @@ export function SalesOrderPage() {
                                         label="ID Number"
                                         placeholder="National ID"
                                         {...residentForm.getInputProps('idNumber')}
+                                        data-er-field="RESIDENT.id_number"
                                     />
                                 </Grid.Col>
                             </Grid>
@@ -986,6 +1079,7 @@ export function SalesOrderPage() {
                                 placeholder="List any medical conditions..."
                                 rows={2}
                                 {...residentForm.getInputProps('medicalConditions')}
+                                data-er-field="RESIDENT.medical_conditions"
                             />
                             <Grid>
                                 <Grid.Col span={6}>
@@ -993,6 +1087,7 @@ export function SalesOrderPage() {
                                         label="Allergies"
                                         placeholder="Known allergies"
                                         {...residentForm.getInputProps('allergies')}
+                                        data-er-field="RESIDENT.allergies"
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={6}>
@@ -1000,6 +1095,7 @@ export function SalesOrderPage() {
                                         label="Dietary Restrictions"
                                         placeholder="E.g., low sodium, vegetarian"
                                         {...residentForm.getInputProps('dietaryRestrictions')}
+                                        data-er-field="RESIDENT.dietary_restrictions"
                                     />
                                 </Grid.Col>
                             </Grid>
@@ -1007,6 +1103,7 @@ export function SalesOrderPage() {
                                 label="Emergency Contact"
                                 placeholder="Phone number"
                                 {...residentForm.getInputProps('emergencyContact')}
+                                data-er-field="RESIDENT.emergency_contact"
                             />
                         </Stack>
                     </Card>
@@ -1039,15 +1136,16 @@ export function SalesOrderPage() {
                                     withBorder
                                     className={`room-card ${checkoutData.room?.id === room.id ? 'selected' : ''}`}
                                     onClick={() => handleSelectRoom(room)}
+                                    data-er-field="ROOM"
                                 >
                                     <Group justify="space-between" mb="xs">
-                                        <Text fw={600} size="lg">Room {room.number}</Text>
-                                        <Badge color={room.type === 'suite' ? 'violet' : room.type === 'deluxe' ? 'blue' : 'gray'}>
+                                        <Text fw={600} size="lg" data-er-field="ROOM.room_number">Room {room.number}</Text>
+                                        <Badge color={room.type === 'suite' ? 'violet' : room.type === 'deluxe' ? 'blue' : 'gray'} data-er-field="ROOM.room_type">
                                             {getRoomTypeLabel(room.type)}
                                         </Badge>
                                     </Group>
-                                    <Text size="sm" c="dimmed">Floor {room.floor}</Text>
-                                    <Text size="lg" fw={600} c="blue" mt="xs">
+                                    <Text size="sm" c="dimmed" data-er-field="ROOM.floor">Floor {room.floor}</Text>
+                                    <Text size="lg" fw={600} c="blue" mt="xs" data-er-field="ROOM.price_per_day">
                                         +฿{formatCurrency(room.pricePerDay)}/day
                                     </Text>
                                     {checkoutData.room?.id === room.id && (
@@ -1086,6 +1184,7 @@ export function SalesOrderPage() {
                                             }
                                         }));
                                     }}
+                                    data-er-field="ADDITIONAL_SERVICES.additional_bed"
                                 />
                             </Paper>
 
@@ -1101,6 +1200,7 @@ export function SalesOrderPage() {
                                             specialAmenities: value
                                         }
                                     }))}
+                                    data-er-field="ADDITIONAL_SERVICES.special_amenities"
                                 >
                                     <Stack gap="xs">
                                         <Checkbox value="wheelchair" label="Wheelchair" />
@@ -1131,6 +1231,7 @@ export function SalesOrderPage() {
                                                 }
                                             }));
                                         }}
+                                        data-er-field="ADDITIONAL_SERVICES.self_provide_pampers"
                                     />
                                     <Checkbox
                                         label="Medications"
@@ -1146,6 +1247,7 @@ export function SalesOrderPage() {
                                                 }
                                             }));
                                         }}
+                                        data-er-field="ADDITIONAL_SERVICES.self_provide_medications"
                                     />
                                 </Stack>
                             </Paper>
@@ -1212,9 +1314,9 @@ export function SalesOrderPage() {
                         <Group justify="space-between" mb="xl">
                             <div>
                                 <Text fw={700} size="xl" c="blue">INVOICE</Text>
-                                <Text size="sm" c="dimmed">{checkoutData.invoice.invoiceNumber}</Text>
+                                <Text size="sm" c="dimmed" data-er-field="INVOICE.invoice_number">{checkoutData.invoice.invoiceNumber}</Text>
                             </div>
-                            <Badge size="lg" color={checkoutData.invoice.status === 'paid' ? 'green' : 'yellow'}>
+                            <Badge size="lg" color={checkoutData.invoice.status === 'paid' ? 'green' : 'yellow'} data-er-field="INVOICE.status">
                                 {checkoutData.invoice.status.toUpperCase()}
                             </Badge>
                         </Group>
@@ -1225,8 +1327,8 @@ export function SalesOrderPage() {
                                 <Text size="sm" fw={600} c="dimmed" mb="xs">BILL TO (Paying Guardian)</Text>
                                 {guardianForms.filter(g => g.pays).length > 0 ? (
                                     guardianForms.filter(g => g.pays).map((guardian, idx) => (
-                                        <Paper key={idx} p="sm" withBorder mb="xs" className="invoicee-card">
-                                            <Text fw={500}>{guardian.firstName} {guardian.lastName}</Text>
+                                        <Paper key={idx} p="sm" withBorder mb="xs" className="invoicee-card" data-er-field="INVOICE.guardian_id">
+                                            <Text fw={500} data-er-field="INVOICE.guardian_name">{guardian.firstName} {guardian.lastName}</Text>
                                             {guardian.address ? (
                                                 <Text size="sm" c="dimmed">{guardian.address}</Text>
                                             ) : (
@@ -1248,15 +1350,15 @@ export function SalesOrderPage() {
                             <Grid.Col span={6}>
                                 <Text size="sm" fw={600} c="dimmed" mb="xs">RESIDENT / CARE RECIPIENT</Text>
                                 <Paper p="sm" withBorder>
-                                    <Text fw={500}>{checkoutData.invoice.residentName}</Text>
+                                    <Text fw={500} data-er-field="INVOICE.resident_name">{checkoutData.invoice.residentName}</Text>
                                     <Text size="sm" c="dimmed">Room {checkoutData.room?.number}</Text>
                                     <Group gap="xs" mt="xs">
                                         <Badge size="xs" variant="light">
-                                            {checkoutData.checkIn?.toLocaleDateString()} - {
+                                            <span data-er-field="SALES_ORDER.check_in">{checkoutData.checkIn?.toLocaleDateString()}</span> - <span data-er-field="SALES_ORDER.check_out">{
                                                 checkoutData.checkIn && checkoutData.adjustedDays 
                                                     ? new Date(checkoutData.checkIn.getTime() + (checkoutData.adjustedDays - 1) * 24 * 60 * 60 * 1000).toLocaleDateString()
                                                     : ''
-                                            }
+                                            }</span>
                                         </Badge>
                                         <Badge size="xs" variant="outline">{checkoutData.adjustedDays} days</Badge>
                                     </Group>
@@ -1270,8 +1372,8 @@ export function SalesOrderPage() {
                             {checkoutData.package ? (
                                 <>
                                     <Group justify="space-between" mb="sm">
-                                        <Text fw={600}>{checkoutData.package.name}</Text>
-                                        <Badge color="blue">{checkoutData.package.duration} days base</Badge>
+                                        <Text fw={600} data-er-field="SALE_PACKAGE.name">{checkoutData.package.name}</Text>
+                                        <Badge color="blue" data-er-field="SALE_PACKAGE.duration_days">{checkoutData.package.duration} days base</Badge>
                                     </Group>
                                     {checkoutData.package.description ? (
                                         <Text size="sm" c="dimmed" mb="md">{checkoutData.package.description}</Text>
@@ -1316,35 +1418,27 @@ export function SalesOrderPage() {
                                 </Table.Tr>
                             </Table.Thead>
                             <Table.Tbody>
-                                {checkoutData.invoice.items.map((item, idx) => (
-                                    <Table.Tr key={idx}>
-                                        <Table.Td>{item.description}</Table.Td>
-                                        <Table.Td ta="center">{item.quantity}</Table.Td>
-                                        <Table.Td ta="right">฿{formatCurrency(item.unitPrice)}</Table.Td>
-                                        <Table.Td ta="right">฿{formatCurrency(item.total)}</Table.Td>
+                                {invoiceItemsForDisplay.map((item, idx) => (
+                                    <Table.Tr key={idx} data-er-field="INVOICE_ITEM">
+                                        <Table.Td data-er-field="INVOICE_ITEM.description">{item.description}</Table.Td>
+                                        <Table.Td ta="center" data-er-field="INVOICE_ITEM.quantity">{item.quantity}</Table.Td>
+                                        <Table.Td ta="right" data-er-field="INVOICE_ITEM.unit_price">฿{formatCurrency(item.unitPrice)}</Table.Td>
+                                        <Table.Td ta="right" data-er-field="INVOICE_ITEM.total">฿{formatCurrency(item.total)}</Table.Td>
                                     </Table.Tr>
                                 ))}
-                                {checkoutData.additionalServices.additionalBed && (
-                                    <Table.Tr>
-                                        <Table.Td>Additional Bed ({checkoutData.adjustedDays} days)</Table.Td>
-                                        <Table.Td ta="center">1</Table.Td>
-                                        <Table.Td ta="right">฿{formatCurrency(500 * checkoutData.adjustedDays)}</Table.Td>
-                                        <Table.Td ta="right">฿{formatCurrency(500 * checkoutData.adjustedDays)}</Table.Td>
-                                    </Table.Tr>
-                                )}
                             </Table.Tbody>
                             <Table.Tfoot>
                                 <Table.Tr>
                                     <Table.Td colSpan={3} ta="right"><Text fw={500}>Subtotal</Text></Table.Td>
-                                    <Table.Td ta="right">฿{formatCurrency(checkoutData.invoice.subtotal)}</Table.Td>
+                                    <Table.Td ta="right" data-er-field="INVOICE.subtotal">฿{formatCurrency(invoiceTotalsForDisplay.subtotal)}</Table.Td>
                                 </Table.Tr>
                                 <Table.Tr>
                                     <Table.Td colSpan={3} ta="right"><Text fw={500}>VAT (7%)</Text></Table.Td>
-                                    <Table.Td ta="right">฿{formatCurrency(checkoutData.invoice.tax)}</Table.Td>
+                                    <Table.Td ta="right" data-er-field="INVOICE.tax">฿{formatCurrency(invoiceTotalsForDisplay.tax)}</Table.Td>
                                 </Table.Tr>
                                 <Table.Tr className="invoice-total-row">
                                     <Table.Td colSpan={3} ta="right"><Text fw={700} size="lg">Total Due</Text></Table.Td>
-                                    <Table.Td ta="right"><Text fw={700} size="xl" c="blue">฿{formatCurrency(checkoutData.invoice.total)}</Text></Table.Td>
+                                    <Table.Td ta="right" data-er-field="INVOICE.total"><Text fw={700} size="xl" c="blue">฿{formatCurrency(invoiceTotalsForDisplay.total)}</Text></Table.Td>
                                 </Table.Tr>
                             </Table.Tfoot>
                         </Table>
@@ -1353,7 +1447,7 @@ export function SalesOrderPage() {
                         <Grid mt="xl" className="invoice-signature-section">
                             <Grid.Col span={6}>
                                 <Text size="xs" c="dimmed" mb="xs">Invoice Date</Text>
-                                <Text size="sm">{new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+                                <Text size="sm" data-er-field="INVOICE.issued_at">{new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
                             </Grid.Col>
                             <Grid.Col span={6}>
                                 <Stack gap="xs" align="center" className="signature-block">
@@ -1474,7 +1568,7 @@ export function SalesOrderPage() {
                                     <div className="qr-code-box">
                                         <Text size="xs" c="dimmed">QR Code</Text>
                                     </div>
-                                    <Text size="sm" c="dimmed">Scan to pay ฿{formatCurrency(checkoutData.invoice.total)}</Text>
+                                    <Text size="sm" c="dimmed">Scan to pay ฿{formatCurrency(invoiceTotalsForDisplay.total)}</Text>
                                 </Stack>
                             </Paper>
                             <Text size="sm" c="dimmed">PromptPay ID: 0-1234-56789-01-2</Text>
@@ -1555,7 +1649,7 @@ export function SalesOrderPage() {
 
                             <Divider />
                             
-                            <Text size="sm" fw={500}>Amount: ฿{formatCurrency(checkoutData.invoice.total)}</Text>
+                            <Text size="sm" fw={500}>Amount: ฿{formatCurrency(invoiceTotalsForDisplay.total)}</Text>
                             <Text size="sm" c="dimmed">Account Name: Elderly Care Facility Co., Ltd.</Text>
 
                             <Button 
@@ -1593,7 +1687,7 @@ export function SalesOrderPage() {
                                 description="For record keeping purposes"
                             />
 
-                            <Text size="sm" fw={500}>Amount: ฿{formatCurrency(checkoutData.invoice.total)}</Text>
+                            <Text size="sm" fw={500}>Amount: ฿{formatCurrency(invoiceTotalsForDisplay.total)}</Text>
 
                             <Button 
                                 fullWidth 
@@ -1628,34 +1722,29 @@ export function SalesOrderPage() {
             {/* Step 4: Contract */}
             {step === 4 && checkoutData.contract && (
                 <Card padding="lg" radius="md" withBorder>
-                    <Group justify="space-between" mb="lg">
+                            <Group justify="space-between" mb="lg">
                         <div>
                             <Text fw={600} size="lg">Service Agreement</Text>
-                            <Text size="sm" c="dimmed">Contract #{checkoutData.contract.contractNumber}</Text>
+                            <Text size="sm" c="dimmed" data-er-field="CONTRACT.contract_number">Contract #{checkoutData.contract.contractNumber}</Text>
                         </div>
-                        <Badge size="lg" color={checkoutData.contract.status === 'signed' ? 'green' : 'yellow'}>
+                        <Badge size="lg" color={checkoutData.contract.status === 'signed' ? 'green' : 'yellow'} data-er-field="CONTRACT.status">
                             {checkoutData.contract.status}
                         </Badge>
                     </Group>
 
                     <Card padding="md" withBorder mb="lg" bg="gray.0">
-                        <Text fw={600} mb="sm">Contract Terms</Text>
-                        <Text size="sm" mb="md">{checkoutData.contract.terms}</Text>
-                        
-                        <Divider my="sm" />
-                        
                         <Grid>
                             <Grid.Col span={6}>
                                 <Text size="sm" c="dimmed">Start Date</Text>
-                                <Text fw={500}>{checkoutData.contract.startDate}</Text>
+                                <Text fw={500} data-er-field="CONTRACT.start_date">{checkoutData.contract.startDate}</Text>
                             </Grid.Col>
                             <Grid.Col span={6}>
                                 <Text size="sm" c="dimmed">End Date</Text>
-                                <Text fw={500}>{checkoutData.contract.endDate}</Text>
+                                <Text fw={500} data-er-field="CONTRACT.end_date">{checkoutData.contract.endDate}</Text>
                             </Grid.Col>
                             <Grid.Col span={6}>
-                                <Text size="sm" c="dimmed">Guardian</Text>
-                                <Text fw={500}>
+                                <Text size="sm" c="dimmed">Primary Guardian</Text>
+                                <Text fw={500} data-er-field="CONTRACT.guardian_id">
                                     {(checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0])?.firstName}{' '}
                                     {(checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0])?.lastName}
                                 </Text>
@@ -1665,30 +1754,29 @@ export function SalesOrderPage() {
                             </Grid.Col>
                             <Grid.Col span={6}>
                                 <Text size="sm" c="dimmed">Resident</Text>
-                                <Text fw={500}>{checkoutData.resident?.firstName} {checkoutData.resident?.lastName}</Text>
+                                <Text fw={500} data-er-field="CONTRACT.resident_id">{checkoutData.resident?.firstName} {checkoutData.resident?.lastName}</Text>
                             </Grid.Col>
                         </Grid>
-                    </Card>
 
-                    <Card padding="md" withBorder mb="lg">
-                        <Checkbox
-                            label="I have read and agree to the terms and conditions of this service agreement"
-                            size="md"
-                        />
+                        <Divider my="sm" />
+
+                        <Text size="sm" c="dimmed">
+                            Open the full contract document to review, print, sign, and send to all guardians.
+                        </Text>
                     </Card>
 
                     <Group justify="space-between">
                         <Button variant="subtle" onClick={() => setStep(3)}>Back</Button>
                         <Group gap="sm">
                             <Button 
-                                variant="outline" 
-                                leftSection={<IconPrinter size={18} />}
-                                onClick={() => window.print()}
+                                variant="filled"
+                                leftSection={<IconFileText size={18} />}
+                                onClick={() => {
+                                    syncToContext();
+                                    navigate('/sales/order/contract', { state: { draftId: currentDraft?.id } });
+                                }}
                             >
-                                Print Contract
-                            </Button>
-                            <Button onClick={() => setStep(5)}>
-                                Sign & Continue
+                                Open Contract Page
                             </Button>
                         </Group>
                     </Group>
