@@ -1,8 +1,6 @@
 import Papa from 'papaparse';
 import type { Database, Package, Staff, Team, Order, Task, AssignmentType } from '../types';
 
-const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
-
 const parse = async (url: string): Promise<any[]> => {
     try {
         const response = await fetch(url);
@@ -15,7 +13,7 @@ const parse = async (url: string): Promise<any[]> => {
                 complete: (results) => {
                     resolve(results.data || []);
                 },
-                error: (error) => {
+                error: (error: unknown) => {
                     reject(error);
                 }
             });

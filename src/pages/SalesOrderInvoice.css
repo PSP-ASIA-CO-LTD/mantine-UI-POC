@@ -2,25 +2,27 @@
     --_gap: var(--mantine-spacing-md);
     --_a4-width: 794px;
     --_a4-padding: 48px;
+    --_page-paper-inline-size: var(--_a4-width);
+    display: grid;
+    gap: var(--_gap);
 }
 
 /* Header Actions - Hidden when printing */
 .invoice-header {
-    max-inline-size: var(--_a4-width);
-    margin-inline: auto;
 }
 
 /* A4 Paper Container */
-.invoice-a4-paper {
+.invoice-page .invoice-a4-paper {
     background: white;
     border: 1px solid var(--mantine-color-gray-3);
     border-radius: var(--mantine-radius-sm);
     padding: var(--_a4-padding);
-    max-inline-size: var(--_a4-width);
+    max-inline-size: var(--_page-paper-inline-size);
     min-block-size: 1123px; /* A4 height at 96 DPI */
     margin-inline: auto;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Letterhead */
@@ -180,21 +182,21 @@
     margin-block-start: var(--mantine-spacing-xl);
 }
 
-.signature-block {
+.invoice-page .signature-block {
     max-inline-size: 200px;
     margin-inline-start: auto;
 }
 
-.signature-image {
-    max-inline-size: 150px;
-    block-size: auto;
+.invoice-page .signature-image {
+    inline-size: min(150px, 100%);
+    block-size: 64px;
+    object-fit: contain;
+    display: block;
 }
 
 /* Footer */
-.invoice-footer {
-    position: absolute;
-    inset-block-end: var(--_a4-padding);
-    inset-inline: var(--_a4-padding);
+.invoice-page .invoice-footer {
+    margin-block-start: auto;
     padding-block-start: var(--mantine-spacing-md);
     border-block-start: 1px solid var(--mantine-color-gray-2);
 }
@@ -210,19 +212,13 @@
         background: white;
     }
 
-    .invoice-a4-paper {
+    .invoice-page .invoice-a4-paper {
         box-shadow: none;
         border: none;
         padding: 20mm;
         max-inline-size: none;
         min-block-size: auto;
         margin: 0;
-    }
-
-    .invoice-footer {
-        position: relative;
-        inset: auto;
-        margin-block-start: var(--mantine-spacing-xl);
     }
 
     @page {
@@ -233,7 +229,7 @@
 
 /* Responsive */
 @media (max-width: 850px) {
-    .invoice-a4-paper {
+    .invoice-page .invoice-a4-paper {
         --_a4-padding: 24px;
         max-inline-size: 100%;
         min-block-size: auto;

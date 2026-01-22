@@ -174,6 +174,59 @@ export interface Contract {
     status: 'pending' | 'signed' | 'expired' | 'terminated';
 }
 
+export type ContractLanguage = 'th' | 'en';
+
+export interface ContractEmailLogEntry {
+    id: string;
+    to: string[];
+    subject: string;
+    sentAt: string;
+}
+
+export interface StoredContractPricing {
+    subtotal: number;
+    tax: number;
+    total: number;
+}
+
+export interface StoredContractSourceData {
+    // Package info
+    package: Package | null;
+    adjustedDays: number;
+    checkIn: string | null; // ISO string
+    checkOut: string | null; // ISO string
+    // People
+    guardians: Guardian[];
+    primaryContactGuardianId: string | null;
+    resident: Resident | null;
+    // Room & services
+    room: Room | null;
+    additionalServices: AdditionalServices;
+    // Generated documents (for referencing numbers/status)
+    salesOrder: SalesOrder | null;
+    invoice: Invoice | null;
+    contract: Contract | null;
+}
+
+export interface StoredContract {
+    id: string; // share id used in /contract/:id
+    contractNumber: string;
+    language: ContractLanguage;
+    status: 'pending' | 'signed' | 'expired' | 'terminated';
+    createdAt: string;
+    updatedAt: string;
+    signedAt?: string;
+    signedByEmail?: string;
+    // Access control: viewer must enter one of these emails
+    allowedGuardianEmails: string[];
+    // “Compiled paper”: the exact contract body HTML snapshot
+    compiledHtml: string;
+    // Snapshot inputs used to generate compiled paper
+    source: StoredContractSourceData;
+    pricing: StoredContractPricing;
+    emailLog: ContractEmailLogEntry[];
+}
+
 export interface Notification {
     id: string;
     type: 'sale' | 'task' | 'alert' | 'info';

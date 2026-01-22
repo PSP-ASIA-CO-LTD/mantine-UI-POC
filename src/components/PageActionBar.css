@@ -1,0 +1,21 @@
+.page-actionbar {
+  --_page-actionbar-top: 0px;
+  --_page-actionbar-z: 10;
+
+  position: sticky;
+  inset-block-start: var(--_page-actionbar-top);
+  z-index: var(--_page-actionbar-z);
+  background: var(--mantine-color-white);
+  inline-size: 100%;
+}
+
+.page-actionbar :where(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+  padding-block: 0;
+}
+
+.page-actionbar__right {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+

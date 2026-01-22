@@ -1,4 +1,4 @@
-import { useEffect, ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Title, Button, Text } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import './AppSidesheet.css';

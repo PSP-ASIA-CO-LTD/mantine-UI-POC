@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { 
-    Package, Guardian, Resident, Room, SalesOrder, Invoice, Contract,
-    AdditionalServices, CompleteSalesOrderData 
+    Guardian,
+    AdditionalServices,
+    CompleteSalesOrderData
 } from '../types';
 
 const STORAGE_KEY = 'bourbon44_sales_orders';
@@ -58,25 +59,25 @@ const createEmptyDraft = (): CompleteSalesOrderData => ({
 const SalesOrderContext = createContext<SalesOrderContextValue | null>(null);
 
 export function SalesOrderProvider({ children }: { children: ReactNode }) {
-    const [currentDraft, setCurrentDraft] = useState<CompleteSalesOrderData | null>(null);
-    const [savedOrders, setSavedOrders] = useState<CompleteSalesOrderData[]>([]);
+    const [currentDraft, setCurrentDraft] = useState<CompleteSalesOrderData | null>(() => {
+        try {
+            const storedDraft = localStorage.getItem(DRAFT_KEY);
+            return storedDraft ? JSON.parse(storedDraft) : null;
+        } catch (error) {
+            console.error('Failed to load current draft from storage:', error);
+            return null;
+        }
+    });
 
-    // Load from localStorage on mount
-    useEffect(() => {
+    const [savedOrders, setSavedOrders] = useState<CompleteSalesOrderData[]>(() => {
         try {
             const storedOrders = localStorage.getItem(STORAGE_KEY);
-            if (storedOrders) {
-                setSavedOrders(JSON.parse(storedOrders));
-            }
-            
-            const storedDraft = localStorage.getItem(DRAFT_KEY);
-            if (storedDraft) {
-                setCurrentDraft(JSON.parse(storedDraft));
-            }
+            return storedOrders ? JSON.parse(storedOrders) : [];
         } catch (error) {
-            console.error('Failed to load sales order data from storage:', error);
+            console.error('Failed to load saved orders from storage:', error);
+            return [];
         }
-    }, []);
+    });
 
     // Persist saved orders to localStorage
     useEffect(() => {
