@@ -11,7 +11,13 @@ import {
     Divider,
     Card ,
     Stack,
+    TextInput,
+    Select,
+    Textarea,
+    FileInput,
+    NumberInput,
 } from '@mantine/core';
+import { DateInput } from '@mantine/dates';
 import { IconPlus, IconDotsVertical, IconMinus } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
@@ -196,6 +202,106 @@ export function Staff() {
         });
     };
 
+    const openAddStaffSidesheet = () => {
+        const leftPane = (
+            <Stack>
+                <Title order={5}>Basic Info</Title>
+
+                <TextInput label="Staff ID / Employee ID" required />
+                <TextInput label="Full Name" required />
+                <TextInput label="Nickname" />
+                <Select
+                    label="Gender"
+                    data={['Male', 'Female', 'Other']}
+                />
+                <DateInput label="Date of Birth" />
+                <FileInput label="Profile Photo" accept="image/*" />
+
+                <Divider my="md" />
+
+                <Title order={5}>Contact Info</Title>
+                <TextInput label="Phone Number" />
+                <TextInput label="Email" type="email" />
+                <Textarea label="Address" />
+                <TextInput label="Emergency Contact" />
+            </Stack>
+        );
+
+        const rightPane = (
+            <Stack>
+                <Title order={5}>Employment Info</Title>
+                <TextInput label="Job Title / Position" />
+                <Select label="Department / Unit" data={departments} />
+                <Select
+                    label="Employment Type"
+                    data={['Full-time', 'Part-time', 'Contract']}
+                />
+                <DateInput label="Start Date" />
+                <Select
+                    label="Work Status"
+                    data={['Active', 'On Leave', 'Resigned']}
+                />
+
+                <Divider my="md" />
+
+                <Title order={5}>Professional Info</Title>
+                <TextInput label="License Number / Certification" />
+                <TextInput label="Specialization" />
+                <NumberInput label="Years of Experience" min={0} />
+                <Textarea label="Education / Training" />
+
+                <Divider my="md" />
+
+                <Title order={5}>Schedule</Title>
+                <TextInput label="Work Schedule / Shift" />
+                <TextInput label="Assigned Ward / Room" />
+                <TextInput label="Supervisor / Manager" />
+
+                <Divider my="md" />
+
+                <Title order={5}>System Access</Title>
+                <Select
+                    label="Role"
+                    data={['Admin', 'Staff', 'Doctor']}
+                />
+                <Select
+                    label="Access Level / Permissions"
+                    data={['Full', 'Limited', 'Read-only']}
+                />
+                <TextInput label="Last Login" disabled />
+
+                <Divider my="md" />
+
+                <Title order={5}>Optional</Title>
+                <Textarea label="Notes / Remarks" />
+                <FileInput
+                    label="Uploaded Documents"
+                    placeholder="Upload ID card, License, Contract"
+                    multiple
+                />
+            </Stack>
+        );
+
+        const footer = (
+            <AppSidesheetFooter
+                onCancel={close}
+                onSave={() => {
+                    // TODO: handle create staff API
+                    close();
+                }}
+                saveLabel="Create Staff"
+            />
+        );
+
+        open({
+            title: 'Add New Staff',
+            subtitle: 'Create Staff Profile',
+            leftPane,
+            rightPane,
+            footer,
+        });
+    };
+
     const handleRowClick = (member: Staff) => {
         setActiveStaff(member);
         setIsEditing(false);
@@ -215,8 +321,11 @@ export function Staff() {
         <div>
             <Group justify="space-between" mb="xl">
                 <Title order={2}>Staff Management</Title>
-                <Button leftSection={<IconPlus size={16} />}>Add Staff</Button>
+                <Button leftSection={<IconPlus size={16} />} onClick={openAddStaffSidesheet}>
+                    Add Staff
+                </Button>
             </Group>
+
 
             <Table>
                 <Table.Thead>
