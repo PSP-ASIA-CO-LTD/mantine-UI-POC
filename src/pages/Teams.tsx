@@ -6,6 +6,10 @@ import {
     Grid,
     Card,
     Text,
+    TextInput,
+    Textarea,
+    Select,
+    MultiSelect,
     Stack,
     Badge,
     List,
@@ -47,6 +51,89 @@ export function Teams() {
     const removeService = (index: number) => {
         setEditableServices((prev) => prev.filter((_, i) => i !== index));
     };
+
+    const openCreateDepartmentSidesheet = () => {
+        const leftPane = (
+            <Stack gap="md">
+                <Text fw={600} size="sm">Basic Info</Text>
+
+                <TextInput label="Department ID" placeholder="Auto-generated or enter ID" />
+                <TextInput label="Department Name" placeholder="e.g. Cardiology" required />
+                <TextInput label="Department Code" placeholder="e.g. CAR-01" />
+
+                <Select
+                    label="Department Head / Manager"
+                    placeholder="Select staff"
+                    data={teams.map((team) => team.name)}
+                    searchable
+                    clearable
+                />
+
+                <Select
+                    label="Parent Department"
+                    placeholder="None"
+                    data={teams.map((team) => team.name)}
+                    clearable
+                />
+
+                <Textarea
+                    label="Description"
+                    placeholder="Department description"
+                    autosize
+                    minRows={3}
+                />
+
+                <TextInput
+                    label="Location / Floor / Building"
+                    placeholder="e.g. Building A, 3rd Floor"
+                />
+
+                {/* Operating hours as time range */}
+                <Group grow>
+                    <TextInput label="Start Time" type="time" />
+                    <TextInput label="End Time" type="time" />
+                </Group>
+            </Stack>
+        );
+
+        const rightPane = (
+            <Stack gap="md">
+                <Text fw={600} size="sm">Services</Text>
+
+                <MultiSelect
+                    label="Select Services"
+                    placeholder="Choose services"
+                    data={[
+                        { value: 'service1', label: 'Service 1' },
+                        { value: 'service2', label: 'Service 2' },
+                        { value: 'service3', label: 'Service 3' },
+                        { value: 'service4', label: 'Service 4' },
+                    ]}
+                    searchable
+                    clearable
+                />
+            </Stack>
+        );
+
+        const footer = (
+            <AppSidesheetFooter
+                onCancel={close}
+                onSave={() => {
+                    close();
+                }}
+                saveLabel="Create Department"
+            />
+        );
+
+        open({
+            title: 'Create Department',
+            subtitle: 'Basic Information',
+            leftPane,
+            rightPane,
+            footer,
+        });
+    };
+
 
     const openTeamSidesheet = (team: Team) => {
         const leftPane = (
@@ -102,6 +189,8 @@ export function Teams() {
                 </div>
             </div>
         );
+
+
 
         const rightPane = (
             <div>
@@ -213,9 +302,10 @@ export function Teams() {
         <div>
             <Group justify="space-between" mb="xl">
                 <Title order={2}>Department Management</Title>
-                <Button leftSection={<IconPlus size={16} />}>
+                <Button leftSection={<IconPlus size={16} />} onClick={openCreateDepartmentSidesheet}>
                     Create Department
                 </Button>
+
             </Group>
 
             <Grid>
