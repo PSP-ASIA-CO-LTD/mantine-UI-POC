@@ -38,6 +38,34 @@ import type { Staff } from '../types';
 export function Staff() {
   const [activeStaff, setActiveStaff] = useState<Staff | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [newStaffFormData, setNewStaffFormData] = useState({
+    name: '',
+    nickname: '',
+    gender: '',
+    dateOfBirth: null as Date | null,
+    profilePhoto: null as File | null,
+    phone: '',
+    email: '',
+    address: '',
+    emergencyContact: '',
+    dept: '',
+    role: '',
+    jobTitle: '',
+    employmentType: '',
+    startDate: null as Date | null,
+    workStatus: '',
+    licenseNumber: '',
+    specialization: '',
+    yearsOfExperience: 0,
+    education: '',
+    workSchedule: '',
+    assignedWard: '',
+    supervisor: '',
+    systemRole: '',
+    accessLevel: '',
+    notes: '',
+    documents: [] as File[],
+  });
 
   // GraphQL hooks
   const { loading, error, data } = useGetAllStaff();
@@ -212,12 +240,6 @@ export function Staff() {
   };
 
   const openAddStaffSidesheet = () => {
-    const [formData, setFormData] = useState({
-      name: '',
-      dept: '',
-      role: '',
-    });
-
     const leftPane = (
       <Stack>
         <Title order={5}>Basic Info</Title>
@@ -231,23 +253,100 @@ export function Staff() {
         <TextInput
           label="Full Name"
           required
-          value={formData.name}
+          value={newStaffFormData.name}
           onChange={(e) =>
-            setFormData({ ...formData, name: e.currentTarget.value })
+            setNewStaffFormData({
+              ...newStaffFormData,
+              name: e.currentTarget.value,
+            })
           }
         />
-        <TextInput label="Nickname" />
-        <Select label="Gender" data={['Male', 'Female', 'Other']} />
-        <DateInput label="Date of Birth" />
-        <FileInput label="Profile Photo" accept="image/*" />
+        <TextInput
+          label="Nickname"
+          value={newStaffFormData.nickname}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              nickname: e.currentTarget.value,
+            })
+          }
+        />
+        <Select
+          label="Gender"
+          data={['Male', 'Female', 'Other']}
+          value={newStaffFormData.gender}
+          onChange={(value) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              gender: value || '',
+            })
+          }
+        />
+        <DateInput
+          label="Date of Birth"
+          value={newStaffFormData.dateOfBirth}
+          onChange={(value) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              dateOfBirth: value,
+            })
+          }
+        />
+        <FileInput
+          label="Profile Photo"
+          accept="image/*"
+          onChange={(file) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              profilePhoto: file,
+            })
+          }
+        />
 
         <Divider my="md" />
 
         <Title order={5}>Contact Info</Title>
-        <TextInput label="Phone Number" />
-        <TextInput label="Email" type="email" />
-        <Textarea label="Address" />
-        <TextInput label="Emergency Contact" />
+        <TextInput
+          label="Phone Number"
+          value={newStaffFormData.phone}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              phone: e.currentTarget.value,
+            })
+          }
+        />
+        <TextInput
+          label="Email"
+          type="email"
+          value={newStaffFormData.email}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              email: e.currentTarget.value,
+            })
+          }
+        />
+        <Textarea
+          label="Address"
+          value={newStaffFormData.address}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              address: e.currentTarget.value,
+            })
+          }
+        />
+        <TextInput
+          label="Emergency Contact"
+          value={newStaffFormData.emergencyContact}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              emergencyContact: e.currentTarget.value,
+            })
+          }
+        />
       </Stack>
     );
 
@@ -256,77 +355,260 @@ export function Staff() {
         <Title order={5}>Employment Info</Title>
         <TextInput
           label="Job Title / Position"
-          value={formData.role}
+          value={newStaffFormData.role}
           onChange={(e) =>
-            setFormData({ ...formData, role: e.currentTarget.value })
+            setNewStaffFormData({
+              ...newStaffFormData,
+              role: e.currentTarget.value,
+            })
           }
         />
         <Select
           label="Department / Unit"
           data={departments}
-          value={formData.dept}
+          value={newStaffFormData.dept}
           onChange={(value) =>
-            setFormData({ ...formData, dept: value || '' })
+            setNewStaffFormData({
+              ...newStaffFormData,
+              dept: value || '',
+            })
           }
         />
         <Select
           label="Employment Type"
           data={['Full-time', 'Part-time', 'Contract']}
+          value={newStaffFormData.employmentType}
+          onChange={(value) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              employmentType: value || '',
+            })
+          }
         />
-        <DateInput label="Start Date" />
+        <DateInput
+          label="Start Date"
+          value={newStaffFormData.startDate}
+          onChange={(value) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              startDate: value,
+            })
+          }
+        />
         <Select
           label="Work Status"
           data={['Active', 'On Leave', 'Resigned']}
+          value={newStaffFormData.workStatus}
+          onChange={(value) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              workStatus: value || '',
+            })
+          }
         />
 
         <Divider my="md" />
 
         <Title order={5}>Professional Info</Title>
-        <TextInput label="License Number / Certification" />
-        <TextInput label="Specialization" />
-        <NumberInput label="Years of Experience" min={0} />
-        <Textarea label="Education / Training" />
+        <TextInput
+          label="License Number / Certification"
+          value={newStaffFormData.licenseNumber}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              licenseNumber: e.currentTarget.value,
+            })
+          }
+        />
+        <TextInput
+          label="Specialization"
+          value={newStaffFormData.specialization}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              specialization: e.currentTarget.value,
+            })
+          }
+        />
+        <NumberInput
+          label="Years of Experience"
+          min={0}
+          value={newStaffFormData.yearsOfExperience}
+          onChange={(value) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              yearsOfExperience: Number(value || 0),
+            })
+          }
+        />
+        <Textarea
+          label="Education / Training"
+          value={newStaffFormData.education}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              education: e.currentTarget.value,
+            })
+          }
+        />
 
         <Divider my="md" />
 
         <Title order={5}>Schedule</Title>
-        <TextInput label="Work Schedule / Shift" />
-        <TextInput label="Assigned Ward / Room" />
-        <TextInput label="Supervisor / Manager" />
+        <TextInput
+          label="Work Schedule / Shift"
+          value={newStaffFormData.workSchedule}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              workSchedule: e.currentTarget.value,
+            })
+          }
+        />
+        <TextInput
+          label="Assigned Ward / Room"
+          value={newStaffFormData.assignedWard}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              assignedWard: e.currentTarget.value,
+            })
+          }
+        />
+        <TextInput
+          label="Supervisor / Manager"
+          value={newStaffFormData.supervisor}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              supervisor: e.currentTarget.value,
+            })
+          }
+        />
 
         <Divider my="md" />
 
         <Title order={5}>System Access</Title>
-        <Select label="Role" data={['Admin', 'Staff', 'Doctor']} />
+        <Select
+          label="Role"
+          data={['Admin', 'Staff', 'Doctor']}
+          value={newStaffFormData.systemRole}
+          onChange={(value) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              systemRole: value || '',
+            })
+          }
+        />
         <Select
           label="Access Level / Permissions"
           data={['Full', 'Limited', 'Read-only']}
+          value={newStaffFormData.accessLevel}
+          onChange={(value) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              accessLevel: value || '',
+            })
+          }
         />
         <TextInput label="Last Login" disabled />
 
         <Divider my="md" />
 
         <Title order={5}>Optional</Title>
-        <Textarea label="Notes / Remarks" />
+        <Textarea
+          label="Notes / Remarks"
+          value={newStaffFormData.notes}
+          onChange={(e) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              notes: e.currentTarget.value,
+            })
+          }
+        />
         <FileInput
           label="Uploaded Documents"
           placeholder="Upload ID card, License, Contract"
           multiple
+          onChange={(files) =>
+            setNewStaffFormData({
+              ...newStaffFormData,
+              documents: files ? Array.from(files) : [],
+            })
+          }
         />
       </Stack>
     );
 
     const footer = (
       <AppSidesheetFooter
-        onCancel={close}
+        onCancel={() => {
+          setNewStaffFormData({
+            name: '',
+            nickname: '',
+            gender: '',
+            dateOfBirth: null,
+            profilePhoto: null,
+            phone: '',
+            email: '',
+            address: '',
+            emergencyContact: '',
+            dept: '',
+            role: '',
+            jobTitle: '',
+            employmentType: '',
+            startDate: null,
+            workStatus: '',
+            licenseNumber: '',
+            specialization: '',
+            yearsOfExperience: 0,
+            education: '',
+            workSchedule: '',
+            assignedWard: '',
+            supervisor: '',
+            systemRole: '',
+            accessLevel: '',
+            notes: '',
+            documents: [],
+          });
+          close();
+        }}
         onSave={async () => {
           try {
             await createStaff({
               variables: {
-                name: formData.name,
-                dept: formData.dept,
-                role: formData.role,
+                name: newStaffFormData.name,
+                dept: newStaffFormData.dept,
+                role: newStaffFormData.role,
               },
+            });
+            setNewStaffFormData({
+              name: '',
+              nickname: '',
+              gender: '',
+              dateOfBirth: null,
+              profilePhoto: null,
+              phone: '',
+              email: '',
+              address: '',
+              emergencyContact: '',
+              dept: '',
+              role: '',
+              jobTitle: '',
+              employmentType: '',
+              startDate: null,
+              workStatus: '',
+              licenseNumber: '',
+              specialization: '',
+              yearsOfExperience: 0,
+              education: '',
+              workSchedule: '',
+              assignedWard: '',
+              supervisor: '',
+              systemRole: '',
+              accessLevel: '',
+              notes: '',
+              documents: [],
             });
             close();
           } catch (error) {
