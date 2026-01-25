@@ -1,0 +1,33 @@
+query GetAllStaff {
+  staff {
+    id
+    name
+  }
+}
+
+query GetStaffById($id: uuid!) {
+  staff_by_pk(id: $id) {
+    id
+    name
+  }
+}
+
+mutation CreateStaff($name: String!) {
+  insert_staff_one(object: { name: $name }) {
+    id
+    name
+  }
+}
+
+mutation UpdateStaff($id: uuid!, $name: String) {
+  update_staff_by_pk(pk_columns: { id: $id }, _set: { name: $name }) {
+    id
+    name
+  }
+}
+
+mutation DeleteStaff($id: uuid!) {
+  delete_staff_by_pk(id: $id) {
+    id
+  }
+}
