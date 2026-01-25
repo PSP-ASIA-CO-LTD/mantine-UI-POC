@@ -7,12 +7,15 @@ import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import App from './App';
 import './index.css';
+import { GraphQLProvider } from './components/GraphQLProvider';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <MantineProvider>
-            <Notifications />
-            <App />
-        </MantineProvider>
-    </React.StrictMode>
+  <React.StrictMode>
+    <GraphQLProvider>
+      <MantineProvider>
+        <Notifications />
+        <App />
+      </MantineProvider>
+    </GraphQLProvider>
+  </React.StrictMode>,
 );
