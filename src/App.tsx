@@ -58,6 +58,7 @@ function AppLayout() {
                     <Route path="/packages" element={<Packages />} />
                     <Route path="/teams" element={<Teams />} />
                     <Route path="/staff" element={<Staff />} />
+                    {/*<Route path="/patient" element={<Patient />} />*/}
                 </Routes>
             </AppShell.Main>
         </AppShell>
