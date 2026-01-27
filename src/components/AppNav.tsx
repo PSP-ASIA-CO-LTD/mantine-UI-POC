@@ -4,7 +4,8 @@ import {
     IconChartLine, 
     IconBox, 
     IconUsers, 
-    IconUser, 
+    IconUser,
+    IconUserHeart,
     IconSettings,
     IconShoppingCart,
     IconReceipt,
@@ -67,6 +68,10 @@ export function AppNav() {
                         <NavLink to="/staff" end className="nav-link">
                             <IconUser size={20} />
                             <span>Staff</span>
+                        </NavLink>
+                        <NavLink to="/patient" end className="nav-link">
+                            <IconUserHeart size={20} />
+                            <span>Patient</span>
                         </NavLink>
                     </Stack>
                 </div>
