@@ -1,5 +1,5 @@
 import { buildDatabase } from '../utils/csvParser';
-import type { 
+import type {
     Database, Package, Staff, Team, DashboardStats,
     Guardian, Resident, Room, SalesOrder, Invoice, Contract,
     Notification, OperationTask, StaffShift, SalesDashboardStats,
@@ -65,21 +65,54 @@ const loadJSON = async <T>(url: string): Promise<T[]> => {
     }
 };
 
+// LocalStorage keys
+const STORAGE_KEYS = {
+    guardians: 'bourbon44_db_guardians',
+    residents: 'bourbon44_db_residents',
+    rooms: 'bourbon44_db_rooms',
+    salesOrders: 'bourbon44_db_salesOrders',
+    invoices: 'bourbon44_db_invoices',
+    contracts: 'bourbon44_db_contracts',
+    notifications: 'bourbon44_db_notifications',
+    operationTasks: 'bourbon44_db_operationTasks',
+    staffShifts: 'bourbon44_db_staffShifts',
+};
+
+const persist = <T>(key: string, data: T[]) => {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+        console.error('Failed to persist data', e);
+    }
+};
+
+const loadWithPersistence = async <T>(key: string, url: string): Promise<T[]> => {
+    try {
+        const raw = localStorage.getItem(key);
+        if (raw) return JSON.parse(raw);
+    } catch (e) {
+        console.error('Failed to load persisted data', e);
+    }
+    const data = await loadJSON<T>(url);
+    persist(key, data);
+    return data;
+};
+
 const loadAllJSON = async () => {
     if (jsonLoaded) return;
-    
+
     const [g, r, rm, so, inv, ctr, ntf, ot, ss] = await Promise.all([
-        loadJSON<Guardian>('/data/guardians.json'),
-        loadJSON<Resident>('/data/residents.json'),
-        loadJSON<Room>('/data/rooms.json'),
-        loadJSON<SalesOrder>('/data/salesOrders.json'),
-        loadJSON<Invoice>('/data/invoices.json'),
-        loadJSON<Contract>('/data/contracts.json'),
-        loadJSON<Notification>('/data/notifications.json'),
-        loadJSON<OperationTask>('/data/operationTasks.json'),
-        loadJSON<StaffShift>('/data/staffShifts.json'),
+        loadWithPersistence<Guardian>(STORAGE_KEYS.guardians, '/data/guardians.json'),
+        loadWithPersistence<Resident>(STORAGE_KEYS.residents, '/data/residents.json'),
+        loadWithPersistence<Room>(STORAGE_KEYS.rooms, '/data/rooms.json'),
+        loadWithPersistence<SalesOrder>(STORAGE_KEYS.salesOrders, '/data/salesOrders.json'),
+        loadWithPersistence<Invoice>(STORAGE_KEYS.invoices, '/data/invoices.json'),
+        loadWithPersistence<Contract>(STORAGE_KEYS.contracts, '/data/contracts.json'),
+        loadWithPersistence<Notification>(STORAGE_KEYS.notifications, '/data/notifications.json'),
+        loadWithPersistence<OperationTask>(STORAGE_KEYS.operationTasks, '/data/operationTasks.json'),
+        loadWithPersistence<StaffShift>(STORAGE_KEYS.staffShifts, '/data/staffShifts.json'),
     ]);
-    
+
     guardians = g;
     residents = r;
     rooms = rm;
@@ -101,13 +134,13 @@ export const API = {
         const data = await loadDB();
         return data.packages;
     },
-    
+
     getPackageById: async (id: string): Promise<Package | undefined> => {
         await delay();
         const data = await loadDB();
         return data.packages.find(p => p.id === id);
     },
-    
+
     getStaff: async (): Promise<Staff[]> => {
         await delay();
         const data = await loadDB();
@@ -125,13 +158,13 @@ export const API = {
         const data = await loadDB();
         return data.orders;
     },
-    
+
     getTasks: async () => {
         await delay();
         const data = await loadDB();
         return data.tasks;
     },
-    
+
     savePackage: async (pkgData: Partial<Package> & { id?: string }): Promise<Package> => {
         await delay(600);
         const data = await loadDB();
@@ -146,7 +179,7 @@ export const API = {
         data.packages.push(newPkg);
         return newPkg;
     },
-    
+
     deletePackage: async (id: string): Promise<boolean> => {
         await delay(400);
         const data = await loadDB();
@@ -224,6 +257,7 @@ export const API = {
             createdAt: new Date().toISOString()
         };
         guardians.push(newGuardian);
+        persist(STORAGE_KEYS.guardians, guardians);
         return newGuardian;
     },
 
@@ -233,6 +267,7 @@ export const API = {
         const index = guardians.findIndex(g => g.id === id);
         if (index !== -1) {
             guardians[index] = { ...guardians[index], ...data };
+            persist(STORAGE_KEYS.guardians, guardians);
             return guardians[index];
         }
         return null;
@@ -259,6 +294,7 @@ export const API = {
             createdAt: new Date().toISOString()
         };
         residents.push(newResident);
+        persist(STORAGE_KEYS.residents, residents);
         return newResident;
     },
 
@@ -280,6 +316,7 @@ export const API = {
         const room = rooms.find(r => r.id === id);
         if (room) {
             room.status = status;
+            persist(STORAGE_KEYS.rooms, rooms);
             return room;
         }
         return null;
@@ -306,6 +343,7 @@ export const API = {
             createdAt: new Date().toISOString()
         };
         salesOrders.push(newOrder);
+        persist(STORAGE_KEYS.salesOrders, salesOrders);
         return newOrder;
     },
 
@@ -315,6 +353,7 @@ export const API = {
         const index = salesOrders.findIndex(so => so.id === id);
         if (index !== -1) {
             salesOrders[index] = { ...salesOrders[index], ...data };
+            persist(STORAGE_KEYS.salesOrders, salesOrders);
             return salesOrders[index];
         }
         return null;
@@ -349,6 +388,7 @@ export const API = {
             issuedAt: new Date().toISOString()
         };
         invoices.push(newInvoice);
+        persist(STORAGE_KEYS.invoices, invoices);
         return newInvoice;
     },
 
@@ -358,6 +398,7 @@ export const API = {
         const index = invoices.findIndex(inv => inv.id === id);
         if (index !== -1) {
             invoices[index] = { ...invoices[index], ...data };
+            persist(STORAGE_KEYS.invoices, invoices);
             return invoices[index];
         }
         return null;
@@ -385,6 +426,7 @@ export const API = {
             contractNumber
         };
         contracts.push(newContract);
+        persist(STORAGE_KEYS.contracts, contracts);
         return newContract;
     },
 
@@ -464,7 +506,7 @@ export const API = {
     getNotifications: async (): Promise<Notification[]> => {
         await loadAllJSON();
         await delay();
-        return notifications.sort((a, b) => 
+        return notifications.sort((a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
     },
@@ -483,6 +525,7 @@ export const API = {
             createdAt: new Date().toISOString()
         };
         notifications.unshift(newNotification);
+        persist(STORAGE_KEYS.notifications, notifications);
         return newNotification;
     },
 
@@ -491,18 +534,19 @@ export const API = {
         const notification = notifications.find(n => n.id === id);
         if (notification) {
             notification.readAt = new Date().toISOString();
+            persist(STORAGE_KEYS.notifications, notifications);
         }
     },
 
     getSalesDashboardStats: async (): Promise<SalesDashboardStats> => {
         await loadAllJSON();
         await delay();
-        
+
         const today = new Date().toISOString().split('T')[0];
-        const todayOrders = salesOrders.filter(so => 
+        const todayOrders = salesOrders.filter(so =>
             so.createdAt.split('T')[0] === today && so.status === 'paid'
         );
-        
+
         return {
             todaySales: todayOrders.length,
             todayRevenue: todayOrders.reduce((sum, so) => sum + so.adjustedPrice, 0),
@@ -541,8 +585,8 @@ export const API = {
     },
 
     updateTaskStatus: async (
-        id: string, 
-        status: OperationTask['status'], 
+        id: string,
+        status: OperationTask['status'],
         completedBy?: string,
         notes?: string
     ): Promise<OperationTask | null> => {
@@ -556,6 +600,7 @@ export const API = {
                 task.completedBy = completedBy;
             }
             if (notes) task.notes = notes;
+            persist(STORAGE_KEYS.operationTasks, operationTasks);
             return task;
         }
         return null;
@@ -568,6 +613,7 @@ export const API = {
         if (task) {
             task.assignedTo = staffId;
             task.assignedToName = staffName;
+            persist(STORAGE_KEYS.operationTasks, operationTasks);
             return task;
         }
         return null;
@@ -581,14 +627,14 @@ export const API = {
     ): Promise<OperationTask[]> => {
         await loadAllJSON();
         await delay(500);
-        
+
         const newTasks: OperationTask[] = [];
         const checkIn = new Date(salesOrder.checkIn);
         const checkOut = new Date(salesOrder.checkOut);
-        
+
         for (const service of pkg.services) {
             let currentDate = new Date(checkIn);
-            
+
             while (currentDate <= checkOut) {
                 const shouldAdd = (() => {
                     if (service.interval === 'Daily') return true;
@@ -599,7 +645,7 @@ export const API = {
                     }
                     return true;
                 })();
-                
+
                 if (shouldAdd) {
                     const task: OperationTask = {
                         id: 'opt-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
@@ -616,12 +662,13 @@ export const API = {
                     };
                     newTasks.push(task);
                 }
-                
+
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         }
-        
+
         operationTasks.push(...newTasks);
+        persist(STORAGE_KEYS.operationTasks, operationTasks);
         return newTasks;
     },
 
@@ -651,18 +698,18 @@ export const API = {
     }[]> => {
         await loadAllJSON();
         await delay();
-        
+
         const result: { date: string; totalStaff: number; scheduledStaff: number; taskCount: number }[] = [];
         const start = new Date(startDate);
         const end = new Date(endDate);
-        
+
         const allStaff = (await API.getStaff()).length;
-        
+
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
             const dateStr = d.toISOString().split('T')[0];
             const dayShifts = staffShifts.filter(s => s.date === dateStr);
             const dayTasks = operationTasks.filter(t => t.scheduledDate === dateStr && t.status === 'pending');
-            
+
             result.push({
                 date: dateStr,
                 totalStaff: allStaff,
@@ -670,7 +717,7 @@ export const API = {
                 taskCount: dayTasks.length
             });
         }
-        
+
         return result;
     }
 };

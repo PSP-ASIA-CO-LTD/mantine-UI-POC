@@ -9,6 +9,7 @@ import {
     Paper,
     Select,
     Stack,
+    Switch,
     Table,
     Text,
     TextInput,
@@ -16,10 +17,11 @@ import {
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconArrowLeft, IconCheck, IconMail, IconPrinter } from '@tabler/icons-react';
-import { API } from '../api';
+import { useStoredContract } from '../hooks/useStoredContract';
+import { useNotifications } from '../hooks/useNotifications';
 import { PageActionBar } from '../components/PageActionBar';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
-import type { ContractLanguage, StoredContract } from '../types';
+import type { ContractLanguage, StoredContract, Contract } from '../types';
 import './SalesOrderContract.css';
 
 type ContractLocationState = {
@@ -60,6 +62,9 @@ export function SalesOrderContract() {
     const [signerEmail, setSignerEmail] = useState('');
 
     const paperRef = useRef<HTMLDivElement>(null);
+
+    const { getStoredContractBySalesOrderId, upsertStoredContract, logEmail, signContract } = useStoredContract();
+    const { createNotification } = useNotifications();
 
     useEffect(() => {
         storedRef.current = stored;
@@ -121,7 +126,7 @@ export function SalesOrderContract() {
     useEffect(() => {
         const run = async () => {
             const salesOrderId = order.salesOrder?.id || contract.salesOrderId;
-            const existing = salesOrderId ? await API.getStoredContractBySalesOrderId(salesOrderId) : undefined;
+            const existing = salesOrderId ? await getStoredContractBySalesOrderId(salesOrderId) : undefined;
 
             if (existing) {
                 setStored(existing);
@@ -162,7 +167,7 @@ export function SalesOrderContract() {
                 emailLog: [],
             };
 
-            const saved = await API.upsertStoredContract(initial);
+            const saved = await upsertStoredContract(initial);
             setStored(saved);
             setLanguage(saved.language);
         };
@@ -186,26 +191,13 @@ export function SalesOrderContract() {
                 contractNumber: contract.contractNumber,
                 compiledHtml,
                 source: {
-                    package: order.package,
-                    adjustedDays: order.adjustedDays,
-                    checkIn: order.checkIn,
-                    checkOut: order.checkOut,
-                    guardians: order.guardians,
-                    primaryContactGuardianId: order.primaryContactGuardianId,
-                    resident: order.resident,
-                    room: order.room,
-                    additionalServices: order.additionalServices,
-                    salesOrder: order.salesOrder,
-                    invoice: order.invoice,
+                    ...current.source,
                     contract,
                 },
                 pricing,
-                allowedGuardianEmails: order.guardians
-                    .map(g => (g.email || '').trim().toLowerCase())
-                    .filter(Boolean),
             };
 
-            const saved = await API.upsertStoredContract(updated);
+            const saved = await upsertStoredContract(updated);
             setStored(saved);
         };
 
@@ -252,10 +244,10 @@ export function SalesOrderContract() {
                 ? `สัญญาเลขที่ ${stored.contractNumber} (ลิงก์สำหรับดูเอกสาร)`
                 : `Contract ${stored.contractNumber} (View link)`;
 
-        const updated = await API.logStoredContractEmail(stored.id, { to: recipients, subject });
+        const updated = await logEmail(stored.id, { to: recipients, subject });
         if (updated) setStored(updated);
 
-        await API.createNotification({
+        await createNotification({
             type: 'info',
             title: language === 'th' ? 'บันทึกการส่งสัญญาแล้ว' : 'Contract email logged',
             message:
@@ -294,7 +286,7 @@ export function SalesOrderContract() {
             return;
         }
 
-        const updatedStored = await API.signStoredContract(stored.id, email);
+        const updatedStored = await signContract(stored.id, email);
         if (updatedStored) setStored(updatedStored);
 
         const signedAt = new Date().toISOString();
@@ -315,6 +307,36 @@ export function SalesOrderContract() {
         });
 
         setShowSignModal(false);
+    };
+
+    const handleUnsign = async () => {
+        if (!stored) return;
+
+        const updatedContract = {
+            ...stored,
+            status: 'pending' as const,
+            signedAt: undefined,
+            signedByEmail: undefined,
+        };
+
+        const updatedStored = await upsertStoredContract(updatedContract);
+        if (updatedStored) setStored(updatedStored);
+
+        updateDraft({
+            contract: {
+                ...(order.contract as Contract),
+                status: 'pending',
+                signedAt: undefined,
+                signedBy: undefined,
+            },
+        });
+        saveDraft();
+
+        notifications.show({
+            title: language === 'th' ? 'ยกเลิกการลงนาม' : 'Signature Removed',
+            message: language === 'th' ? 'เปลี่ยนสถานะสัญญาเป็นรอลงนามเรียบร้อย' : 'Contract status has been set to pending',
+            color: 'gray',
+        });
     };
 
     const packageDailyRate = order.package.price / order.package.duration;
@@ -354,9 +376,18 @@ export function SalesOrderContract() {
                         <Button variant="light" leftSection={<IconPrinter size={18} />} onClick={handlePrint}>
                             {language === 'th' ? 'พิมพ์' : 'Print'}
                         </Button>
-                        <Button leftSection={<IconCheck size={18} />} onClick={openSignModal}>
-                            {language === 'th' ? 'ลงนาม' : 'Sign'}
-                        </Button>
+                        <Switch
+                            label={language === 'th' ? 'ลงนามแล้ว' : 'Signed'}
+                            size="md"
+                            checked={stored?.status === 'signed' || order.contract.status === 'signed'}
+                            onChange={async (e) => {
+                                if (e.currentTarget.checked) {
+                                    openSignModal();
+                                } else {
+                                    await handleUnsign();
+                                }
+                            }}
+                        />
                     </>
                 }
             />

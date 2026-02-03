@@ -26,8 +26,8 @@ import {
 import { notifications } from '@mantine/notifications';
 import { DateInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
-import { 
-    IconChevronDown, 
+import {
+    IconChevronDown,
     IconChevronUp,
     IconCalendar,
     IconUser,
@@ -36,14 +36,17 @@ import {
     IconFileText,
     IconCheck,
     IconPrinter,
-    IconMail,
     IconArrowLeft,
     IconPlus,
     IconTrash,
     IconBed,
     IconPhone
 } from '@tabler/icons-react';
-import { API } from '../api';
+import { usePackages } from '../hooks/usePackages';
+import { useRooms } from '../hooks/useRooms';
+import { useCustomerMutations } from '../hooks/useCustomerMutations';
+import { useSalesOrderMutations } from '../hooks/useSalesOrderMutations';
+import { useNotifications } from '../hooks/useNotifications';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
 import type { Package, Room, Guardian, Resident, SalesOrder, Invoice, Contract, AdditionalServices } from '../types';
 import { getBusinessSettings } from '../utils/businessSettings';
@@ -80,12 +83,38 @@ export function SalesOrderPage() {
     const location = useLocation();
     const navState = location.state as { draftId?: string; forceStep?: number } | null;
 
-    const { currentDraft, initNewDraft, loadDraft, updateDraft, saveDraft } = useSalesOrder();
+    const { currentDraft, initNewDraft, loadDraft, updateDraft, saveDraft, clearDraft } = useSalesOrder();
     const depositMonths = getBusinessSettings().depositMonths;
-    
-    const [packages, setPackages] = useState<Package[]>([]);
-    const [rooms, setRooms] = useState<Room[]>([]);
-    const [loading, setLoading] = useState(true);
+
+    const { packages, loading: loadingPackages, error: packageError } = usePackages();
+    const { rooms, loading: loadingRooms, error: roomError } = useRooms(true); // true for availableOnly
+
+    // Mutation hooks
+    const { saveGuardian, saveResident, processing: savingCustomer } = useCustomerMutations();
+    const {
+        createSalesOrder,
+        createInvoice,
+        updateInvoice,
+        updateSalesOrder,
+        createContract,
+        generateTasks,
+        processing: processingOrder
+    } = useSalesOrderMutations();
+    const { createNotification } = useNotifications();
+
+    // Derived state
+    const loading = loadingPackages || loadingRooms;
+    const processing = savingCustomer || processingOrder;
+
+    // Error handling
+    useEffect(() => {
+        if (packageError) {
+            notifications.show({ title: 'Error', message: 'Failed to load packages', color: 'red' });
+        }
+        if (roomError) {
+            notifications.show({ title: 'Error', message: 'Failed to load rooms', color: 'red' });
+        }
+    }, [packageError, roomError]);
     const [expandedPackage, setExpandedPackage] = useState<string | null>(null);
     const [step, setStep] = useState(0);
     const [checkoutData, setCheckoutData] = useState<CheckoutData>({
@@ -106,8 +135,7 @@ export function SalesOrderPage() {
         invoice: null,
         contract: null
     });
-    const [processing, setProcessing] = useState(false);
-    const [showSuccess, setShowSuccess] = useState(false);
+    // Removed local processing state in favor of hook state
     const [guardianForms, setGuardianForms] = useState<GuardianFormValues[]>([{
         firstName: '',
         lastName: '',
@@ -117,7 +145,7 @@ export function SalesOrderPage() {
         relationship: 'son',
         pays: true
     }]);
-    
+
     // Payment modals state
     const [showBankModal, setShowBankModal] = useState(false);
     const [showCreditCardModal, setShowCreditCardModal] = useState(false);
@@ -134,7 +162,7 @@ export function SalesOrderPage() {
             package: checkoutData.package,
             adjustedDays: checkoutData.adjustedDays,
             checkIn: checkoutData.checkIn?.toISOString() || null,
-            checkOut: checkoutData.checkIn && checkoutData.adjustedDays 
+            checkOut: checkoutData.checkIn && checkoutData.adjustedDays
                 ? new Date(checkoutData.checkIn.getTime() + (checkoutData.adjustedDays - 1) * 24 * 60 * 60 * 1000).toISOString()
                 : null,
             guardians: checkoutData.guardians,
@@ -145,9 +173,9 @@ export function SalesOrderPage() {
             salesOrder: checkoutData.salesOrder,
             invoice: checkoutData.invoice,
             contract: checkoutData.contract,
-            status: checkoutData.salesOrder?.status === 'paid' ? 'paid' 
-                : checkoutData.invoice ? 'pending_payment' 
-                : 'draft'
+            status: checkoutData.salesOrder?.status === 'paid' ? 'paid'
+                : checkoutData.invoice ? 'pending_payment'
+                    : 'draft'
         });
     }, [checkoutData, updateDraft]);
 
@@ -254,7 +282,7 @@ export function SalesOrderPage() {
     };
 
     const updateGuardianField = (index: number, field: keyof GuardianFormValues, value: string) => {
-        setGuardianForms(prev => prev.map((g, i) => 
+        setGuardianForms(prev => prev.map((g, i) =>
             i === index ? { ...g, [field]: value } : g
         ));
     };
@@ -278,26 +306,11 @@ export function SalesOrderPage() {
         }
     });
 
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                const [pkgData, roomData] = await Promise.all([
-                    API.getPackages(),
-                    API.getAvailableRooms()
-                ]);
-                setPackages(pkgData);
-                setRooms(roomData);
-            } catch (error) {
-                console.error('Failed to load data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadData();
-    }, []);
+    // Data loading is now handled by hooks usePackages and useRooms
 
     // Auto-sync to context when checkout data changes (debounced)
     useEffect(() => {
+        if (step === 5) return;
         const timeout = setTimeout(() => {
             if (checkoutData.package || checkoutData.guardians.length > 0) {
                 syncToContext();
@@ -388,7 +401,7 @@ export function SalesOrderPage() {
                 pays: true
             }
         ]);
-        
+
         // Set resident info
         residentForm.setValues({
             firstName: 'สมศรี',
@@ -401,7 +414,7 @@ export function SalesOrderPage() {
             dietaryRestrictions: 'อาหารลดโซเดียม, ลดน้ำตาล',
             emergencyContact: '081-234-5678'
         });
-        
+
         // Clear any validation errors
         setGuardianErrors({});
     };
@@ -410,7 +423,7 @@ export function SalesOrderPage() {
         // Validate all guardians
         let allValid = true;
         const newErrors: Record<number, Record<string, string>> = {};
-        
+
         guardianForms.forEach((guardian, index) => {
             const errors = validateGuardian(guardian);
             if (Object.keys(errors).length > 0) {
@@ -418,42 +431,45 @@ export function SalesOrderPage() {
                 newErrors[index] = errors;
             }
         });
-        
+
         setGuardianErrors(newErrors);
-        
+
         const residentValid = !residentForm.validate().hasErrors;
-        
+
         if (!allValid || !residentValid) return;
-        
-        setProcessing(true);
+
         try {
             // Save all guardians
             const savedGuardians: Guardian[] = [];
             for (const guardianData of guardianForms) {
-                const guardian = await API.saveGuardian(guardianData);
+                const guardian = await saveGuardian(guardianData);
                 savedGuardians.push(guardian);
             }
-            
+
             // Use first guardian as the primary guardian for resident
-            const resident = await API.saveResident({
+            const resident = await saveResident({
                 ...residentForm.values,
                 gender: residentForm.values.gender as 'male' | 'female' | 'other',
                 guardianId: savedGuardians[0].id
             });
-            
-            setCheckoutData(prev => ({ 
-                ...prev, 
-                guardians: savedGuardians, 
+
+            setCheckoutData(prev => ({
+                ...prev,
+                guardians: savedGuardians,
                 primaryContactGuardianId: savedGuardians[0].id,
-                resident 
+                resident
             }));
             setStep(2);
         } catch (error) {
             console.error('Failed to save contact info:', error);
-        } finally {
-            setProcessing(false);
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to save contact info',
+                color: 'red'
+            });
         }
     };
+
 
     const handleSelectRoom = (room: Room) => {
         setCheckoutData(prev => ({ ...prev, room }));
@@ -461,7 +477,7 @@ export function SalesOrderPage() {
 
     const handleCreateOrder = async () => {
         const primaryGuardian = checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0];
-        
+
         // Validate all required data before proceeding
         if (!checkoutData.package) {
             notifications.show({
@@ -503,12 +519,11 @@ export function SalesOrderPage() {
             });
             return;
         }
-        
-        setProcessing(true);
+
         try {
             const checkOut = new Date(checkoutData.checkIn);
             checkOut.setDate(checkOut.getDate() + checkoutData.adjustedDays - 1);
-            
+
             const adjustedPrice = calculatePrice(checkoutData.package, checkoutData.adjustedDays);
             const { depositMonths } = getBusinessSettings();
             const items = buildInvoiceItems({
@@ -519,8 +534,8 @@ export function SalesOrderPage() {
                 depositMonths,
             });
             const { subtotal, tax, total } = calculateInvoiceTotals(items);
-            
-            const salesOrder = await API.createSalesOrder({
+
+            const salesOrder = await createSalesOrder({
                 packageId: checkoutData.package.id,
                 packageName: checkoutData.package.name,
                 residentId: checkoutData.resident.id,
@@ -535,7 +550,7 @@ export function SalesOrderPage() {
                 createdBy: 'Manager Alice'
             });
 
-            const invoice = await API.createInvoice({
+            const invoice = await createInvoice({
                 salesOrderId: salesOrder.id,
                 guardianId: primaryGuardian.id,
                 guardianName: `${primaryGuardian.firstName} ${primaryGuardian.lastName}`,
@@ -558,10 +573,9 @@ export function SalesOrderPage() {
                 message: 'Failed to create order. Please try again.',
                 color: 'red',
             });
-        } finally {
-            setProcessing(false);
         }
     };
+
 
     const handleMarkPaid = async (method: 'cash' | 'transfer' | 'credit_card') => {
         const primaryGuardian = checkoutData.guardians.find(g => g.id === checkoutData.primaryContactGuardianId) || checkoutData.guardians[0];
@@ -577,10 +591,9 @@ export function SalesOrderPage() {
             })
             : checkoutData.invoice.items;
         const computedTotals = calculateInvoiceTotals(computedItems);
-        
-        setProcessing(true);
+
         try {
-            await API.updateInvoice(checkoutData.invoice.id, {
+            await updateInvoice(checkoutData.invoice.id, {
                 items: computedItems,
                 subtotal: computedTotals.subtotal,
                 tax: computedTotals.tax,
@@ -590,12 +603,12 @@ export function SalesOrderPage() {
                 paymentMethod: method
             });
 
-            await API.updateSalesOrder(checkoutData.salesOrder.id, {
+            await updateSalesOrder(checkoutData.salesOrder.id, {
                 status: 'paid',
                 paidAt: new Date().toISOString()
             });
 
-            const contract = await API.createContract({
+            const contract = await createContract({
                 salesOrderId: checkoutData.salesOrder.id,
                 guardianId: primaryGuardian.id,
                 residentId: checkoutData.resident.id,
@@ -607,7 +620,7 @@ export function SalesOrderPage() {
 
             // Generate operation tasks
             if (checkoutData.package && checkoutData.resident && checkoutData.room) {
-                await API.generateTasksFromPackage(
+                await generateTasks(
                     checkoutData.salesOrder,
                     checkoutData.package,
                     checkoutData.resident,
@@ -616,15 +629,15 @@ export function SalesOrderPage() {
             }
 
             // Create notification
-            await API.createNotification({
+            await createNotification({
                 type: 'sale',
                 title: 'New Sale Completed',
                 message: `${checkoutData.package?.name} sold to ${primaryGuardian.firstName} ${primaryGuardian.lastName} for resident ${checkoutData.resident.firstName} ${checkoutData.resident.lastName}. Total: ฿${formatCurrency(computedTotals.total)}`,
                 relatedId: checkoutData.salesOrder.id
             });
 
-            setCheckoutData(prev => ({ 
-                ...prev, 
+            setCheckoutData(prev => ({
+                ...prev,
                 contract,
                 invoice: {
                     ...prev.invoice!,
@@ -643,19 +656,25 @@ export function SalesOrderPage() {
             setStep(4);
         } catch (error) {
             console.error('Failed to process payment:', error);
-        } finally {
-            setProcessing(false);
         }
     };
 
+
     const handleSaveDraft = async () => {
         if (!checkoutData.salesOrder) return;
-        await API.updateSalesOrder(checkoutData.salesOrder.id, { status: 'draft' });
+        await updateSalesOrder(checkoutData.salesOrder.id, { status: 'draft' });
         navigate('/sales');
     };
 
+    const handleCompleteOrder = () => {
+        saveDraft();
+        clearDraft();
+        restoredDraftIdRef.current = null;
+        setStep(5);
+    };
+
     const handleFinish = () => {
-        setShowSuccess(true);
+        navigate('/sales');
     };
 
     const getRoomTypeLabel = (type: Room['type']) => {
@@ -712,61 +731,61 @@ export function SalesOrderPage() {
     return (
         <div className="sales-order-page">
             <Group mb="xl">
-                <ActionIcon variant="subtle" size="lg" onClick={() => navigate('/sales')}>
+                {step !== 5 && <ActionIcon variant="subtle" size="lg" onClick={() => navigate('/sales')}>
                     <IconArrowLeft size={20} />
-                </ActionIcon>
+                </ActionIcon>}
                 <Title order={2}>Create Sales Order</Title>
             </Group>
 
-            <Stepper 
-                active={step} 
-                onStepClick={setStep} 
+            {step !== 5 && <Stepper
+                active={step}
+                onStepClick={setStep}
                 mb="xl"
                 color="blue"
                 size="sm"
                 iconSize={32}
             >
-                <Stepper.Step 
-                    label="Select Package" 
+                <Stepper.Step
+                    label="Select Package"
                     description={getStepDescription(0)}
-                    icon={<IconReceipt size={16} />} 
+                    icon={<IconReceipt size={16} />}
                 />
-                <Stepper.Step 
-                    label="Contact Info" 
+                <Stepper.Step
+                    label="Contact Info"
                     description={getStepDescription(1)}
-                    icon={<IconUser size={16} />} 
+                    icon={<IconUser size={16} />}
                 />
-                <Stepper.Step 
-                    label="Select Room" 
+                <Stepper.Step
+                    label="Select Room"
                     description={getStepDescription(2)}
-                    icon={<IconHome size={16} />} 
+                    icon={<IconHome size={16} />}
                 />
-                <Stepper.Step 
-                    label="Invoice" 
+                <Stepper.Step
+                    label="Invoice"
                     description={getStepDescription(3)}
-                    icon={<IconReceipt size={16} />} 
+                    icon={<IconReceipt size={16} />}
                 />
-                <Stepper.Step 
-                    label="Contract" 
+                <Stepper.Step
+                    label="Contract"
                     description={getStepDescription(4)}
-                    icon={<IconFileText size={16} />} 
+                    icon={<IconFileText size={16} />}
                 />
-                <Stepper.Step 
-                    label="Complete" 
+                <Stepper.Step
+                    label="Complete"
                     description={getStepDescription(5)}
-                    icon={<IconCheck size={16} />} 
+                    icon={<IconCheck size={16} />}
                 />
-            </Stepper>
+            </Stepper>}
 
             {/* Step 0: Package Selection */}
             {step === 0 && (
                 <div className="package-list">
                     {packages.map(pkg => (
-                        <Card 
-                            key={pkg.id} 
-                            padding="lg" 
-                            radius="md" 
-                            withBorder 
+                        <Card
+                            key={pkg.id}
+                            padding="lg"
+                            radius="md"
+                            withBorder
                             className={`package-card ${expandedPackage === pkg.id ? 'package-card--expanded' : ''}`}
                         >
                             <Group justify="space-between" onClick={() => setExpandedPackage(
@@ -787,7 +806,7 @@ export function SalesOrderPage() {
                             <Collapse in={expandedPackage === pkg.id}>
                                 <Divider my="md" />
                                 <Text size="sm" c="dimmed" mb="md" data-er-field="SALE_PACKAGE.description">{pkg.description}</Text>
-                                
+
                                 <Text fw={600} size="sm" mb="xs">Included Services:</Text>
                                 <Stack gap="xs" mb="lg">
                                     {pkg.services.map((service, idx) => (
@@ -807,7 +826,7 @@ export function SalesOrderPage() {
                                 </Stack>
 
                                 <Divider my="md" label="Adjust Stay Duration" labelPosition="center" />
-                                
+
                                 <Grid align="flex-end" mb="md">
                                     <Grid.Col span={4}>
                                         <NumberInput
@@ -843,7 +862,7 @@ export function SalesOrderPage() {
                                             <Text size="sm" c="dimmed">Total Price</Text>
                                             <Text size="xl" fw={700} c="blue" data-er-field="SALES_ORDER.adjusted_price">
                                                 ฿{formatCurrency(calculatePrice(
-                                                    pkg, 
+                                                    pkg,
                                                     checkoutData.package?.id === pkg.id ? checkoutData.adjustedDays : pkg.duration
                                                 ))}
                                             </Text>
@@ -851,8 +870,8 @@ export function SalesOrderPage() {
                                     </Grid.Col>
                                 </Grid>
 
-                                <Button 
-                                    fullWidth 
+                                <Button
+                                    fullWidth
                                     size="lg"
                                     onClick={() => handleSelectPackage(pkg)}
                                     disabled={!checkoutData.checkIn}
@@ -870,8 +889,8 @@ export function SalesOrderPage() {
                 <div className="contact-forms-grid">
                     {/* Auto-fill Button for Testing */}
                     <div className="autofill-bar">
-                        <Button 
-                            variant="filled" 
+                        <Button
+                            variant="filled"
                             color="grape"
                             size="sm"
                             onClick={handleAutoFillContactInfo}
@@ -889,8 +908,8 @@ export function SalesOrderPage() {
                                     Contact persons responsible for the resident.
                                 </Text>
                             </div>
-                            <Button 
-                                variant="light" 
+                            <Button
+                                variant="light"
                                 size="xs"
                                 leftSection={<IconPlus size={14} />}
                                 onClick={addGuardian}
@@ -907,9 +926,9 @@ export function SalesOrderPage() {
                                             Guardian {index + 1} {index === 0 && '(Primary)'}
                                         </Badge>
                                         {guardianForms.length > 1 && (
-                                            <ActionIcon 
-                                                variant="subtle" 
-                                                color="red" 
+                                            <ActionIcon
+                                                variant="subtle"
+                                                color="red"
                                                 size="sm"
                                                 onClick={() => removeGuardian(index)}
                                             >
@@ -992,9 +1011,9 @@ export function SalesOrderPage() {
                                             checked={guardian.pays ?? false}
                                             onChange={(e) => {
                                                 const checked = e.currentTarget.checked;
-                                                setGuardianForms(prev => prev.map((g, i) => 
+                                                setGuardianForms(prev => prev.map((g, i) =>
                                                     i === index ? { ...g, pays: checked } : g
-                                                 ));
+                                                ));
                                             }}
                                             data-er-field="GUARDIAN.pays"
                                         />
@@ -1013,8 +1032,8 @@ export function SalesOrderPage() {
                                     Person who will be staying at the facility.
                                 </Text>
                             </div>
-                            <Button 
-                                variant="light" 
+                            <Button
+                                variant="light"
                                 size="xs"
                                 onClick={handleCopyGuardianToResident}
                             >
@@ -1129,7 +1148,7 @@ export function SalesOrderPage() {
 
                         <div className="room-grid">
                             {rooms.map(room => (
-                                <Card 
+                                <Card
                                     key={room.id}
                                     padding="md"
                                     radius="md"
@@ -1279,8 +1298,8 @@ export function SalesOrderPage() {
 
                     <Group justify="space-between">
                         <Button variant="subtle" onClick={() => setStep(1)}>Back</Button>
-                        <Button 
-                            onClick={handleCreateOrder} 
+                        <Button
+                            onClick={handleCreateOrder}
                             loading={processing}
                             disabled={!checkoutData.room || !checkoutData.package || checkoutData.guardians.length === 0 || !checkoutData.resident || !checkoutData.checkIn}
                         >
@@ -1355,7 +1374,7 @@ export function SalesOrderPage() {
                                     <Group gap="xs" mt="xs">
                                         <Badge size="xs" variant="light">
                                             <span data-er-field="SALES_ORDER.check_in">{checkoutData.checkIn?.toLocaleDateString()}</span> - <span data-er-field="SALES_ORDER.check_out">{
-                                                checkoutData.checkIn && checkoutData.adjustedDays 
+                                                checkoutData.checkIn && checkoutData.adjustedDays
                                                     ? new Date(checkoutData.checkIn.getTime() + (checkoutData.adjustedDays - 1) * 24 * 60 * 60 * 1000).toLocaleDateString()
                                                     : ''
                                             }</span>
@@ -1464,11 +1483,11 @@ export function SalesOrderPage() {
                     {/* Payment Section - Outside A4 */}
                     <Card padding="lg" radius="md" withBorder className="payment-section">
                         <Text fw={600} size="lg" mb="md">Payment Channels</Text>
-                        
+
                         <div className="payment-buttons-grid">
                             {/* PromptPay */}
-                            <Button 
-                                variant="outline" 
+                            <Button
+                                variant="outline"
                                 size="lg"
                                 className="payment-btn promptpay"
                                 onClick={() => setShowPromptPayModal(true)}
@@ -1480,8 +1499,8 @@ export function SalesOrderPage() {
                             </Button>
 
                             {/* Bank Transfer */}
-                            <Button 
-                                variant="outline" 
+                            <Button
+                                variant="outline"
                                 size="lg"
                                 className="payment-btn bank"
                                 onClick={() => setShowBankModal(true)}
@@ -1493,8 +1512,8 @@ export function SalesOrderPage() {
                             </Button>
 
                             {/* Cash */}
-                            <Button 
-                                variant="outline" 
+                            <Button
+                                variant="outline"
                                 size="lg"
                                 className="payment-btn cash"
                                 onClick={() => handleMarkPaid('cash')}
@@ -1507,8 +1526,8 @@ export function SalesOrderPage() {
                             </Button>
 
                             {/* Credit Card */}
-                            <Button 
-                                variant="outline" 
+                            <Button
+                                variant="outline"
                                 size="lg"
                                 className="payment-btn credit-card"
                                 onClick={() => setShowCreditCardModal(true)}
@@ -1526,8 +1545,8 @@ export function SalesOrderPage() {
                             <Button variant="subtle" onClick={() => setStep(2)}>Back</Button>
                             <Group gap="sm">
                                 <Button variant="light" onClick={handleSaveDraft}>Save as Draft</Button>
-                                <Button 
-                                    variant="outline" 
+                                <Button
+                                    variant="outline"
                                     leftSection={<IconPrinter size={18} />}
                                     onClick={() => {
                                         // Sync current data to context before navigating
@@ -1556,8 +1575,8 @@ export function SalesOrderPage() {
                     </Card>
 
                     {/* PromptPay Modal */}
-                    <Modal 
-                        opened={showPromptPayModal} 
+                    <Modal
+                        opened={showPromptPayModal}
                         onClose={() => setShowPromptPayModal(false)}
                         title="PromptPay QR Code"
                         centered
@@ -1574,8 +1593,8 @@ export function SalesOrderPage() {
                             <Text size="sm" c="dimmed">PromptPay ID: 0-1234-56789-01-2</Text>
                             <Text size="sm" c="dimmed">Elderly Care Facility Co., Ltd.</Text>
                             <Divider w="100%" />
-                            <Button 
-                                fullWidth 
+                            <Button
+                                fullWidth
                                 onClick={() => {
                                     setShowPromptPayModal(false);
                                     handleMarkPaid('transfer');
@@ -1588,8 +1607,8 @@ export function SalesOrderPage() {
                     </Modal>
 
                     {/* Bank Transfer Modal */}
-                    <Modal 
-                        opened={showBankModal} 
+                    <Modal
+                        opened={showBankModal}
                         onClose={() => setShowBankModal(false)}
                         title="Bank Transfer Details"
                         centered
@@ -1597,7 +1616,7 @@ export function SalesOrderPage() {
                     >
                         <Stack gap="md">
                             <Text size="sm" c="dimmed">Select bank and confirm payment:</Text>
-                            
+
                             <Radio.Group value={selectedBank || ''} onChange={setSelectedBank}>
                                 <Stack gap="sm">
                                     <Paper p="md" withBorder className={`bank-option ${selectedBank === 'kbank' ? 'selected' : ''}`}>
@@ -1648,12 +1667,12 @@ export function SalesOrderPage() {
                             </Radio.Group>
 
                             <Divider />
-                            
+
                             <Text size="sm" fw={500}>Amount: ฿{formatCurrency(invoiceTotalsForDisplay.total)}</Text>
                             <Text size="sm" c="dimmed">Account Name: Elderly Care Facility Co., Ltd.</Text>
 
-                            <Button 
-                                fullWidth 
+                            <Button
+                                fullWidth
                                 disabled={!selectedBank}
                                 onClick={() => {
                                     setShowBankModal(false);
@@ -1667,8 +1686,8 @@ export function SalesOrderPage() {
                     </Modal>
 
                     {/* Credit Card Modal */}
-                    <Modal 
-                        opened={showCreditCardModal} 
+                    <Modal
+                        opened={showCreditCardModal}
                         onClose={() => setShowCreditCardModal(false)}
                         title="Credit Card Payment"
                         centered
@@ -1677,7 +1696,7 @@ export function SalesOrderPage() {
                             <Text size="sm" c="dimmed">
                                 Enter the last 4 digits of the card used for payment verification:
                             </Text>
-                            
+
                             <TextInput
                                 label="Last 4 digits of card"
                                 placeholder="XXXX"
@@ -1689,8 +1708,8 @@ export function SalesOrderPage() {
 
                             <Text size="sm" fw={500}>Amount: ฿{formatCurrency(invoiceTotalsForDisplay.total)}</Text>
 
-                            <Button 
-                                fullWidth 
+                            <Button
+                                fullWidth
                                 disabled={creditCardLast4.length !== 4}
                                 onClick={() => {
                                     setShowCreditCardModal(false);
@@ -1722,10 +1741,14 @@ export function SalesOrderPage() {
             {/* Step 4: Contract */}
             {step === 4 && checkoutData.contract && (
                 <Card padding="lg" radius="md" withBorder>
-                            <Group justify="space-between" mb="lg">
+                    <Group justify="space-between" mb="lg">
                         <div>
-                            <Text fw={600} size="lg">Service Agreement</Text>
-                            <Text size="sm" c="dimmed" data-er-field="CONTRACT.contract_number">Contract #{checkoutData.contract.contractNumber}</Text>
+                            <Text fw={700} size="lg">Service Agreement</Text>
+                            <Group gap="xs">
+                                <Text size="sm" c="dimmed" data-er-field="CONTRACT.contract_number">Contract #{checkoutData.contract.contractNumber}</Text>
+                                <Text size="sm" c="dimmed">•</Text>
+                                <Text size="sm" c="dimmed" fw={500}>Order ID: {checkoutData.salesOrder?.id}</Text>
+                            </Group>
                         </div>
                         <Badge size="lg" color={checkoutData.contract.status === 'signed' ? 'green' : 'yellow'} data-er-field="CONTRACT.status">
                             {checkoutData.contract.status}
@@ -1768,8 +1791,8 @@ export function SalesOrderPage() {
                     <Group justify="space-between">
                         <Button variant="subtle" onClick={() => setStep(3)}>Back</Button>
                         <Group gap="sm">
-                            <Button 
-                                variant="filled"
+                            <Button
+                                variant="outline"
                                 leftSection={<IconFileText size={18} />}
                                 onClick={() => {
                                     syncToContext();
@@ -1777,6 +1800,13 @@ export function SalesOrderPage() {
                                 }}
                             >
                                 Open Contract Page
+                            </Button>
+                            <Button
+                                variant="filled"
+                                color="blue"
+                                onClick={handleCompleteOrder}
+                            >
+                                Complete Order
                             </Button>
                         </Group>
                     </Group>
@@ -1810,8 +1840,22 @@ export function SalesOrderPage() {
                         <Text fw={600} mb="md">Summary</Text>
                         <Stack gap="sm">
                             <Group gap="sm">
+                                <IconCheck size={20} color="var(--mantine-color-green-6)" />
+                                <Text size="sm" fw={600}>Order ID: {checkoutData.salesOrder?.id}</Text>
+                            </Group>
+                            <Group gap="sm">
                                 <IconFileText size={20} />
-                                <Text size="sm">Contract #{checkoutData.contract?.contractNumber} has been signed</Text>
+                                <Text size="sm">
+                                    Contract #{checkoutData.contract?.contractNumber} has been signed
+                                    <Button
+                                        variant="link"
+                                        size="compact-xs"
+                                        onClick={() => navigate('/sales/order/contract', { state: { draftId: currentDraft?.id } })}
+                                        ml="xs"
+                                    >
+                                        View Service Agreement
+                                    </Button>
+                                </Text>
                             </Group>
                             <Group gap="sm">
                                 <IconReceipt size={20} />
@@ -1836,44 +1880,26 @@ export function SalesOrderPage() {
                         </Stack>
                     </Card>
 
-                    <Group justify="center" gap="md">
-                        <Button 
-                            variant="outline" 
-                            leftSection={<IconPrinter size={18} />}
-                            onClick={() => window.print()}
-                        >
-                            Print Receipt
-                        </Button>
-                        <Button 
-                            variant="outline" 
-                            leftSection={<IconMail size={18} />}
-                        >
-                            Send via Email
-                        </Button>
-                        <Button onClick={handleFinish}>
-                            Return to Dashboard
-                        </Button>
-                    </Group>
+                    <Paper withBorder p="md" mt="xl" bg="gray.0" radius="md">
+                        <Group justify="center">
+                            <Button
+                                variant="subtle"
+                                onClick={handleFinish}
+                            >
+                                Return to Sales Dashboard
+                            </Button>
+                            <Button
+                                variant="filled"
+                                color="blue"
+                                leftSection={<IconFileText size={18} />}
+                                onClick={() => navigate('/sales/order/contract', { state: { draftId: currentDraft?.id } })}
+                            >
+                                Open Contract Page
+                            </Button>
+                        </Group>
+                    </Paper>
                 </Card>
             )}
-
-            <Modal 
-                opened={showSuccess} 
-                onClose={() => {}} 
-                withCloseButton={false}
-                centered
-            >
-                <Stack align="center" py="xl">
-                    <IconCheck size={48} color="var(--mantine-color-green-6)" />
-                    <Text fw={600} size="lg">Order Complete!</Text>
-                    <Text size="sm" c="dimmed" ta="center">
-                        A notification has been sent to the Sales Dashboard.
-                    </Text>
-                    <Button onClick={() => navigate('/sales')} mt="md">
-                        Go to Sales Dashboard
-                    </Button>
-                </Stack>
-            </Modal>
         </div>
     );
 }

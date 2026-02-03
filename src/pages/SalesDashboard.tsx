@@ -14,9 +14,9 @@ import {
     Popover,
     ScrollArea,
 } from '@mantine/core';
-import { 
-    IconPlus, 
-    IconBell, 
+import {
+    IconPlus,
+    IconBell,
     IconEye,
     IconCurrencyBaht,
     IconUsers,
@@ -24,13 +24,16 @@ import {
     IconClock
 } from '@tabler/icons-react';
 import { API } from '../api';
+import { useSalesOrder } from '../contexts/SalesOrderContext';
+import { notifications } from '@mantine/notifications';
 import type { SalesDashboardStats, Notification, SalesOrder } from '../types';
 import './SalesDashboard.css';
 
 export function SalesDashboard() {
     const navigate = useNavigate();
+    const { getOrderBySalesOrderId, initNewDraft } = useSalesOrder();
     const [stats, setStats] = useState<SalesDashboardStats | null>(null);
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [dashboardNotifications, setDashboardNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
@@ -41,7 +44,7 @@ export function SalesDashboard() {
                 API.getNotifications()
             ]);
             setStats(statsData);
-            setNotifications(notifData);
+            setDashboardNotifications(notifData);
             setUnreadCount(notifData.filter(n => !n.readAt).length);
         } catch (error) {
             console.error('Failed to load dashboard:', error);
@@ -56,7 +59,7 @@ export function SalesDashboard() {
 
     const handleMarkRead = async (id: string) => {
         await API.markNotificationRead(id);
-        setNotifications(prev => 
+        setDashboardNotifications((prev: Notification[]) =>
             prev.map(n => n.id === id ? { ...n, readAt: new Date().toISOString() } : n)
         );
         setUnreadCount(prev => Math.max(0, prev - 1));
@@ -86,6 +89,19 @@ export function SalesDashboard() {
         return colors[status];
     };
 
+    const handleViewContract = (salesOrderId: string) => {
+        const orderDraft = getOrderBySalesOrderId(salesOrderId);
+        if (orderDraft) {
+            navigate('/sales/order/contract', { state: { draftId: orderDraft.id } });
+        } else {
+            notifications.show({
+                title: 'Details Not Found',
+                message: 'Detailed document data for this order is not available on this device.',
+                color: 'orange'
+            });
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -97,10 +113,10 @@ export function SalesDashboard() {
                 <Group gap="sm">
                     <Popover width={360} position="bottom-end" withArrow shadow="md">
                         <Popover.Target>
-                            <Indicator 
-                                color="red" 
-                                size={18} 
-                                label={unreadCount} 
+                            <Indicator
+                                color="red"
+                                size={18}
+                                label={unreadCount}
                                 disabled={unreadCount === 0}
                             >
                                 <ActionIcon variant="light" size="lg">
@@ -112,10 +128,10 @@ export function SalesDashboard() {
                             <Text fw={600} mb="sm">Notifications</Text>
                             <ScrollArea h={300}>
                                 <Stack gap="xs">
-                                    {notifications.slice(0, 10).map(notif => (
-                                        <Card 
-                                            key={notif.id} 
-                                            padding="sm" 
+                                    {dashboardNotifications.slice(0, 10).map(notif => (
+                                        <Card
+                                            key={notif.id}
+                                            padding="sm"
                                             withBorder
                                             className={!notif.readAt ? 'unread' : ''}
                                             onClick={() => !notif.readAt && handleMarkRead(notif.id)}
@@ -139,9 +155,12 @@ export function SalesDashboard() {
                             </ScrollArea>
                         </Popover.Dropdown>
                     </Popover>
-                    <Button 
+                    <Button
                         leftSection={<IconPlus size={16} />}
-                        onClick={() => navigate('/sales/order')}
+                        onClick={() => {
+                            initNewDraft();
+                            navigate('/sales/order');
+                        }}
                     >
                         Create Sales Order
                     </Button>
@@ -237,7 +256,12 @@ export function SalesDashboard() {
                                         </Badge>
                                     </Table.Td>
                                     <Table.Td>
-                                        <ActionIcon variant="subtle" size="sm">
+                                        <ActionIcon
+                                            variant="subtle"
+                                            size="sm"
+                                            onClick={() => handleViewContract(order.id)}
+                                            title="View Contract"
+                                        >
                                             <IconEye size={16} />
                                         </ActionIcon>
                                     </Table.Td>
