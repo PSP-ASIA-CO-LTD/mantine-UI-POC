@@ -1,0 +1,44 @@
+[
+  {
+    "id": "dept-housekeeping",
+    "name": "Housekeeping",
+    "code": "HOUSEK",
+    "description": "Provides cleaning, room service, and overall guest support."
+  },
+  {
+    "id": "dept-kitchen",
+    "name": "Kitchen",
+    "code": "KITCHE",
+    "description": "Handles food preparation, cooking, and kitchen operations."
+  },
+  {
+    "id": "dept-laundry",
+    "name": "Laundry",
+    "code": "LAUNDR",
+    "description": ""
+  },
+  {
+    "id": "dept-therapy",
+    "name": "Therapy",
+    "code": "THERAP",
+    "description": ""
+  },
+  {
+    "id": "dept-nursing",
+    "name": "Nursing",
+    "code": "NURSIN",
+    "description": ""
+  },
+  {
+    "id": "dept-frontend",
+    "name": "Frontend",
+    "code": "FRONTE",
+    "description": "Responsible for building and maintaining the user interface and user experience."
+  },
+  {
+    "id": "dept-medical",
+    "name": "Medical",
+    "code": "MEDICA",
+    "description": ""
+  }
+]

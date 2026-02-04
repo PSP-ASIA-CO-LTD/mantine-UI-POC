@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextInput, Textarea, Button, Paper, Title, Text, Stack, Progress, Group, NumberInput } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight, IconCheck } from '@tabler/icons-react';
 import { getBusinessSettings, saveBusinessSettings } from '../utils/businessSettings';
+import { API } from '../api';
 
 interface BusinessSetupFlowProps {
   onBack?: () => void;
@@ -41,6 +42,29 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
     language: '',
   });
 
+  useEffect(() => {
+    let mounted = true;
+    const loadProfile = async () => {
+      try {
+        const profile = await API.getBusinessProfile();
+        if (!mounted) return;
+        setBusinessInfo(profile.businessInfo);
+        setAdminInfo(profile.adminInfo);
+        setFacilityInfo(profile.facilityInfo);
+        setPreferences(profile.preferences);
+        const nextDepositMonths = Number.isFinite(profile.depositMonths) ? profile.depositMonths : getBusinessSettings().depositMonths;
+        setDepositMonths(nextDepositMonths);
+        saveBusinessSettings({ depositMonths: nextDepositMonths });
+      } catch (error) {
+        console.error('Failed to load business profile:', error);
+      }
+    };
+    loadProfile();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleNext = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
@@ -53,12 +77,24 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
     }
   };
 
-  const handleComplete = () => {
-    // Mock completion logic
-    console.log('Setup complete:', { businessInfo, adminInfo, facilityInfo, preferences });
-    saveBusinessSettings({ depositMonths });
-    if (onComplete) {
-      onComplete();
+  const handleComplete = async () => {
+    try {
+      await API.saveBusinessProfile({
+        id: 'business-1',
+        businessInfo,
+        adminInfo,
+        facilityInfo,
+        preferences,
+        depositMonths,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      saveBusinessSettings({ depositMonths });
+      if (onComplete) {
+        onComplete();
+      }
+    } catch (error) {
+      console.error('Failed to save business profile:', error);
     }
   };
 

@@ -4,7 +4,7 @@ import { AppNav } from './components/AppNav';
 import { BusinessSetup } from './pages/BusinessSetup';
 import { Dashboard } from './pages/Dashboard';
 import { Packages } from './pages/Packages';
-import { Teams } from './pages/Teams';
+import { Departments } from './pages/Departments';
 import { Staff } from './pages/Staff';
 import { SalesDashboard } from './pages/SalesDashboard';
 import { SalesOrderPage } from './pages/SalesOrder';
@@ -56,7 +56,7 @@ function AppLayout() {
                     <Route path="/business-setup" element={<BusinessSetup />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/packages" element={<Packages />} />
-                    <Route path="/teams" element={<Teams />} />
+                    <Route path="/departments" element={<Departments />} />
                     <Route path="/staff" element={<Staff />} />
                     {/*<Route path="/patient" element={<Patient />} />*/}
                 </Routes>

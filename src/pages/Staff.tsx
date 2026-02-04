@@ -27,18 +27,28 @@ import type { Staff } from '../types';
 
 export function Staff() {
     const [staff, setStaff] = useState<Staff[]>([]);
+    const [departments, setDepartments] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeStaff, setActiveStaff] = useState<Staff | null>(null);
     const [isEditing, setIsEditing] = useState(false);
-    const departments = Array.from(new Set(staff.map((s) => s.dept)));
-
+    const [draftStaff, setDraftStaff] = useState({
+        id: '',
+        name: '',
+        role: '',
+        dept: '',
+        status: 'Active',
+    });
     const { open, close } = useSidesheet();
 
     useEffect(() => {
         const loadStaff = async () => {
             try {
-                const data = await API.getStaff();
-                setStaff(data);
+                const [staffData, departmentData] = await Promise.all([
+                    API.getStaff(),
+                    API.getDepartments(),
+                ]);
+                setStaff(staffData);
+                setDepartments(departmentData.map((dept) => dept.name));
             } catch (error) {
                 console.error('Failed to load staff:', error);
             } finally {
@@ -203,12 +213,28 @@ export function Staff() {
     };
 
     const openAddStaffSidesheet = () => {
+        setDraftStaff({
+            id: '',
+            name: '',
+            role: '',
+            dept: '',
+            status: 'Active',
+        });
         const leftPane = (
             <Stack>
                 <Title order={5}>Basic Info</Title>
 
-                <TextInput label="Staff ID / Employee ID" required />
-                <TextInput label="Full Name" required />
+                <TextInput
+                    label="Staff ID / Employee ID"
+                    value={draftStaff.id}
+                    onChange={(e) => setDraftStaff((prev) => ({ ...prev, id: e.target.value }))}
+                />
+                <TextInput
+                    label="Full Name"
+                    required
+                    value={draftStaff.name}
+                    onChange={(e) => setDraftStaff((prev) => ({ ...prev, name: e.target.value }))}
+                />
                 <TextInput label="Nickname" />
                 <Select
                     label="Gender"
@@ -230,8 +256,19 @@ export function Staff() {
         const rightPane = (
             <Stack>
                 <Title order={5}>Employment Info</Title>
-                <TextInput label="Job Title / Position" />
-                <Select label="Department / Unit" data={departments} />
+                <TextInput
+                    label="Job Title / Position"
+                    value={draftStaff.role}
+                    onChange={(e) => setDraftStaff((prev) => ({ ...prev, role: e.target.value }))}
+                />
+                <Select
+                    label="Department / Unit"
+                    data={departments}
+                    value={draftStaff.dept}
+                    onChange={(value) => setDraftStaff((prev) => ({ ...prev, dept: value || '' }))}
+                    searchable
+                    clearable
+                />
                 <Select
                     label="Employment Type"
                     data={['Full-time', 'Part-time', 'Contract']}
@@ -240,6 +277,8 @@ export function Staff() {
                 <Select
                     label="Work Status"
                     data={['Active', 'On Leave', 'Resigned']}
+                    value={draftStaff.status}
+                    onChange={(value) => setDraftStaff((prev) => ({ ...prev, status: value || 'Active' }))}
                 />
 
                 <Divider my="md" />
@@ -285,9 +324,28 @@ export function Staff() {
         const footer = (
             <AppSidesheetFooter
                 onCancel={close}
-                onSave={() => {
-                    // TODO: handle create staff API
-                    close();
+                onSave={async () => {
+                    const name = draftStaff.name.trim();
+                    const dept = draftStaff.dept.trim() || 'Unassigned';
+                    const role = draftStaff.role.trim() || 'Staff';
+                    const status = draftStaff.status.trim() || 'Active';
+                    if (!name) {
+                        console.error('Staff name is required');
+                        return;
+                    }
+                    try {
+                        const created = await API.createStaff({
+                            id: draftStaff.id.trim() || undefined,
+                            name,
+                            dept,
+                            role,
+                            status,
+                        });
+                        setStaff((prev) => [...prev, created]);
+                        close();
+                    } catch (error) {
+                        console.error('Failed to create staff:', error);
+                    }
                 }}
                 saveLabel="Create Staff"
             />

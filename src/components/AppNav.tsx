@@ -61,7 +61,7 @@ export function AppNav() {
                             <IconBox size={20} />
                             <span>Packages</span>
                         </NavLink>
-                        <NavLink to="/teams" className="nav-link">
+                        <NavLink to="/departments" className="nav-link">
                             <IconUsers size={20} />
                             <span>Departments</span>
                         </NavLink>
