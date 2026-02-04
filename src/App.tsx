@@ -12,6 +12,7 @@ import { SalesOrderInvoice } from './pages/SalesOrderInvoice';
 import { SalesOrderContract } from './pages/SalesOrderContract';
 import { PublicContractView } from './pages/PublicContractView';
 import { StaffTasks } from './pages/StaffTasks';
+import { Patient } from './pages/Patient';
 import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
 import { SalesOrderProvider } from './contexts/SalesOrderContext';
@@ -58,7 +59,7 @@ function AppLayout() {
                     <Route path="/packages" element={<Packages />} />
                     <Route path="/departments" element={<Departments />} />
                     <Route path="/staff" element={<Staff />} />
-                    {/*<Route path="/patient" element={<Patient />} />*/}
+                    <Route path="/patient" element={<Patient />} />
                 </Routes>
             </AppShell.Main>
         </AppShell>

@@ -24,5 +24,16 @@
     "signedAt": "2025-12-19T09:30:00Z",
     "signedBy": "John Doe",
     "status": "signed"
+  },
+  {
+    "salesOrderId": "so-1770202920962",
+    "guardianId": "gdn-1770202911654-o3rqe",
+    "residentId": "res-1770202912457",
+    "startDate": "2026-02-11",
+    "endDate": "2026-03-02",
+    "terms": "Care agreement for 20-day Elder Recreation. Includes all services as per package details.",
+    "status": "pending",
+    "id": "ctr-1770202924489",
+    "contractNumber": "CTR-2026-0003"
   }
 ]

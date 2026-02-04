@@ -36,9 +36,25 @@ export function useCustomerMutations() {
         }
     };
 
+    const updateGuardian = async (id: string, data: Partial<Guardian>) => {
+        setProcessing(true);
+        setError(null);
+        try {
+            const result = await API.updateGuardian(id, data);
+            return result;
+        } catch (err) {
+            const errorObj = err instanceof Error ? err : new Error('Failed to update guardian');
+            setError(errorObj);
+            throw errorObj;
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     return {
         saveGuardian,
         saveResident,
+        updateGuardian,
         processing,
         error
     };

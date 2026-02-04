@@ -134,6 +134,7 @@ export interface Guardian {
     address: string;
     relationship: string; // e.g., 'son', 'daughter', 'spouse', 'relative'
     pays: boolean; // indicates if this guardian contributes to payment
+    residentId?: string;
     createdAt: string;
 }
 

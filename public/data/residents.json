@@ -26,5 +26,19 @@
     "emergencyContact": "089-999-8888",
     "guardianId": "gdn-2",
     "createdAt": "2025-12-18T15:00:00Z"
+  },
+  {
+    "firstName": "สมศรี",
+    "lastName": "ใจดี",
+    "dateOfBirth": "1948-05-15",
+    "gender": "female",
+    "idNumber": "3-1001-00123-45-6",
+    "medicalConditions": "เบาหวานชนิดที่ 2, ความดันโลหิตสูง, ข้อเข่าเสื่อม",
+    "allergies": "Penicillin, ถั่วลิสง",
+    "dietaryRestrictions": "อาหารลดโซเดียม, ลดน้ำตาล",
+    "emergencyContact": "081-234-5678",
+    "guardianId": "gdn-1770202911654-o3rqe",
+    "id": "res-1770202912457",
+    "createdAt": "2026-02-04T11:01:52.457Z"
   }
 ]

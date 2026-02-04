@@ -90,7 +90,7 @@ export function SalesOrderPage() {
     const { rooms, loading: loadingRooms, error: roomError } = useRooms(true); // true for availableOnly
 
     // Mutation hooks
-    const { saveGuardian, saveResident, processing: savingCustomer } = useCustomerMutations();
+    const { saveGuardian, saveResident, updateGuardian, processing: savingCustomer } = useCustomerMutations();
     const {
         createSalesOrder,
         createInvoice,
@@ -453,9 +453,16 @@ export function SalesOrderPage() {
                 guardianId: savedGuardians[0].id
             });
 
+            const linkedGuardians = await Promise.all(
+                savedGuardians.map(async (guardian) => {
+                    const updated = await updateGuardian(guardian.id, { residentId: resident.id });
+                    return updated ?? { ...guardian, residentId: resident.id };
+                })
+            );
+
             setCheckoutData(prev => ({
                 ...prev,
-                guardians: savedGuardians,
+                guardians: linkedGuardians,
                 primaryContactGuardianId: savedGuardians[0].id,
                 resident
             }));
@@ -892,6 +899,110 @@ export function SalesOrderPage() {
                         </Button>
                     </div>
 
+                    {/* Resident Block */}
+                    <Card padding="lg" radius="md" withBorder className="contact-form-card">
+                        <Group justify="space-between" mb="md">
+                            <div>
+                                <Text fw={600} size="lg">Resident Information</Text>
+                                <Text size="sm" c="dimmed">
+                                    Person who will be staying at the facility.
+                                </Text>
+                            </div>
+                            <Button
+                                variant="light"
+                                size="xs"
+                                onClick={handleCopyGuardianToResident}
+                            >
+                                Copy from Guardian
+                            </Button>
+                        </Group>
+
+                        <Stack gap="md">
+                            <Grid>
+                                <Grid.Col span={6}>
+                                    <TextInput
+                                        label="First Name"
+                                        placeholder="Enter first name"
+                                        required
+                                        {...residentForm.getInputProps('firstName')}
+                                        data-er-field="RESIDENT.first_name"
+                                    />
+                                </Grid.Col>
+                                <Grid.Col span={6}>
+                                    <TextInput
+                                        label="Last Name"
+                                        placeholder="Enter last name"
+                                        required
+                                        {...residentForm.getInputProps('lastName')}
+                                        data-er-field="RESIDENT.last_name"
+                                    />
+                                </Grid.Col>
+                            </Grid>
+                            <Grid>
+                                <Grid.Col span={4}>
+                                    <TextInput
+                                        label="Date of Birth"
+                                        type="date"
+                                        required
+                                        {...residentForm.getInputProps('dateOfBirth')}
+                                        data-er-field="RESIDENT.date_of_birth"
+                                    />
+                                </Grid.Col>
+                                <Grid.Col span={4}>
+                                    <Select
+                                        label="Gender"
+                                        data={[
+                                            { value: 'male', label: 'Male' },
+                                            { value: 'female', label: 'Female' },
+                                            { value: 'other', label: 'Other' }
+                                        ]}
+                                        {...residentForm.getInputProps('gender')}
+                                        data-er-field="RESIDENT.gender"
+                                    />
+                                </Grid.Col>
+                                <Grid.Col span={4}>
+                                    <TextInput
+                                        label="ID Number"
+                                        placeholder="National ID"
+                                        {...residentForm.getInputProps('idNumber')}
+                                        data-er-field="RESIDENT.id_number"
+                                    />
+                                </Grid.Col>
+                            </Grid>
+                            <Textarea
+                                label="Medical Conditions"
+                                placeholder="List any medical conditions..."
+                                rows={2}
+                                {...residentForm.getInputProps('medicalConditions')}
+                                data-er-field="RESIDENT.medical_conditions"
+                            />
+                            <Grid>
+                                <Grid.Col span={6}>
+                                    <TextInput
+                                        label="Allergies"
+                                        placeholder="Known allergies"
+                                        {...residentForm.getInputProps('allergies')}
+                                        data-er-field="RESIDENT.allergies"
+                                    />
+                                </Grid.Col>
+                                <Grid.Col span={6}>
+                                    <TextInput
+                                        label="Dietary Restrictions"
+                                        placeholder="E.g., low sodium, vegetarian"
+                                        {...residentForm.getInputProps('dietaryRestrictions')}
+                                        data-er-field="RESIDENT.dietary_restrictions"
+                                    />
+                                </Grid.Col>
+                            </Grid>
+                            <TextInput
+                                label="Emergency Contact"
+                                placeholder="Phone number"
+                                {...residentForm.getInputProps('emergencyContact')}
+                                data-er-field="RESIDENT.emergency_contact"
+                            />
+                        </Stack>
+                    </Card>
+
                     {/* Guardian Block */}
                     <Card padding="lg" radius="md" withBorder className="contact-form-card guardians-card">
                         <Group justify="space-between" mb="md">
@@ -1013,110 +1124,6 @@ export function SalesOrderPage() {
                                     </Stack>
                                 </Paper>
                             ))}
-                        </Stack>
-                    </Card>
-
-                    {/* Resident Block */}
-                    <Card padding="lg" radius="md" withBorder className="contact-form-card">
-                        <Group justify="space-between" mb="md">
-                            <div>
-                                <Text fw={600} size="lg">Resident Information</Text>
-                                <Text size="sm" c="dimmed">
-                                    Person who will be staying at the facility.
-                                </Text>
-                            </div>
-                            <Button
-                                variant="light"
-                                size="xs"
-                                onClick={handleCopyGuardianToResident}
-                            >
-                                Copy from Guardian
-                            </Button>
-                        </Group>
-
-                        <Stack gap="md">
-                            <Grid>
-                                <Grid.Col span={6}>
-                                    <TextInput
-                                        label="First Name"
-                                        placeholder="Enter first name"
-                                        required
-                                        {...residentForm.getInputProps('firstName')}
-                                        data-er-field="RESIDENT.first_name"
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={6}>
-                                    <TextInput
-                                        label="Last Name"
-                                        placeholder="Enter last name"
-                                        required
-                                        {...residentForm.getInputProps('lastName')}
-                                        data-er-field="RESIDENT.last_name"
-                                    />
-                                </Grid.Col>
-                            </Grid>
-                            <Grid>
-                                <Grid.Col span={4}>
-                                    <TextInput
-                                        label="Date of Birth"
-                                        type="date"
-                                        required
-                                        {...residentForm.getInputProps('dateOfBirth')}
-                                        data-er-field="RESIDENT.date_of_birth"
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={4}>
-                                    <Select
-                                        label="Gender"
-                                        data={[
-                                            { value: 'male', label: 'Male' },
-                                            { value: 'female', label: 'Female' },
-                                            { value: 'other', label: 'Other' }
-                                        ]}
-                                        {...residentForm.getInputProps('gender')}
-                                        data-er-field="RESIDENT.gender"
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={4}>
-                                    <TextInput
-                                        label="ID Number"
-                                        placeholder="National ID"
-                                        {...residentForm.getInputProps('idNumber')}
-                                        data-er-field="RESIDENT.id_number"
-                                    />
-                                </Grid.Col>
-                            </Grid>
-                            <Textarea
-                                label="Medical Conditions"
-                                placeholder="List any medical conditions..."
-                                rows={2}
-                                {...residentForm.getInputProps('medicalConditions')}
-                                data-er-field="RESIDENT.medical_conditions"
-                            />
-                            <Grid>
-                                <Grid.Col span={6}>
-                                    <TextInput
-                                        label="Allergies"
-                                        placeholder="Known allergies"
-                                        {...residentForm.getInputProps('allergies')}
-                                        data-er-field="RESIDENT.allergies"
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={6}>
-                                    <TextInput
-                                        label="Dietary Restrictions"
-                                        placeholder="E.g., low sodium, vegetarian"
-                                        {...residentForm.getInputProps('dietaryRestrictions')}
-                                        data-er-field="RESIDENT.dietary_restrictions"
-                                    />
-                                </Grid.Col>
-                            </Grid>
-                            <TextInput
-                                label="Emergency Contact"
-                                placeholder="Phone number"
-                                {...residentForm.getInputProps('emergencyContact')}
-                                data-er-field="RESIDENT.emergency_contact"
-                            />
                         </Stack>
                     </Card>
 
