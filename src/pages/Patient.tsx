@@ -6,7 +6,6 @@ import {
     Text,
     Stack,
     Badge,
-    Table,
     TextInput,
     ActionIcon,
     Avatar,
@@ -15,6 +14,8 @@ import {
 import { IconSearch, IconEye, IconPhone, IconMail, IconCalendar } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
+import { CardList } from '../components/CardList';
+import { StyledTable } from '../components/StyledTable';
 import { buildLeftSection } from '../utils/sidesheetHelper';
 import type { Guardian, Resident, SalesOrder, Room } from '../types';
 import './Patient.css';
@@ -117,46 +118,6 @@ export function Patient() {
         return admissionsByResident.get(residentId) || [];
     };
 
-    const buildGuardianCards = (resident: Resident) => {
-        const residentGuardians = getGuardiansForResident(resident);
-        if (residentGuardians.length === 0) {
-            return <Text size="sm" c="dimmed">No guardians on file.</Text>;
-        }
-
-        return (
-            <Stack gap="sm">
-                {residentGuardians.map((guardian) => (
-                    <Card key={guardian.id} padding="md" withBorder className="patient-guardian-card">
-                        <Group justify="space-between" mb="xs">
-                            <Text fw={600} size="sm">
-                                {guardian.firstName} {guardian.lastName}
-                            </Text>
-                            <Group gap="xs">
-                                {guardian.id === resident.guardianId && (
-                                    <Badge size="xs" color="blue" variant="light">Primary</Badge>
-                                )}
-                                {guardian.pays && (
-                                    <Badge size="xs" color="green" variant="light">Pays</Badge>
-                                )}
-                            </Group>
-                        </Group>
-                        <Stack gap={4}>
-                            <Group gap="xs">
-                                <IconPhone size={14} />
-                                <Text size="sm">{guardian.phone || '—'}</Text>
-                            </Group>
-                            <Group gap="xs">
-                                <IconMail size={14} />
-                                <Text size="sm">{guardian.email || '—'}</Text>
-                            </Group>
-                            <Text size="xs" c="dimmed">Relationship: {guardian.relationship || '—'}</Text>
-                        </Stack>
-                    </Card>
-                ))}
-            </Stack>
-        );
-    };
-
     const openResidentSidesheet = (resident: Resident) => {
         const residentGuardians = getGuardiansForResident(resident);
         const admissions = getAdmissionsForResident(resident.id);
@@ -229,59 +190,92 @@ export function Patient() {
 
         const rightPane = (
             <div className="patient-right-pane">
-                <div className="patient-right-guardians">
-                    <Group justify="space-between" mb="sm">
-                        <Text fw={600}>Guardians ({residentGuardians.length})</Text>
-                    </Group>
-                    {buildGuardianCards(resident)}
+                <div>
+                    <Text fw={600} mb="md">Guardians ({residentGuardians.length})</Text>
+                    {residentGuardians.length > 0 ? (
+                        <Stack gap="sm">
+                            {residentGuardians.map((guardian) => (
+                                <CardList
+                                    key={guardian.id}
+                                    title={(
+                                        <Text fw={600} size="sm">
+                                            {guardian.firstName} {guardian.lastName}
+                                        </Text>
+                                    )}
+                                    badge={(
+                                        <Group gap="xs">
+                                            {guardian.id === resident.guardianId && (
+                                                <Badge size="xs" color="blue" variant="light">Primary</Badge>
+                                            )}
+                                            {guardian.pays && (
+                                                <Badge size="xs" color="green" variant="light">Pays</Badge>
+                                            )}
+                                        </Group>
+                                    )}
+                                    description={(
+                                        <Stack gap={4}>
+                                            <Group gap="xs">
+                                                <IconPhone size={14} />
+                                                <Text size="sm">{guardian.phone || '—'}</Text>
+                                            </Group>
+                                            <Group gap="xs">
+                                                <IconMail size={14} />
+                                                <Text size="sm">{guardian.email || '—'}</Text>
+                                            </Group>
+                                            <Text size="xs" c="dimmed">Relationship: {guardian.relationship || '—'}</Text>
+                                        </Stack>
+                                    )}
+                                />
+                            ))}
+                        </Stack>
+                    ) : (
+                        <Text size="sm" c="dimmed">No guardians on file.</Text>
+                    )}
                 </div>
 
-                <Divider my="md" />
-
-                <Group justify="space-between" mb="md">
-                    <Text fw={600}>Admissions ({admissions.length})</Text>
-                    {admissions[0] && (
-                        <Badge color={getStatusColor(admissions[0].status)} size="sm">
-                            {admissions[0].status.replace('_', ' ')}
-                        </Badge>
+                <div>
+                    <Text fw={600} mb="md">Admissions ({admissions.length})</Text>
+                    {admissions.length > 0 ? (
+                        <Stack gap="md">
+                            {admissions.map((order) => {
+                                const room = roomsById.get(order.roomId);
+                                return (
+                                    <CardList
+                                        key={order.id}
+                                        title={<Text fw={600}>{order.packageName}</Text>}
+                                        badge={(
+                                            <Badge color={getStatusColor(order.status)} size="sm">
+                                                {order.status.replace('_', ' ')}
+                                            </Badge>
+                                        )}
+                                        description={(
+                                            <Stack gap={4}>
+                                                <Group gap="xs" c="dimmed">
+                                                    <IconCalendar size={14} />
+                                                    <Text size="sm">Arrive {formatDate(order.checkIn)}</Text>
+                                                    <Text size="sm">•</Text>
+                                                    <Text size="sm">Leave {formatDate(order.checkOut)}</Text>
+                                                </Group>
+                                                <Group gap="xs">
+                                                    <Text size="sm" c="dimmed">Room</Text>
+                                                    <Text size="sm">{room?.number || '—'}</Text>
+                                                    <Text size="sm" c="dimmed">•</Text>
+                                                    <Text size="sm" c="dimmed">Days</Text>
+                                                    <Text size="sm">{order.adjustedDays}</Text>
+                                                </Group>
+                                                <Text size="sm" fw={500}>
+                                                    ฿{formatCurrency(order.adjustedPrice)}
+                                                </Text>
+                                            </Stack>
+                                        )}
+                                    />
+                                );
+                            })}
+                        </Stack>
+                    ) : (
+                        <Text c="dimmed">No admissions yet.</Text>
                     )}
-                </Group>
-
-                {admissions.length > 0 ? (
-                    <Stack gap="md">
-                        {admissions.map((order) => {
-                            const room = roomsById.get(order.roomId);
-                            return (
-                                <Card key={order.id} padding="md" withBorder className="patient-admission-card">
-                                    <Group justify="space-between" mb="xs">
-                                        <Text fw={600}>{order.packageName}</Text>
-                                        <Badge color={getStatusColor(order.status)} size="sm">
-                                            {order.status.replace('_', ' ')}
-                                        </Badge>
-                                    </Group>
-                                    <Group gap="xs" c="dimmed">
-                                        <IconCalendar size={14} />
-                                        <Text size="sm">Arrive {formatDate(order.checkIn)}</Text>
-                                        <Text size="sm">•</Text>
-                                        <Text size="sm">Leave {formatDate(order.checkOut)}</Text>
-                                    </Group>
-                                    <Group gap="xs" mt="xs">
-                                        <Text size="sm" c="dimmed">Room</Text>
-                                        <Text size="sm">{room?.number || '—'}</Text>
-                                        <Text size="sm" c="dimmed">•</Text>
-                                        <Text size="sm" c="dimmed">Days</Text>
-                                        <Text size="sm">{order.adjustedDays}</Text>
-                                    </Group>
-                                    <Text size="sm" fw={500} mt="xs">
-                                        ฿{formatCurrency(order.adjustedPrice)}
-                                    </Text>
-                                </Card>
-                            );
-                        })}
-                    </Stack>
-                ) : (
-                    <Text c="dimmed">No admissions yet.</Text>
-                )}
+                </div>
             </div>
         );
 
@@ -341,17 +335,17 @@ export function Patient() {
                 </Group>
 
                 {filteredResidents.length > 0 ? (
-                    <Table>
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th>Resident</Table.Th>
-                                <Table.Th>Guardians</Table.Th>
-                                <Table.Th>Latest Admission</Table.Th>
-                                <Table.Th>Status</Table.Th>
-                                <Table.Th></Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
+                    <StyledTable>
+                        <StyledTable.Thead>
+                            <StyledTable.Tr>
+                                <StyledTable.Th>Resident</StyledTable.Th>
+                                <StyledTable.Th>Guardians</StyledTable.Th>
+                                <StyledTable.Th>Latest Admission</StyledTable.Th>
+                                <StyledTable.Th>Status</StyledTable.Th>
+                                <StyledTable.Th></StyledTable.Th>
+                            </StyledTable.Tr>
+                        </StyledTable.Thead>
+                        <StyledTable.Tbody>
                             {filteredResidents.map((resident) => {
                                 const residentGuardians = getGuardiansForResident(resident);
                                 const primaryGuardian =
@@ -362,12 +356,12 @@ export function Patient() {
                                 const latestStatus = latestAdmission?.status;
 
                                 return (
-                                    <Table.Tr
+                                    <StyledTable.Tr
                                         key={resident.id}
                                         className="patient-table-row"
                                         onClick={() => openResidentSidesheet(resident)}
                                     >
-                                        <Table.Td>
+                                        <StyledTable.Td>
                                             <Group gap="sm">
                                                 <Avatar color="blue" radius="xl">
                                                     {resident.firstName?.[0] || 'R'}
@@ -377,8 +371,8 @@ export function Patient() {
                                                     <Text size="xs" c="dimmed">ID: {resident.id}</Text>
                                                 </div>
                                             </Group>
-                                        </Table.Td>
-                                        <Table.Td>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
                                             {primaryGuardian ? (
                                                 <Stack gap={2}>
                                                     <Text size="sm" fw={500}>
@@ -391,8 +385,8 @@ export function Patient() {
                                             ) : (
                                                 <Text size="sm" c="dimmed">No guardian</Text>
                                             )}
-                                        </Table.Td>
-                                        <Table.Td>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
                                             {latestAdmission ? (
                                                 <Stack gap={2}>
                                                     <Text size="sm">{latestAdmission.packageName}</Text>
@@ -403,8 +397,8 @@ export function Patient() {
                                             ) : (
                                                 <Text size="sm" c="dimmed">No admissions</Text>
                                             )}
-                                        </Table.Td>
-                                        <Table.Td>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
                                             {latestStatus ? (
                                                 <Badge size="sm" color={getStatusColor(latestStatus)}>
                                                     {latestStatus.replace('_', ' ')}
@@ -412,8 +406,8 @@ export function Patient() {
                                             ) : (
                                                 <Badge size="sm" color="gray">—</Badge>
                                             )}
-                                        </Table.Td>
-                                        <Table.Td>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
                                             <ActionIcon
                                                 variant="subtle"
                                                 size="sm"
@@ -425,12 +419,12 @@ export function Patient() {
                                             >
                                                 <IconEye size={16} />
                                             </ActionIcon>
-                                        </Table.Td>
-                                    </Table.Tr>
+                                        </StyledTable.Td>
+                                    </StyledTable.Tr>
                                 );
                             })}
-                        </Table.Tbody>
-                    </Table>
+                        </StyledTable.Tbody>
+                    </StyledTable>
                 ) : (
                     <Text c="dimmed" ta="center" py="xl">No residents found</Text>
                 )}

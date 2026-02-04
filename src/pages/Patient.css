@@ -30,24 +30,10 @@
     gap: var(--mantine-spacing-sm);
 }
 
-.patient-guardian-card {
-    background-color: var(--mantine-color-gray-0);
-}
-
-.patient-admission-card {
-    background-color: var(--mantine-color-white);
-}
-
 .patient-right-pane {
     display: flex;
     flex-direction: column;
     gap: var(--mantine-spacing-md);
-}
-
-.patient-right-guardians {
-    display: flex;
-    flex-direction: column;
-    gap: var(--mantine-spacing-sm);
 }
 
 @media (max-width: 900px) {

@@ -3,13 +3,11 @@ import {
     Title,
     Group,
     Button,
-    Table,
     Avatar,
     Badge,
     ActionIcon,
     Text,
     Divider,
-    Card ,
     Stack,
     TextInput,
     Select,
@@ -18,10 +16,12 @@ import {
     NumberInput,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconPlus, IconDotsVertical, IconMinus } from '@tabler/icons-react';
+import { IconPlus, IconDotsVertical } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
+import { CardList } from '../components/CardList';
+import { StyledTable } from '../components/StyledTable';
 import { buildLeftSection } from '../utils/sidesheetHelper';
 import type { Staff } from '../types';
 
@@ -99,89 +99,51 @@ export function Staff() {
             </div>
         );
 
+        const assignments = member.role ? [{ role: member.role, dept: member.dept }] : [];
         const rightPane = (
-            <Stack>
+            <div>
                 <Group justify="space-between" mb="md">
                     <Text fw={600}>
-                        Departments ({departments.length})
+                        Departments ({assignments.length})
                     </Text>
 
                     {isEditing && (
-                        <Button
-                            size="xs"
+                        <ActionIcon
+                            size={28}
                             variant="light"
                             color="green"
-                            styles={{
-                                root: {
-                                    width: 28,
-                                    height: 28,
-                                    borderRadius: '50%',
-                                    padding: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'background-color 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: '#e6f4ea',
-                                    },
-                                },
+                            onClick={(event) => {
+                                event.stopPropagation();
                             }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                            }}
+                            aria-label="Add department"
                         >
                             <IconPlus size={16} />
-                        </Button>
+                        </ActionIcon>
                     )}
                 </Group>
 
-                <Card padding="md" withBorder>
-                    <Stack gap="xs">
-                        <Group justify="space-between">
-                            <Text fw={500} data-er-field="STAFF.role">
-                                {member.role}
-                            </Text>
-
-                            {isEditing ? (
-                                <Button
-                                    size="xs"
-                                    color="red"
-                                    variant="light"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteStaff(member.id);
-                                    }}
-                                    styles={{
-                                        root: {
-                                            width: 28,
-                                            height: 28,
-                                            borderRadius: '50%',
-                                            padding: 0,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            transition: 'background-color 0.2s ease',
-                                            '&:hover': {
-                                                backgroundColor: '#ffe5e5',
-                                            },
-                                        },
-                                    }}
-                                >
-                                    <IconMinus size={16} />
-                                </Button>
-                            ) : (
+                {assignments.length > 0 ? (
+                    assignments.map((assignment) => (
+                        <CardList
+                            key={`${assignment.role}-${assignment.dept}`}
+                            title={assignment.role}
+                            titleDataErField="STAFF.role"
+                            badge={(
                                 <Badge size="sm" data-er-field="STAFF.department_id">
-                                    {member.dept}
+                                    {assignment.dept}
                                 </Badge>
                             )}
-                        </Group>
-
-                        <Text size="sm" c="dimmed" data-er-field="STAFF.department_id">
-                            Department: {member.dept}
-                        </Text>
-                    </Stack>
-                </Card>
-            </Stack>
+                            isEditing={isEditing}
+                            onRemove={() => handleDeleteStaff(member.id)}
+                            description={`Department: ${assignment.dept}`}
+                            descriptionDataErField="STAFF.department_id"
+                            mb="sm"
+                        />
+                    ))
+                ) : (
+                    <Text size="sm" c="dimmed">No departments assigned.</Text>
+                )}
+            </div>
         );
         const footer = (
             <AppSidesheetFooter
@@ -385,26 +347,26 @@ export function Staff() {
             </Group>
 
 
-            <Table>
-                <Table.Thead>
-                    <Table.Tr>
-                        <Table.Th>Name</Table.Th>
-                        <Table.Th>Department</Table.Th>
-                        <Table.Th>Role</Table.Th>
-                        <Table.Th>Status</Table.Th>
-                        <Table.Th style={{ textAlign: 'right' }}>Actions</Table.Th>
-                    </Table.Tr>
-                </Table.Thead>
+            <StyledTable>
+                <StyledTable.Thead>
+                    <StyledTable.Tr>
+                        <StyledTable.Th>Name</StyledTable.Th>
+                        <StyledTable.Th>Department</StyledTable.Th>
+                        <StyledTable.Th>Role</StyledTable.Th>
+                        <StyledTable.Th>Status</StyledTable.Th>
+                        <StyledTable.Th style={{ textAlign: 'right' }}>Actions</StyledTable.Th>
+                    </StyledTable.Tr>
+                </StyledTable.Thead>
 
-                <Table.Tbody>
+                <StyledTable.Tbody>
                     {staff.map((member) => (
-                        <Table.Tr
+                        <StyledTable.Tr
                             key={member.id}
                             data-er-field="STAFF"
                             style={{ cursor: 'pointer' }}
                             onClick={() => handleRowClick(member)}
                         >
-                            <Table.Td>
+                            <StyledTable.Td>
                                 <Group gap="sm">
                                     <Avatar color="blue" radius="md">
                                         {member.name.charAt(0)}
@@ -418,23 +380,23 @@ export function Staff() {
                                         </Text>
                                     </div>
                                 </Group>
-                            </Table.Td>
+                            </StyledTable.Td>
 
-                            <Table.Td data-er-field="STAFF.department_id">
+                            <StyledTable.Td data-er-field="STAFF.department_id">
                                 {member.dept}
-                            </Table.Td>
+                            </StyledTable.Td>
 
-                            <Table.Td data-er-field="STAFF.role">
+                            <StyledTable.Td data-er-field="STAFF.role">
                                 {member.role}
-                            </Table.Td>
+                            </StyledTable.Td>
 
-                            <Table.Td>
+                            <StyledTable.Td>
                                 <Badge color="green" data-er-field="STAFF.status">
                                     {member.status}
                                 </Badge>
-                            </Table.Td>
+                            </StyledTable.Td>
 
-                            <Table.Td>
+                            <StyledTable.Td>
                                 <Group justify="flex-end">
                                     <ActionIcon
                                         variant="subtle"
@@ -445,11 +407,11 @@ export function Staff() {
                                         <IconDotsVertical size={16} />
                                     </ActionIcon>
                                 </Group>
-                            </Table.Td>
-                        </Table.Tr>
+                            </StyledTable.Td>
+                        </StyledTable.Tr>
                     ))}
-                </Table.Tbody>
-            </Table>
+                </StyledTable.Tbody>
+            </StyledTable>
         </div>
     );
 }

@@ -41,7 +41,7 @@ export function AppNav() {
                     <Stack gap="xs">
                         <NavLink to="/staff/tasks" className="nav-link">
                             <IconCalendarCheck size={20} />
-                            <span>Staff Tasks</span>
+                            <span>Staff Task</span>
                         </NavLink>
                     </Stack>
                 </div>
@@ -57,13 +57,13 @@ export function AppNav() {
                             <IconReceipt size={20} />
                             <span>Dashboard</span>
                         </NavLink>
-                        <NavLink to="/packages" className="nav-link">
+                        <NavLink to="/package" className="nav-link">
                             <IconBox size={20} />
-                            <span>Packages</span>
+                            <span>Package</span>
                         </NavLink>
-                        <NavLink to="/departments" className="nav-link">
+                        <NavLink to="/department" className="nav-link">
                             <IconUsers size={20} />
-                            <span>Departments</span>
+                            <span>Department</span>
                         </NavLink>
                         <NavLink to="/staff" end className="nav-link">
                             <IconUser size={20} />

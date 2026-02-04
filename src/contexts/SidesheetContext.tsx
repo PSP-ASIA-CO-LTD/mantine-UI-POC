@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { AppSidesheet } from '../components/AppSidesheet';
+import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 
 interface SidesheetState {
     opened: boolean;
@@ -52,6 +53,14 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
         rightPane?: ReactNode;
         footer?: ReactNode;
     }) => {
+        const defaultFooter = (
+            <AppSidesheetFooter
+                onCancel={close}
+                cancelLabel="Close"
+                showSave={false}
+            />
+        );
+
         setState({
             opened: true,
             title: config.title || '',
@@ -59,7 +68,7 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
             subtitle: config.subtitle,
             leftPane: config.leftPane || null,
             rightPane: config.rightPane || null,
-            footer: config.footer || null,
+            footer: config.footer === undefined ? defaultFooter : config.footer,
         });
     };
 
