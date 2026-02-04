@@ -4,15 +4,30 @@ export interface Package {
     price: number;
     duration: number;
     description: string;
+    serviceIds: string[];
     services: Service[];
 }
 
-export interface Service {
+export interface PackageRecord {
+    id: string;
+    name: string;
+    price: number;
+    duration: number;
+    description: string;
+    serviceIds: string[];
+}
+
+export interface ServiceRecord {
+    id: string;
     title: string;
-    dept: string;
+    departmentId: string;
     interval: string;
     description: string;
     price: number;
+}
+
+export interface Service extends ServiceRecord {
+    dept: string;
 }
 
 export interface Staff {
@@ -23,22 +38,11 @@ export interface Staff {
     status: string;
 }
 
-export interface Team {
+export interface Department {
     id: string;
     name: string;
-    dept: string;
-    description: string;
-    members: string[];
-    tasks: any[];
-    assignmentTypes: AssignmentType[];
-}
-
-export interface AssignmentType {
-    id: string;
-    name: string;
-    price: number;
-    description: string;
-    dept?: string;
+    code?: string;
+    description?: string;
 }
 
 export interface Order {
@@ -64,9 +68,9 @@ export interface Task {
 }
 
 export interface Database {
-    packages: Package[];
+    packages: PackageRecord[];
     staff: Staff[];
-    teams: Team[];
+    departments: Department[];
     orders: Order[];
     tasks: Task[];
 }
@@ -76,6 +80,47 @@ export interface DashboardStats {
     pendingTasks: number;
     totalStaff: number;
     newPurchases: number;
+}
+
+// ==================== BUSINESS SETUP ====================
+
+export interface BusinessInfo {
+    businessName: string;
+    businessType: string;
+    address: string;
+    phone: string;
+}
+
+export interface AdminInfo {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+}
+
+export interface FacilityInfo {
+    numberOfBeds: string;
+    numberOfFloors: string;
+    operatingHours: string;
+    licenseNumber: string;
+}
+
+export interface BusinessPreferences {
+    timezone: string;
+    currency: string;
+    language: string;
+}
+
+export interface BusinessProfile {
+    id: string;
+    businessInfo: BusinessInfo;
+    adminInfo: AdminInfo;
+    facilityInfo: FacilityInfo;
+    preferences: BusinessPreferences;
+    depositMonths: number;
+    createdAt: string;
+    updatedAt: string;
 }
 
 // ==================== SALES TYPES ====================

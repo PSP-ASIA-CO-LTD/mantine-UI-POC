@@ -87,7 +87,7 @@ export function Packages() {
                     Services ({editableServices.length})
                 </Text>
                 {editableServices.map((service, idx) => (
-                    <Card key={idx} padding="md" mb="sm" withBorder data-er-field="PACKAGE_ITEM">
+                    <Card key={service.id || idx} padding="md" mb="sm" withBorder data-er-field="PACKAGE_ITEM">
                         <Stack gap="xs">
                             <Group justify="space-between">
                                 <Text fw={500} data-er-field="TASK.title">{service.title}</Text>
@@ -163,7 +163,7 @@ export function Packages() {
                         setSaving(true);
                         const updated = await API.savePackage({
                             id: activePackage.id,
-                            services: editableServices,
+                            serviceIds: editableServices.map((service) => service.id),
                         });
 
                         setPackages((prev) =>

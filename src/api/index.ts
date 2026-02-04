@@ -1,23 +1,29 @@
-import { buildDatabase } from '../utils/csvParser';
+import { jsonCrud } from './jsonCrud';
 import type {
-    Database, Package, Staff, Team, DashboardStats,
+    Package, PackageRecord, Staff, Department, DashboardStats,
+    Service, ServiceRecord, Order, Task,
     Guardian, Resident, Room, SalesOrder, Invoice, Contract,
     Notification, OperationTask, StaffShift, SalesDashboardStats,
-    StoredContract, ContractEmailLogEntry
+    StoredContract, ContractEmailLogEntry, BusinessProfile
 } from '../types';
 
-let db: Database | null = null;
-
 // In-memory stores for JSON data
+let packageRecords: PackageRecord[] = [];
+let departments: Department[] = [];
+let serviceRecords: ServiceRecord[] = [];
+let orders: Order[] = [];
+let tasks: Task[] = [];
 let guardians: Guardian[] = [];
 let residents: Resident[] = [];
 let rooms: Room[] = [];
+let staffMembers: Staff[] = [];
 let salesOrders: SalesOrder[] = [];
 let invoices: Invoice[] = [];
 let contracts: Contract[] = [];
 let notifications: Notification[] = [];
 let operationTasks: OperationTask[] = [];
 let staffShifts: StaffShift[] = [];
+let businessProfiles: BusinessProfile[] = [];
 
 let jsonLoaded = false;
 
@@ -44,21 +50,17 @@ const saveStoredContractsToStorage = (items: StoredContract[]) => {
     }
 };
 
-const loadDB = async (): Promise<Database> => {
-    if (db) return db;
-    try {
-        db = await buildDatabase();
-        return db;
-    } catch (error) {
-        console.error("Failed to load database:", error);
-        throw error;
-    }
-};
+const isSoftDeleted = (item: any) =>
+    Boolean(item?.deletedAt || item?.isDeleted || item?._deleted);
+
+const filterActive = <T>(items: T[]): T[] =>
+    items.filter((item: any) => !isSoftDeleted(item));
 
 const loadJSON = async <T>(url: string): Promise<T[]> => {
     try {
-        const response = await fetch(url);
-        return await response.json();
+        const response = await fetch(url, { cache: 'no-store' });
+        const parsed = await response.json();
+        return Array.isArray(parsed) ? filterActive(parsed as T[]) : [];
     } catch (error) {
         console.error(`Failed to load JSON: ${url}`, error);
         return [];
@@ -67,9 +69,16 @@ const loadJSON = async <T>(url: string): Promise<T[]> => {
 
 // LocalStorage keys
 const STORAGE_KEYS = {
+    packages: 'bourbon44_db_packages',
+    departments: 'bourbon44_db_departments',
+    services: 'bourbon44_db_services',
+    orders: 'bourbon44_db_orders',
+    tasks: 'bourbon44_db_tasks',
+    business: 'bourbon44_db_business',
     guardians: 'bourbon44_db_guardians',
     residents: 'bourbon44_db_residents',
     rooms: 'bourbon44_db_rooms',
+    staff: 'bourbon44_db_staff',
     salesOrders: 'bourbon44_db_salesOrders',
     invoices: 'bourbon44_db_invoices',
     contracts: 'bourbon44_db_contracts',
@@ -78,18 +87,92 @@ const STORAGE_KEYS = {
     staffShifts: 'bourbon44_db_staffShifts',
 };
 
+const FILE_BY_STORAGE_KEY: Record<string, string> = {
+    [STORAGE_KEYS.packages]: 'packages',
+    [STORAGE_KEYS.departments]: 'departments',
+    [STORAGE_KEYS.services]: 'services',
+    [STORAGE_KEYS.orders]: 'orders',
+    [STORAGE_KEYS.tasks]: 'tasks',
+    [STORAGE_KEYS.business]: 'business',
+    [STORAGE_KEYS.guardians]: 'guardians',
+    [STORAGE_KEYS.residents]: 'residents',
+    [STORAGE_KEYS.rooms]: 'rooms',
+    [STORAGE_KEYS.staff]: 'staff',
+    [STORAGE_KEYS.salesOrders]: 'salesOrders',
+    [STORAGE_KEYS.invoices]: 'invoices',
+    [STORAGE_KEYS.contracts]: 'contracts',
+    [STORAGE_KEYS.notifications]: 'notifications',
+    [STORAGE_KEYS.operationTasks]: 'operationTasks',
+    [STORAGE_KEYS.staffShifts]: 'staffShifts',
+};
+
+const mergeWithDeleted = <T>(active: T[], existing: any[]): T[] => {
+    const activeById = new Map<string, any>();
+    const newWithoutId: any[] = [];
+
+    (active as any[]).forEach((item) => {
+        const id = item?.id;
+        if (id) {
+            activeById.set(id, item);
+        } else {
+            newWithoutId.push(item);
+        }
+    });
+
+    const merged = existing.map((item: any) => {
+        const id = item?.id;
+        if (id && activeById.has(id)) {
+            const updated = activeById.get(id);
+            activeById.delete(id);
+            return updated;
+        }
+        return item;
+    });
+
+    return [...merged, ...Array.from(activeById.values()), ...newWithoutId];
+};
+
+const persistToFile = async <T>(key: string, data: T[]) => {
+    if (!import.meta.env.DEV) return;
+    const file = FILE_BY_STORAGE_KEY[key];
+    if (!file) return;
+    try {
+        const existing = await jsonCrud.list<any>(file, { includeDeleted: true });
+        const merged = mergeWithDeleted(data, existing);
+        await jsonCrud.replaceAll(file, merged);
+    } catch (error) {
+        console.error(`Failed to persist JSON file for ${file}:`, error);
+    }
+};
+
 const persist = <T>(key: string, data: T[]) => {
     try {
         localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
         console.error('Failed to persist data', e);
     }
+    void persistToFile(key, data);
 };
 
 const loadWithPersistence = async <T>(key: string, url: string): Promise<T[]> => {
+    if (import.meta.env.DEV) {
+        const file = FILE_BY_STORAGE_KEY[key];
+        if (file) {
+            try {
+                const data = await jsonCrud.list<T>(file);
+                persist(key, data);
+                return data;
+            } catch (error) {
+                console.error(`Failed to load JSON via CRUD API (${file})`, error);
+            }
+        }
+    }
     try {
         const raw = localStorage.getItem(key);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? filterActive(parsed as T[]) : [];
+        }
     } catch (e) {
         console.error('Failed to load persisted data', e);
     }
@@ -101,10 +184,16 @@ const loadWithPersistence = async <T>(key: string, url: string): Promise<T[]> =>
 const loadAllJSON = async () => {
     if (jsonLoaded) return;
 
-    const [g, r, rm, so, inv, ctr, ntf, ot, ss] = await Promise.all([
+    const [pk, dp, sv, od, tk, g, r, rm, stf, so, inv, ctr, ntf, ot, ss] = await Promise.all([
+        loadWithPersistence<PackageRecord>(STORAGE_KEYS.packages, '/data/packages.json'),
+        loadWithPersistence<Department>(STORAGE_KEYS.departments, '/data/departments.json'),
+        loadWithPersistence<ServiceRecord>(STORAGE_KEYS.services, '/data/services.json'),
+        loadWithPersistence<Order>(STORAGE_KEYS.orders, '/data/orders.json'),
+        loadWithPersistence<Task>(STORAGE_KEYS.tasks, '/data/tasks.json'),
         loadWithPersistence<Guardian>(STORAGE_KEYS.guardians, '/data/guardians.json'),
         loadWithPersistence<Resident>(STORAGE_KEYS.residents, '/data/residents.json'),
         loadWithPersistence<Room>(STORAGE_KEYS.rooms, '/data/rooms.json'),
+        loadWithPersistence<Staff>(STORAGE_KEYS.staff, '/data/staff.json'),
         loadWithPersistence<SalesOrder>(STORAGE_KEYS.salesOrders, '/data/salesOrders.json'),
         loadWithPersistence<Invoice>(STORAGE_KEYS.invoices, '/data/invoices.json'),
         loadWithPersistence<Contract>(STORAGE_KEYS.contracts, '/data/contracts.json'),
@@ -113,9 +202,15 @@ const loadAllJSON = async () => {
         loadWithPersistence<StaffShift>(STORAGE_KEYS.staffShifts, '/data/staffShifts.json'),
     ]);
 
+    packageRecords = pk;
+    departments = dp;
+    serviceRecords = sv;
+    orders = od;
+    tasks = tk;
     guardians = g;
     residents = r;
     rooms = rm;
+    staffMembers = stf;
     salesOrders = so;
     invoices = inv;
     contracts = ctr;
@@ -125,112 +220,245 @@ const loadAllJSON = async () => {
     jsonLoaded = true;
 };
 
+const loadBusinessProfile = async () => {
+    const data = await loadWithPersistence<BusinessProfile>(STORAGE_KEYS.business, '/data/business.json');
+    businessProfiles = data;
+    return businessProfiles;
+};
+
+const ensureBusinessProfile = (): BusinessProfile => {
+    const existing = businessProfiles[0];
+    if (existing) return existing;
+    const now = new Date().toISOString();
+    return {
+        id: 'business-1',
+        businessInfo: {
+            businessName: '',
+            businessType: '',
+            address: '',
+            phone: '',
+        },
+        adminInfo: {
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+        },
+        facilityInfo: {
+            numberOfBeds: '',
+            numberOfFloors: '',
+            operatingHours: '',
+            licenseNumber: '',
+        },
+        preferences: {
+            timezone: '',
+            currency: '',
+            language: '',
+        },
+        depositMonths: 1,
+        createdAt: now,
+        updatedAt: now,
+    };
+};
+
 const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
+
+const getDepartmentName = (departmentId: string) =>
+    departments.find((d) => d.id === departmentId)?.name || 'Unknown';
+
+const resolveService = (service: ServiceRecord): Service => ({
+    ...service,
+    dept: getDepartmentName(service.departmentId),
+});
+
+const resolvePackage = (pkg: PackageRecord): Package => {
+    const serviceMap = new Map(serviceRecords.map((s) => [s.id, s]));
+    const services = pkg.serviceIds
+        .map((id) => serviceMap.get(id))
+        .filter(Boolean)
+        .map((service) => resolveService(service as ServiceRecord));
+
+    return {
+        ...pkg,
+        services,
+    };
+};
 
 export const API = {
     // ==================== EXISTING APIs ====================
     getPackages: async (): Promise<Package[]> => {
         await delay();
-        const data = await loadDB();
-        return data.packages;
+        await loadAllJSON();
+        return packageRecords.map(resolvePackage);
     },
 
     getPackageById: async (id: string): Promise<Package | undefined> => {
         await delay();
-        const data = await loadDB();
-        return data.packages.find(p => p.id === id);
+        await loadAllJSON();
+        const pkg = packageRecords.find(p => p.id === id);
+        return pkg ? resolvePackage(pkg) : undefined;
     },
 
     getStaff: async (): Promise<Staff[]> => {
         await delay();
-        const data = await loadDB();
-        return data.staff;
+        await loadAllJSON();
+        return staffMembers;
     },
 
-    getTeams: async (): Promise<Team[]> => {
+    getDepartments: async (): Promise<Department[]> => {
         await delay();
-        const data = await loadDB();
-        return data.teams;
+        await loadAllJSON();
+        return departments;
     },
 
     getOrders: async () => {
         await delay();
-        const data = await loadDB();
-        return data.orders;
+        await loadAllJSON();
+        return orders;
     },
 
     getTasks: async () => {
         await delay();
-        const data = await loadDB();
-        return data.tasks;
+        await loadAllJSON();
+        return tasks;
     },
 
-    savePackage: async (pkgData: Partial<Package> & { id?: string }): Promise<Package> => {
+    getServices: async (): Promise<Service[]> => {
+        await delay();
+        await loadAllJSON();
+        return serviceRecords.map(resolveService);
+    },
+
+    getServicesByDepartment: async (departmentId: string): Promise<Service[]> => {
+        await delay();
+        await loadAllJSON();
+        return serviceRecords
+            .filter((service) => service.departmentId === departmentId)
+            .map(resolveService);
+    },
+
+    savePackage: async (pkgData: Partial<Package> & { id?: string; serviceIds?: string[] }): Promise<Package> => {
         await delay(600);
-        const data = await loadDB();
+        await loadAllJSON();
+        const serviceIds = pkgData.serviceIds
+            ?? pkgData.services?.map((service) => service.id)
+            ?? [];
         if (pkgData.id) {
-            const index = data.packages.findIndex(p => p.id === pkgData.id);
+            const index = packageRecords.findIndex(p => p.id === pkgData.id);
             if (index !== -1) {
-                data.packages[index] = { ...data.packages[index], ...pkgData } as Package;
-                return data.packages[index];
+                packageRecords[index] = {
+                    ...packageRecords[index],
+                    ...pkgData,
+                    serviceIds,
+                } as PackageRecord;
+                persist(STORAGE_KEYS.packages, packageRecords);
+                return resolvePackage(packageRecords[index]);
             }
         }
-        const newPkg = { ...pkgData, id: 'pkg-' + Date.now() } as Package;
-        data.packages.push(newPkg);
-        return newPkg;
+        const newPkg: PackageRecord = {
+            id: 'pkg-' + Date.now(),
+            name: pkgData.name || 'Untitled Package',
+            price: pkgData.price || 0,
+            duration: pkgData.duration || 0,
+            description: pkgData.description || '',
+            serviceIds,
+        };
+        packageRecords.push(newPkg);
+        persist(STORAGE_KEYS.packages, packageRecords);
+        return resolvePackage(newPkg);
     },
 
     deletePackage: async (id: string): Promise<boolean> => {
         await delay(400);
-        const data = await loadDB();
-        data.packages = data.packages.filter(p => p.id !== id);
+        await loadAllJSON();
+        packageRecords = packageRecords.filter(p => p.id !== id);
+        persist(STORAGE_KEYS.packages, packageRecords);
         return true;
     },
 
-    saveTeam: async (teamData: Partial<Team> & { id: string }): Promise<Team | null> => {
+    saveDepartment: async (departmentData: Partial<Department> & { id: string }): Promise<Department | null> => {
         await delay(500);
-        const data = await loadDB();
-        const index = data.teams.findIndex(t => t.id === teamData.id);
+        await loadAllJSON();
+        const index = departments.findIndex(d => d.id === departmentData.id);
         if (index !== -1) {
-            data.teams[index] = { ...data.teams[index], ...teamData } as Team;
-            return data.teams[index];
+            departments[index] = { ...departments[index], ...departmentData } as Department;
+            persist(STORAGE_KEYS.departments, departments);
+            return departments[index];
         }
         return null;
     },
 
-    deleteTeam: async (id: string): Promise<boolean> => {
+    deleteDepartment: async (id: string): Promise<boolean> => {
         await delay(400);
-        const data = await loadDB();
-        data.teams = data.teams.filter(t => t.id !== id);
+        await loadAllJSON();
+        departments = departments.filter(d => d.id !== id);
+        persist(STORAGE_KEYS.departments, departments);
         return true;
     },
 
     saveStaff: async (staffData: Partial<Staff> & { id: string }): Promise<Staff | null> => {
+        await loadAllJSON();
         await delay(500);
-        const data = await loadDB();
-        const index = data.staff.findIndex(s => s.id === staffData.id);
+        const index = staffMembers.findIndex(s => s.id === staffData.id);
         if (index !== -1) {
-            data.staff[index] = { ...data.staff[index], ...staffData } as Staff;
-            return data.staff[index];
+            staffMembers[index] = { ...staffMembers[index], ...staffData } as Staff;
+            persist(STORAGE_KEYS.staff, staffMembers);
+            return staffMembers[index];
         }
         return null;
     },
 
+    createStaff: async (staffData: Omit<Staff, 'id'> & { id?: string }): Promise<Staff> => {
+        await loadAllJSON();
+        await delay(500);
+        const newStaff: Staff = {
+            ...staffData,
+            id: staffData.id || `st-${Date.now()}`
+        };
+        staffMembers.push(newStaff);
+        persist(STORAGE_KEYS.staff, staffMembers);
+        return newStaff;
+    },
+
     deleteStaff: async (id: string): Promise<boolean> => {
+        await loadAllJSON();
         await delay(400);
-        const data = await loadDB();
-        data.staff = data.staff.filter(s => s.id !== id);
+        staffMembers = staffMembers.filter(s => s.id !== id);
+        persist(STORAGE_KEYS.staff, staffMembers);
         return true;
+    },
+
+    getBusinessProfile: async (): Promise<BusinessProfile> => {
+        await delay(200);
+        await loadBusinessProfile();
+        return ensureBusinessProfile();
+    },
+
+    saveBusinessProfile: async (profile: BusinessProfile): Promise<BusinessProfile> => {
+        await delay(300);
+        await loadBusinessProfile();
+        const now = new Date().toISOString();
+        const existing = businessProfiles[0];
+        const next: BusinessProfile = {
+            ...profile,
+            id: profile.id || existing?.id || 'business-1',
+            createdAt: existing?.createdAt || profile.createdAt || now,
+            updatedAt: now,
+        };
+        businessProfiles = [next];
+        persist(STORAGE_KEYS.business, businessProfiles);
+        return next;
     },
 
     getDashboardStats: async (): Promise<DashboardStats> => {
         await delay();
-        const data = await loadDB();
+        await loadAllJSON();
         return {
             occupancy: Math.floor(Math.random() * 20) + 70,
-            pendingTasks: data.tasks.filter(t => t.status === 'pending').length,
-            totalStaff: data.staff.length,
-            newPurchases: data.orders.length
+            pendingTasks: tasks.filter(t => t.status === 'pending').length,
+            totalStaff: staffMembers.length,
+            newPurchases: orders.length
         };
     },
 

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "pkg-1",
+    "name": "20-day Elder Recreation",
+    "price": 85000,
+    "duration": 20,
+    "description": "Comprehensive recreation package for elders includes room meals and specialized care.",
+    "serviceIds": [
+      "svc-housekeeping-room-cleaning",
+      "svc-housekeeping-amenities-update",
+      "svc-kitchen-daily-meals",
+      "svc-laundry-laundry-service",
+      "svc-therapy-physical-therapy"
+    ]
+  },
+  {
+    "id": "pkg-2",
+    "name": "Golden Years Premium",
+    "price": 120000,
+    "duration": 30,
+    "description": "Premium 30-day package with additional nursing support.",
+    "serviceIds": [
+      "svc-housekeeping-full-service",
+      "svc-nursing-health-monitor"
+    ]
+  }
+]

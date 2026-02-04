@@ -1,0 +1,74 @@
+[
+  {
+    "id": "svc-housekeeping-room-cleaning",
+    "title": "Room Cleaning",
+    "departmentId": "dept-housekeeping",
+    "interval": "Every 3 days",
+    "description": "Clean room and make bed.",
+    "price": 300
+  },
+  {
+    "id": "svc-housekeeping-amenities-update",
+    "title": "Amenities Update",
+    "departmentId": "dept-housekeeping",
+    "interval": "Every 3 days",
+    "description": "Refill water towels and toiletries.",
+    "price": 450
+  },
+  {
+    "id": "svc-kitchen-daily-meals",
+    "title": "Daily Meals",
+    "departmentId": "dept-kitchen",
+    "interval": "Daily",
+    "description": "3 meals per day (Breakfast Lunch Dinner).",
+    "price": 950
+  },
+  {
+    "id": "svc-laundry-laundry-service",
+    "title": "Laundry Service",
+    "departmentId": "dept-laundry",
+    "interval": "Every 3 days",
+    "description": "Wash dry and fold clothes.",
+    "price": 1100
+  },
+  {
+    "id": "svc-therapy-physical-therapy",
+    "title": "Physical Therapy",
+    "departmentId": "dept-therapy",
+    "interval": "Daily",
+    "description": "1 session before noon.",
+    "price": 1000
+  },
+  {
+    "id": "svc-housekeeping-full-service",
+    "title": "Full Service",
+    "departmentId": "dept-housekeeping",
+    "interval": "Daily",
+    "description": "Daily room maintenance.",
+    "price": 1500
+  },
+  {
+    "id": "svc-nursing-health-monitor",
+    "title": "Health Monitor",
+    "departmentId": "dept-nursing",
+    "interval": "Daily",
+    "description": "Vital signs check and medication assistance.",
+    "price": 400
+  },
+  {
+    "id": "svc-frontend-check-in-guidance",
+    "title": "Check-in Guidance",
+    "departmentId": "dept-frontend",
+    "interval": "Daily",
+    "description": "",
+    "price": 500
+  },
+  {
+    "id": "svc-kitchen-daily-3-meal",
+    "title": "Daily 3 Meal",
+    "departmentId": "dept-kitchen",
+    "interval": "Daily",
+    "description": "",
+    "price": 400
+  }
+]

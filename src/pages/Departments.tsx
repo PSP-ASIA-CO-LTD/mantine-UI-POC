@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Title,
     Group,
@@ -15,42 +15,65 @@ import {
     List,
     Divider,
 } from '@mantine/core';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconMinus } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { buildLeftSection } from '../utils/sidesheetHelper';
-import { IconMinus } from '@tabler/icons-react';
-import type { Team, AssignmentType } from '../types';
+import type { Department, Service, Staff } from '../types';
 
-export function Teams() {
-    const [teams, setTeams] = useState<Team[]>([]);
+export function Departments() {
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [services, setServices] = useState<Service[]>([]);
+    const [staff, setStaff] = useState<Staff[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // edit states
-    const [activeTeam, setActiveTeam] = useState<Team | null>(null);
+    const [activeDepartment, setActiveDepartment] = useState<Department | null>(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [editableServices, setEditableServices] = useState<AssignmentType[]>([]);
 
     const { open, close } = useSidesheet();
 
     useEffect(() => {
-        const loadTeams = async () => {
+        const loadDepartments = async () => {
             try {
-                const data = await API.getTeams();
-                setTeams(data);
+                const [deptData, serviceData, staffData] = await Promise.all([
+                    API.getDepartments(),
+                    API.getServices(),
+                    API.getStaff(),
+                ]);
+                setDepartments(deptData);
+                setServices(serviceData);
+                setStaff(staffData);
             } catch (error) {
-                console.error('Failed to load teams:', error);
+                console.error('Failed to load departments:', error);
             } finally {
                 setLoading(false);
             }
         };
-        loadTeams();
+        loadDepartments();
     }, []);
 
-    const removeService = (index: number) => {
-        setEditableServices((prev) => prev.filter((_, i) => i !== index));
-    };
+    const servicesByDept = useMemo(() => {
+        const map = new Map<string, Service[]>();
+        services.forEach((service) => {
+            const list = map.get(service.departmentId) || [];
+            list.push(service);
+            map.set(service.departmentId, list);
+        });
+        return map;
+    }, [services]);
+
+    const staffByDept = useMemo(() => {
+        const map = new Map<string, Staff[]>();
+        staff.forEach((member) => {
+            const dept = departments.find((d) => d.name === member.dept);
+            if (!dept) return;
+            const list = map.get(dept.id) || [];
+            list.push(member);
+            map.set(dept.id, list);
+        });
+        return map;
+    }, [staff, departments]);
 
     const openCreateDepartmentSidesheet = () => {
         const leftPane = (
@@ -64,7 +87,7 @@ export function Teams() {
                 <Select
                     label="Department Head / Manager"
                     placeholder="Select staff"
-                    data={teams.map((team) => team.name)}
+                    data={staff.map((member) => member.name)}
                     searchable
                     clearable
                 />
@@ -72,7 +95,7 @@ export function Teams() {
                 <Select
                     label="Parent Department"
                     placeholder="None"
-                    data={teams.map((team) => team.name)}
+                    data={departments.map((dept) => dept.name)}
                     clearable
                 />
 
@@ -88,7 +111,6 @@ export function Teams() {
                     placeholder="e.g. Building A, 3rd Floor"
                 />
 
-                {/* Operating hours as time range */}
                 <Group grow>
                     <TextInput label="Start Time" type="time" />
                     <TextInput label="End Time" type="time" />
@@ -103,12 +125,7 @@ export function Teams() {
                 <MultiSelect
                     label="Select Services"
                     placeholder="Choose services"
-                    data={[
-                        { value: 'service1', label: 'Service 1' },
-                        { value: 'service2', label: 'Service 2' },
-                        { value: 'service3', label: 'Service 3' },
-                        { value: 'service4', label: 'Service 4' },
-                    ]}
+                    data={services.map((service) => ({ value: service.id, label: service.title }))}
                     searchable
                     clearable
                 />
@@ -134,21 +151,23 @@ export function Teams() {
         });
     };
 
+    const openDepartmentSidesheet = (department: Department) => {
+        const deptServices = servicesByDept.get(department.id) || [];
+        const deptStaff = staffByDept.get(department.id) || [];
 
-    const openTeamSidesheet = (team: Team) => {
         const leftPane = (
             <div>
                 {buildLeftSection(
                     'Department ID',
-                    <Text size="sm" fw={500} data-er-field="DEPARTMENT.id">{team.id}</Text>
+                    <Text size="sm" fw={500} data-er-field="DEPARTMENT.id">{department.id}</Text>
                 )}
 
                 <Divider my="xl" />
 
                 {buildLeftSection(
                     'Department',
-                    <Badge color="gray" size="lg" data-er-field="DEPARTMENT.business_id">
-                        {team.dept}
+                    <Badge color="gray" size="lg" data-er-field="DEPARTMENT.department_name">
+                        {department.name}
                     </Badge>
                 )}
 
@@ -156,8 +175,8 @@ export function Teams() {
 
                 {buildLeftSection(
                     'Description',
-                    team.description ? (
-                        <Text size="sm" data-er-field="DEPARTMENT.description">{team.description}</Text>
+                    department.description ? (
+                        <Text size="sm" data-er-field="DEPARTMENT.description">{department.description}</Text>
                     ) : (
                         <Text size="sm" c="dimmed" data-er-field="DEPARTMENT.description">
                             No description provided
@@ -171,12 +190,12 @@ export function Teams() {
                     <Text fw={600} mb="md" size="sm">
                         Department Members
                     </Text>
-                    {team.members && team.members.length > 0 ? (
+                    {deptStaff.length > 0 ? (
                         <List size="sm" spacing="xs">
-                            {team.members.map((memberId, idx) => (
-                                <List.Item key={idx}>
+                            {deptStaff.map((member) => (
+                                <List.Item key={member.id}>
                                     <Text size="sm" c="dimmed">
-                                        {memberId}
+                                        {member.name}
                                     </Text>
                                 </List.Item>
                             ))}
@@ -190,19 +209,17 @@ export function Teams() {
             </div>
         );
 
-
-
         const rightPane = (
             <div>
                 <Text fw={600} mb="md">
-                    Services ({editableServices.length})
+                    Services ({deptServices.length})
                 </Text>
 
-                {editableServices.map((service, idx) => (
-                    <Card key={idx} padding="md" mb="sm" withBorder data-er-field="TASK">
+                {deptServices.map((service) => (
+                    <Card key={service.id} padding="md" mb="sm" withBorder data-er-field="TASK">
                         <Stack gap="xs">
                             <Group justify="space-between">
-                                <Text fw={500} data-er-field="TASK.title">{service.name}</Text>
+                                <Text fw={500} data-er-field="TASK.title">{service.title}</Text>
 
                                 {isEditing ? (
                                     <Button
@@ -211,7 +228,6 @@ export function Teams() {
                                         variant="light"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            removeService(idx);
                                         }}
                                         styles={{
                                             root: {
@@ -233,7 +249,7 @@ export function Teams() {
                                         <IconMinus size={16} />
                                     </Button>
                                 ) : (
-                                    <Badge color="gray" data-er-field="TASK.department_id">{team.dept}</Badge>
+                                    <Badge color="gray" data-er-field="TASK.department_id">{service.dept}</Badge>
                                 )}
                             </Group>
 
@@ -243,11 +259,15 @@ export function Teams() {
                                 </Text>
                             )}
 
-                            {service.price > 0 && (
-                                <Text size="sm" c="dimmed" data-er-field="TASK.price">
+                            <Group gap="xs">
+                                <Text size="xs" c="dimmed" data-er-field="TASK.interval">
+                                    {service.interval}
+                                </Text>
+                                <Text size="xs" c="dimmed">•</Text>
+                                <Text size="xs" c="dimmed" data-er-field="TASK.price">
                                     ฿{service.price.toLocaleString()}
                                 </Text>
-                            )}
+                            </Group>
                         </Stack>
                     </Card>
                 ))}
@@ -264,7 +284,6 @@ export function Teams() {
                     if (!isEditing) {
                         setIsEditing(true);
                     } else {
-                        // TODO: API.updateTeam(team.id, { assignmentTypes: editableServices })
                         close();
                     }
                 }}
@@ -273,7 +292,7 @@ export function Teams() {
         );
 
         open({
-            title: team.name,
+            title: department.name,
             titleDataAttribute: 'DEPARTMENT.department_name',
             subtitle: 'Department Name',
             leftPane,
@@ -282,17 +301,16 @@ export function Teams() {
         });
     };
 
-    const handleTeamClick = (team: Team) => {
-        setActiveTeam(team);
+    const handleDepartmentClick = (department: Department) => {
+        setActiveDepartment(department);
         setIsEditing(false);
-        setEditableServices([...team.assignmentTypes]);
-        openTeamSidesheet(team);
+        openDepartmentSidesheet(department);
     };
 
     useEffect(() => {
-        if (!activeTeam) return;
-        openTeamSidesheet(activeTeam);
-    }, [isEditing, editableServices]);
+        if (!activeDepartment) return;
+        openDepartmentSidesheet(activeDepartment);
+    }, [isEditing, activeDepartment, servicesByDept, staffByDept]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -309,30 +327,32 @@ export function Teams() {
             </Group>
 
             <Grid>
-                {teams.map((team) => (
-                    <Grid.Col key={team.id} span={{ base: 12, sm: 6, md: 4 }}>
+                {departments.map((department) => (
+                    <Grid.Col key={department.id} span={{ base: 12, sm: 6, md: 4 }}>
                         <Card
                             padding="lg"
                             radius="md"
                             withBorder
                             style={{ cursor: 'pointer' }}
-                            onClick={() => handleTeamClick(team)}
+                            onClick={() => handleDepartmentClick(department)}
                             data-er-field="DEPARTMENT"
                         >
                             <Stack gap="xs">
                                 <Group justify="space-between">
                                     <Text fw={600} size="lg" data-er-field="DEPARTMENT.department_name">
-                                        {team.name}
+                                        {department.name}
                                     </Text>
-                                    <Badge color="gray" data-er-field="DEPARTMENT.business_id">{team.dept}</Badge>
+                                    {department.code && (
+                                        <Badge color="gray" data-er-field="DEPARTMENT.business_id">{department.code}</Badge>
+                                    )}
                                 </Group>
                                 <Group gap="xs">
                                     <Text size="xs" c="dimmed">
-                                        {team.members.length} members
+                                        {(staffByDept.get(department.id) || []).length} members
                                     </Text>
                                     <Text size="xs" c="dimmed">•</Text>
                                     <Text size="xs" c="dimmed">
-                                        {team.assignmentTypes.length} services
+                                        {(servicesByDept.get(department.id) || []).length} services
                                     </Text>
                                 </Group>
                             </Stack>
