@@ -1,4 +1,5 @@
 import { buildDatabase } from '../utils/csvParser';
+import { jsonCrud } from './jsonCrud';
 import type {
     Database, Package, Staff, Team, DashboardStats,
     Guardian, Resident, Room, SalesOrder, Invoice, Contract,
@@ -55,10 +56,17 @@ const loadDB = async (): Promise<Database> => {
     }
 };
 
+const isSoftDeleted = (item: any) =>
+    Boolean(item?.deletedAt || item?.isDeleted || item?._deleted);
+
+const filterActive = <T>(items: T[]): T[] =>
+    items.filter((item: any) => !isSoftDeleted(item));
+
 const loadJSON = async <T>(url: string): Promise<T[]> => {
     try {
-        const response = await fetch(url);
-        return await response.json();
+        const response = await fetch(url, { cache: 'no-store' });
+        const parsed = await response.json();
+        return Array.isArray(parsed) ? filterActive(parsed as T[]) : [];
     } catch (error) {
         console.error(`Failed to load JSON: ${url}`, error);
         return [];
@@ -78,18 +86,85 @@ const STORAGE_KEYS = {
     staffShifts: 'bourbon44_db_staffShifts',
 };
 
+const FILE_BY_STORAGE_KEY: Record<string, string> = {
+    [STORAGE_KEYS.guardians]: 'guardians',
+    [STORAGE_KEYS.residents]: 'residents',
+    [STORAGE_KEYS.rooms]: 'rooms',
+    [STORAGE_KEYS.salesOrders]: 'salesOrders',
+    [STORAGE_KEYS.invoices]: 'invoices',
+    [STORAGE_KEYS.contracts]: 'contracts',
+    [STORAGE_KEYS.notifications]: 'notifications',
+    [STORAGE_KEYS.operationTasks]: 'operationTasks',
+    [STORAGE_KEYS.staffShifts]: 'staffShifts',
+};
+
+const mergeWithDeleted = <T>(active: T[], existing: any[]): T[] => {
+    const activeById = new Map<string, any>();
+    const newWithoutId: any[] = [];
+
+    (active as any[]).forEach((item) => {
+        const id = item?.id;
+        if (id) {
+            activeById.set(id, item);
+        } else {
+            newWithoutId.push(item);
+        }
+    });
+
+    const merged = existing.map((item: any) => {
+        const id = item?.id;
+        if (id && activeById.has(id)) {
+            const updated = activeById.get(id);
+            activeById.delete(id);
+            return updated;
+        }
+        return item;
+    });
+
+    return [...merged, ...Array.from(activeById.values()), ...newWithoutId];
+};
+
+const persistToFile = async <T>(key: string, data: T[]) => {
+    if (!import.meta.env.DEV) return;
+    const file = FILE_BY_STORAGE_KEY[key];
+    if (!file) return;
+    try {
+        const existing = await jsonCrud.list<any>(file, { includeDeleted: true });
+        const merged = mergeWithDeleted(data, existing);
+        await jsonCrud.replaceAll(file, merged);
+    } catch (error) {
+        console.error(`Failed to persist JSON file for ${file}:`, error);
+    }
+};
+
 const persist = <T>(key: string, data: T[]) => {
     try {
         localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
         console.error('Failed to persist data', e);
     }
+    void persistToFile(key, data);
 };
 
 const loadWithPersistence = async <T>(key: string, url: string): Promise<T[]> => {
+    if (import.meta.env.DEV) {
+        const file = FILE_BY_STORAGE_KEY[key];
+        if (file) {
+            try {
+                const data = await jsonCrud.list<T>(file);
+                persist(key, data);
+                return data;
+            } catch (error) {
+                console.error(`Failed to load JSON via CRUD API (${file})`, error);
+            }
+        }
+    }
     try {
         const raw = localStorage.getItem(key);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? filterActive(parsed as T[]) : [];
+        }
     } catch (e) {
         console.error('Failed to load persisted data', e);
     }

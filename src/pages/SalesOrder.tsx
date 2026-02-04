@@ -717,8 +717,6 @@ export function SalesOrderPage() {
                     return 'Signed';
                 }
                 return undefined;
-            case 5: // Complete
-                return undefined;
             default:
                 return undefined;
         }
@@ -769,11 +767,6 @@ export function SalesOrderPage() {
                     label="Contract"
                     description={getStepDescription(4)}
                     icon={<IconFileText size={16} />}
-                />
-                <Stepper.Step
-                    label="Complete"
-                    description={getStepDescription(5)}
-                    icon={<IconCheck size={16} />}
                 />
             </Stepper>}
 
