@@ -65,7 +65,8 @@ export const buildDatabase = async (): Promise<Database> => {
             parse('/data/teams.csv'),
             parse('/data/assignments.csv'),
             parse('/data/orders.csv'),
-            parse('/data/tasks.csv')
+            parse('/data/tasks.csv'),
+            parse('/data/patients.csv')
         ]);
 
         // Process packages

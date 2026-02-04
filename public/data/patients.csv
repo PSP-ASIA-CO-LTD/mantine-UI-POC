@@ -1,0 +1,8 @@
+id,hn,fullName,gender,dob,bloodType,status,medicalCoverage,drugAllergies,chronicConditions,emergencyContactName,emergencyContactRelationship,emergencyContactPhone
+pat-1,HN0001,Mr. Somchai Kittipong,Male,1985-06-12,O+,Follow-up,Universal Coverage,None,Hypertension,Mrs. Suda Kittipong,Wife,089-123-4567
+pat-2,HN0002,Mr. Narin Chansiri,Male,1990-02-20,A+,Admitted,Social Security,Penicillin,Asthma,Mrs. Ploysai Chansiri,Sister,081-222-3333
+pat-3,HN0003,Miss Ploysai Rattanakul,Female,1998-11-05,B+,Follow-up,Private Insurance,None,None,Mr. Anan Rattanakul,Father,086-555-9999
+pat-4,HN0004,Mrs. Suda Wongsa,Female,1975-09-18,AB+,Admitted,Universal Coverage,Sulfa drugs,Diabetes Mellitus,Mr. Sompong Wongsa,Husband,082-888-4444
+pat-5,HN0005,Mr. Hiroshi Tanaka,Male,1982-03-14,A-,Follow-up,Private Insurance,None,Hyperlipidemia,Mrs. Aiko Tanaka,Wife,+81-90-1234-5678
+pat-6,HN0006,Mrs. Aiko Nakamura,Female,1987-07-22,O-,Discharged,Private Insurance,None,None,Mr. Kenji Nakamura,Husband,+81-80-2222-3333
+pat-7,HN0007,Mr. Daniel Chen,Male,1992-12-01,B-,Follow-up,Private Insurance,Shellfish,Allergic Rhinitis,Mrs. Linda Chen,Mother,+1-415-555-7788

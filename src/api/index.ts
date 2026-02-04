@@ -3,7 +3,8 @@ import type {
     Database, Package, Staff, Team, DashboardStats,
     Guardian, Resident, Room, SalesOrder, Invoice, Contract,
     Notification, OperationTask, StaffShift, SalesDashboardStats,
-    StoredContract, ContractEmailLogEntry
+    StoredContract, ContractEmailLogEntry,
+    Patient //just add
 } from '../types';
 
 let db: Database | null = null;
@@ -18,6 +19,7 @@ let contracts: Contract[] = [];
 let notifications: Notification[] = [];
 let operationTasks: OperationTask[] = [];
 let staffShifts: StaffShift[] = [];
+let patients: Patient[] = [];
 
 let jsonLoaded = false;
 
@@ -78,6 +80,7 @@ const loadAllJSON = async () => {
         loadJSON<Notification>('/data/notifications.json'),
         loadJSON<OperationTask>('/data/operationTasks.json'),
         loadJSON<StaffShift>('/data/staffShifts.json'),
+        loadJSON<Patient>('/data/patients.json'),
     ]);
     
     guardians = g;
@@ -89,6 +92,7 @@ const loadAllJSON = async () => {
     notifications = ntf;
     operationTasks = ot;
     staffShifts = ss;
+    patients = pt;
     jsonLoaded = true;
 };
 
@@ -672,5 +676,52 @@ export const API = {
         }
         
         return result;
-    }
+    },
+
+    // ==================== PATIENT APIs ====================
+    getPatients: async (): Promise<Patient[]> => {
+        await loadAllJSON();
+        await delay();
+        return patients;
+    },
+
+    getPatientById: async (id: string): Promise<Patient | undefined> => {
+        await loadAllJSON();
+        await delay();
+        return patients.find(p => p.id === id);
+    },
+
+    savePatient: async (data: Omit<Patient, 'id' | 'createdAt'>): Promise<Patient> => {
+        await loadAllJSON();
+        await delay(400);
+        const newPatient: Patient = {
+            ...data,
+            id: 'pt-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+            createdAt: new Date().toISOString()
+        };
+        patients.push(newPatient);
+        return newPatient;
+    },
+
+    updatePatient: async (id: string, data: Partial<Patient>): Promise<Patient | null> => {
+        await loadAllJSON();
+        await delay(300);
+        const index = patients.findIndex(p => p.id === id);
+        if (index !== -1) {
+            patients[index] = { ...patients[index], ...data };
+            return patients[index];
+        }
+        return null;
+    },
+
+    deletePatient: async (id: string): Promise<boolean> => {
+        await loadAllJSON();
+        await delay(300);
+        patients = patients.filter(p => p.id !== id);
+        return true;
+    },
+
+
 };
+
+

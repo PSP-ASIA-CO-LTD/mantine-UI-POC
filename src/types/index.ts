@@ -311,3 +311,22 @@ export interface CompleteSalesOrderData {
     createdAt: string;
     updatedAt: string;
 }
+
+// ==================== PATIENT STORAGE ====================
+
+
+export interface Patient {
+    id: string;
+    hn: string;
+    nationalId?: string;
+    fullName: string;
+    dob: string;
+    gender: 'male' | 'female' | 'other';
+    bloodType?: string;
+    allergies?: string;
+    chronicConditions?: string;
+    emergencyContactName?: string;
+    emergencyContactRelation?: string;
+    emergencyContactPhone?: string;
+    status: 'Admitted' | 'Discharged' | 'Outpatient';
+};
