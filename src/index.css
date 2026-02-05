@@ -14,6 +14,22 @@
   --surface: hsl(43, 19%, 93%);
   --white: hsl(0, 0%, 100%);
   --border: hsl(0, 0%, 93%);
+
+  --button-accent-1: 2, 222, 252;
+  --button-accent-2: 127, 254, 0;
+  --button-accent-3: 253, 243, 1;
+  --button-accent-4: 246, 99, 21;
+  --button-accent-5: 252, 1, 151;
+  --button-accent-6: 254, 158, 251;
+  --button-accent-gradient: linear-gradient(
+    90deg,
+    rgb(var(--button-accent-1)),
+    rgb(var(--button-accent-2)),
+    rgb(var(--button-accent-3)),
+    rgb(var(--button-accent-4)),
+    rgb(var(--button-accent-5)),
+    rgb(var(--button-accent-6))
+  );
 }
 
 body {
