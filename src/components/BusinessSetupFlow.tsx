@@ -1,17 +1,31 @@
-import { useEffect, useState } from 'react';
-import { TextInput, Textarea, Button, Paper, Title, Text, Stack, Progress, Group, NumberInput } from '@mantine/core';
-import { IconArrowLeft, IconArrowRight, IconCheck } from '@tabler/icons-react';
-import { getBusinessSettings, saveBusinessSettings } from '../utils/businessSettings';
+import { useState } from 'react';
+import { TextInput, Textarea, Button, Paper, Title, Text, Stack, Progress, Group, NumberInput, Select, PasswordInput, Modal } from '@mantine/core';
+import { IconArrowRight, IconCheck } from '@tabler/icons-react';
+import { DEFAULT_BUSINESS_SETTINGS, saveBusinessSettings } from '../utils/businessSettings';
 import { API } from '../api';
 
 interface BusinessSetupFlowProps {
-  onBack?: () => void;
   onComplete?: () => void;
 }
 
-export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps) {
+const BUSINESS_TYPE_OPTIONS = [
+  'Nursing Home',
+  'Assisted Living',
+  'Spa',
+  'Construction',
+  'Clinic',
+  'Hotel',
+  'Restaurant',
+  'Retail',
+  'Manufacturing',
+  'Education',
+];
+
+export function BusinessSetupFlow({ onComplete }: BusinessSetupFlowProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [depositMonths, setDepositMonths] = useState(() => getBusinessSettings().depositMonths);
+  const [depositMonths, setDepositMonths] = useState(DEFAULT_BUSINESS_SETTINGS.depositMonths);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [disagreeOpen, setDisagreeOpen] = useState(false);
 
   // Form state
   const [businessInfo, setBusinessInfo] = useState({
@@ -42,43 +56,76 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
     language: '',
   });
 
-  useEffect(() => {
-    let mounted = true;
-    const loadProfile = async () => {
-      try {
-        const profile = await API.getBusinessProfile();
-        if (!mounted) return;
-        setBusinessInfo(profile.businessInfo);
-        setAdminInfo(profile.adminInfo);
-        setFacilityInfo(profile.facilityInfo);
-        setPreferences(profile.preferences);
-        const nextDepositMonths = Number.isFinite(profile.depositMonths) ? profile.depositMonths : getBusinessSettings().depositMonths;
-        setDepositMonths(nextDepositMonths);
-        saveBusinessSettings({ depositMonths: nextDepositMonths });
-      } catch (error) {
-        console.error('Failed to load business profile:', error);
-      }
-    };
-    loadProfile();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const totalSteps = 2;
 
-  const handleNext = () => {
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
-    }
+  const clearError = (field: string) => {
+    if (!errors[field]) return;
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   };
 
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+  const validateAll = () => {
+    const nextErrors: Record<string, string> = {};
+
+    if (!businessInfo.businessName.trim()) nextErrors.businessName = 'Business name is required.';
+    if (!businessInfo.businessType.trim()) nextErrors.businessType = 'Select a business type.';
+    if (!businessInfo.address.trim()) nextErrors.address = 'Address is required.';
+    if (!businessInfo.phone.trim()) nextErrors.phone = 'Phone number is required.';
+    if (!facilityInfo.licenseNumber.trim()) nextErrors.licenseNumber = 'License number is required.';
+
+    if (!adminInfo.firstName.trim()) nextErrors.firstName = 'First name is required.';
+    if (!adminInfo.lastName.trim()) nextErrors.lastName = 'Last name is required.';
+    if (!adminInfo.email.trim()) {
+      nextErrors.email = 'Email is required.';
+    } else if (!/.+@.+\..+/.test(adminInfo.email)) {
+      nextErrors.email = 'Enter a valid email address.';
     }
+    if (!adminInfo.password.trim()) nextErrors.password = 'Password is required.';
+    if (!adminInfo.confirmPassword.trim()) nextErrors.confirmPassword = 'Confirm your password.';
+    if (adminInfo.password && adminInfo.confirmPassword && adminInfo.password !== adminInfo.confirmPassword) {
+      nextErrors.confirmPassword = 'Passwords do not match.';
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const resetForm = () => {
+    setBusinessInfo({
+      businessName: '',
+      businessType: '',
+      address: '',
+      phone: '',
+    });
+    setAdminInfo({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    });
+    setFacilityInfo({
+      numberOfBeds: '',
+      numberOfFloors: '',
+      operatingHours: '',
+      licenseNumber: '',
+    });
+    setPreferences({
+      timezone: '',
+      currency: '',
+      language: '',
+    });
+    setDepositMonths(DEFAULT_BUSINESS_SETTINGS.depositMonths);
+    setErrors({});
+    setCurrentStep(0);
   };
 
   const handleComplete = async () => {
     try {
+      if (!validateAll()) return;
       await API.saveBusinessProfile({
         id: 'business-1',
         businessInfo,
@@ -90,12 +137,35 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
         updatedAt: new Date().toISOString(),
       });
       saveBusinessSettings({ depositMonths });
+      resetForm();
       if (onComplete) {
         onComplete();
       }
     } catch (error) {
       console.error('Failed to save business profile:', error);
     }
+  };
+
+  const handleReadAgreements = () => {
+    if (!validateAll()) return;
+    setCurrentStep(1);
+  };
+
+  const handleExit = () => {
+    resetForm();
+    if (onComplete) {
+      onComplete();
+    }
+  };
+
+  const handleDisagree = () => {
+    setDisagreeOpen(true);
+  };
+
+  const confirmDisagree = () => {
+    resetForm();
+    setCurrentStep(0);
+    setDisagreeOpen(false);
   };
 
   return (
@@ -105,7 +175,7 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'var(--surface)',
-      padding: '1rem',
+      padding: 0,
     }}>
       <div style={{ width: '100%', maxWidth: '48rem' }}>
         {/* Header */}
@@ -118,301 +188,265 @@ export function BusinessSetupFlow({ onBack, onComplete }: BusinessSetupFlowProps
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
             <Text size="xs" c="dimmed">
-              Step {currentStep + 1} of 4
+              Step {currentStep + 1} of {totalSteps}
             </Text>
             <Text size="xs" c="dimmed">
-              {Math.round(((currentStep + 1) / 4) * 100)}% Complete
+              {Math.round(((currentStep + 1) / totalSteps) * 100)}% Complete
             </Text>
           </div>
           <Progress
-            value={((currentStep + 1) / 4) * 100}
+            value={((currentStep + 1) / totalSteps) * 100}
             size="sm"
           />
         </div>
 
-        {/* Form Card */}
-        <Paper
-          shadow="sm"
-          p="xl"
-          radius="md"
-        >
-          {/* Step 1: Business Information */}
+          {/* Form Card */}
+          <Paper
+            shadow="sm"
+            p={0}
+            radius="md"
+          >
           {currentStep === 0 && (
-            <Stack gap="md" data-er-field="BUSINESS">
-              <Title order={3} mb="sm">Business Information</Title>
+            <div className="business-setup-split">
+              <div className="business-setup-pane">
+                <Stack gap="md" data-er-field="BUSINESS">
+                  <Title order={3} mb="sm">Business Information</Title>
 
-              <div data-er-field="BUSINESS">
-                <TextInput
-                  label="Business Name"
-                  placeholder="Enter your nursing home name"
-                  value={businessInfo.businessName}
-                  onChange={(e) => setBusinessInfo({ ...businessInfo, businessName: e.target.value })}
-                  required
-                  data-er-field="BUSINESS.business_name"
-                />
+                  <div data-er-field="BUSINESS">
+                    <TextInput
+                      label="Business Name"
+                      placeholder="Enter your nursing home name"
+                      value={businessInfo.businessName}
+                      onChange={(e) => {
+                        setBusinessInfo({ ...businessInfo, businessName: e.target.value });
+                        clearError('businessName');
+                      }}
+                      required
+                      error={errors.businessName}
+                      data-er-field="BUSINESS.business_name"
+                    />
+                  </div>
+
+                  <Select
+                    label="Business Type"
+                    placeholder="Select your business type"
+                    data={BUSINESS_TYPE_OPTIONS}
+                    searchable
+                    value={businessInfo.businessType}
+                    onChange={(value) => {
+                      setBusinessInfo({ ...businessInfo, businessType: value ?? '' });
+                      clearError('businessType');
+                    }}
+                    required
+                    error={errors.businessType}
+                    data-er-field="BUSINESS.business_type"
+                  />
+
+                  <Textarea
+                    label="Address"
+                    placeholder="Enter your business address"
+                    value={businessInfo.address}
+                    onChange={(e) => {
+                      setBusinessInfo({ ...businessInfo, address: e.target.value });
+                      clearError('address');
+                    }}
+                    required
+                    rows={3}
+                    error={errors.address}
+                    data-er-field="BUSINESS.address"
+                  />
+
+                  <TextInput
+                    label="Phone Number"
+                    type="tel"
+                    placeholder="Enter your contact number"
+                    value={businessInfo.phone}
+                    onChange={(e) => {
+                      setBusinessInfo({ ...businessInfo, phone: e.target.value });
+                      clearError('phone');
+                    }}
+                    required
+                    error={errors.phone}
+                    data-er-field="BUSINESS.phone"
+                  />
+
+                  <TextInput
+                    label="License Number"
+                    placeholder="Enter facility license number"
+                    value={facilityInfo.licenseNumber}
+                    onChange={(e) => {
+                      setFacilityInfo({ ...facilityInfo, licenseNumber: e.target.value });
+                      clearError('licenseNumber');
+                    }}
+                    required
+                    error={errors.licenseNumber}
+                    data-er-field="VENUE.license_number"
+                  />
+
+                  <NumberInput
+                    label="Deposit policy (months)"
+                    description="Invoice deposit will be calculated as +N month(s) and added as a line item"
+                    value={depositMonths}
+                    onChange={(val) => {
+                      const parsed = typeof val === 'number' ? val : Number(val);
+                      const next = Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 1;
+                      setDepositMonths(next);
+                      saveBusinessSettings({ depositMonths: next });
+                    }}
+                    min={0}
+                    step={1}
+                    allowDecimal={false}
+                    data-er-field="BUSINESS.deposit_months"
+                  />
+                </Stack>
               </div>
 
-              <TextInput
-                label="Business Type"
-                placeholder="e.g., Nursing Home, Assisted Living"
-                value={businessInfo.businessType}
-                onChange={(e) => setBusinessInfo({ ...businessInfo, businessType: e.target.value })}
-                required
-                data-er-field="BUSINESS.business_type"
-              />
+              <div className="business-setup-pane business-setup-pane--contrast">
+                <Stack gap="md">
+                  <Title order={3} mb="sm">Owner Account</Title>
 
-              <Textarea
-                label="Address"
-                placeholder="Enter your business address"
-                value={businessInfo.address}
-                onChange={(e) => setBusinessInfo({ ...businessInfo, address: e.target.value })}
-                required
-                rows={3}
-                data-er-field="BUSINESS.address"
-              />
+                  <Group grow>
+                    <TextInput
+                      label="First Name"
+                      placeholder="First name"
+                      value={adminInfo.firstName}
+                      onChange={(e) => {
+                        setAdminInfo({ ...adminInfo, firstName: e.target.value });
+                        clearError('firstName');
+                      }}
+                      required
+                      error={errors.firstName}
+                    />
 
-              <TextInput
-                label="Phone Number"
-                type="tel"
-                placeholder="Enter your contact number"
-                value={businessInfo.phone}
-                onChange={(e) => setBusinessInfo({ ...businessInfo, phone: e.target.value })}
-                required
-                data-er-field="BUSINESS.phone"
-              />
-            </Stack>
+                    <TextInput
+                      label="Last Name"
+                      placeholder="Last name"
+                      value={adminInfo.lastName}
+                      onChange={(e) => {
+                        setAdminInfo({ ...adminInfo, lastName: e.target.value });
+                        clearError('lastName');
+                      }}
+                      required
+                      error={errors.lastName}
+                    />
+                  </Group>
+
+                  <TextInput
+                    label="Email"
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={adminInfo.email}
+                    onChange={(e) => {
+                      setAdminInfo({ ...adminInfo, email: e.target.value });
+                      clearError('email');
+                    }}
+                    required
+                    error={errors.email}
+                  />
+
+                  <PasswordInput
+                    label="Password"
+                    type="password"
+                    placeholder="Create a strong password"
+                    value={adminInfo.password}
+                    onChange={(e) => {
+                      setAdminInfo({ ...adminInfo, password: e.target.value });
+                      clearError('password');
+                    }}
+                    required
+                    error={errors.password}
+                  />
+
+                  <PasswordInput
+                    label="Confirm Password"
+                    type="password"
+                    placeholder="Confirm your password"
+                    value={adminInfo.confirmPassword}
+                    onChange={(e) => {
+                      setAdminInfo({ ...adminInfo, confirmPassword: e.target.value });
+                      clearError('confirmPassword');
+                    }}
+                    required
+                    error={errors.confirmPassword}
+                  />
+                </Stack>
+              </div>
+            </div>
           )}
 
-          {/* Step 2: Administrator Account */}
           {currentStep === 1 && (
+            <div className="business-setup-terms">
+              <Title order={3} mb="sm">Terms &amp; Condition Agreement</Title>
+              <Text size="sm" c="dimmed">
+                Please read and accept the Terms &amp; Conditions to complete business setup.
+              </Text>
+
+              <div className="business-setup-terms-body">
+                <Stack gap="md">
+                  <Text>
+                    By continuing, you agree to maintain accurate business records, protect resident data,
+                    and comply with applicable local regulations. You acknowledge responsibility for staff
+                    accounts, billing accuracy, and facility operations within the platform.
+                  </Text>
+                  <Text>
+                    Usable App Company Limited provides the platform “as is” and is not liable for
+                    operational decisions made using this system. Please review all local compliance
+                    obligations before onboarding residents.
+                  </Text>
+                  <Text>
+                    If you do not agree to these terms, select Disagree to return and edit your information
+                    or exit setup.
+                  </Text>
+                </Stack>
+              </div>
+            </div>
+          )}
+
+          <Modal
+            opened={disagreeOpen}
+            onClose={() => setDisagreeOpen(false)}
+            title="Discard setup information?"
+            centered
+          >
             <Stack gap="md">
-              <Title order={3} mb="sm">Administrator Account</Title>
-
-              <Group grow>
-                <TextInput
-                  label="First Name"
-                  placeholder="First name"
-                  value={adminInfo.firstName}
-                  onChange={(e) => setAdminInfo({ ...adminInfo, firstName: e.target.value })}
-                  required
-                />
-
-                <TextInput
-                  label="Last Name"
-                  placeholder="Last name"
-                  value={adminInfo.lastName}
-                  onChange={(e) => setAdminInfo({ ...adminInfo, lastName: e.target.value })}
-                  required
-                />
+              <Text size="sm" c="dimmed">
+                If you disagree, all information you entered on the previous page will be removed for your convenience.
+              </Text>
+              <Group justify="flex-end">
+                <Button variant="subtle" color="gray" onClick={() => setDisagreeOpen(false)}>
+                  Keep Editing
+                </Button>
+                <Button color="red" onClick={confirmDisagree}>
+                  Disagree &amp; Clear
+                </Button>
               </Group>
-
-              <TextInput
-                label="Email"
-                type="email"
-                placeholder="admin@example.com"
-                value={adminInfo.email}
-                onChange={(e) => setAdminInfo({ ...adminInfo, email: e.target.value })}
-                required
-              />
-
-              <TextInput
-                label="Password"
-                type="password"
-                placeholder="Create a strong password"
-                value={adminInfo.password}
-                onChange={(e) => setAdminInfo({ ...adminInfo, password: e.target.value })}
-                required
-              />
-
-              <TextInput
-                label="Confirm Password"
-                type="password"
-                placeholder="Confirm your password"
-                value={adminInfo.confirmPassword}
-                onChange={(e) => setAdminInfo({ ...adminInfo, confirmPassword: e.target.value })}
-                required
-              />
             </Stack>
-          )}
-
-          {/* Step 3: Facility Details */}
-          {currentStep === 2 && (
-            <Stack gap="md" data-er-field="VENUE">
-              <Title order={3} mb="sm">Facility Details</Title>
-
-              <Group grow>
-                <TextInput
-                  label="Number of Beds"
-                  type="number"
-                  placeholder="e.g., 50"
-                  value={facilityInfo.numberOfBeds}
-                  onChange={(e) => setFacilityInfo({ ...facilityInfo, numberOfBeds: e.target.value })}
-                  required
-                  data-er-field="VENUE.number_of_beds"
-                />
-
-                <TextInput
-                  label="Number of Floors"
-                  type="number"
-                  placeholder="e.g., 3"
-                  value={facilityInfo.numberOfFloors}
-                  onChange={(e) => setFacilityInfo({ ...facilityInfo, numberOfFloors: e.target.value })}
-                  required
-                  data-er-field="VENUE.number_of_floors"
-                />
-              </Group>
-
-              <TextInput
-                label="Operating Hours"
-                placeholder="e.g., 24/7 or 8:00 AM - 8:00 PM"
-                value={facilityInfo.operatingHours}
-                onChange={(e) => setFacilityInfo({ ...facilityInfo, operatingHours: e.target.value })}
-                required
-                data-er-field="VENUE.operating_hours"
-              />
-
-              <TextInput
-                label="License Number"
-                placeholder="Enter facility license number"
-                value={facilityInfo.licenseNumber}
-                onChange={(e) => setFacilityInfo({ ...facilityInfo, licenseNumber: e.target.value })}
-                required
-                data-er-field="VENUE.license_number"
-              />
-            </Stack>
-          )}
-
-          {/* Step 4: Preferences */}
-          {currentStep === 3 && (
-            <Stack gap="md">
-              <Title order={3} mb="sm">System Preferences</Title>
-
-              <TextInput
-                label="Timezone"
-                placeholder="e.g., Asia/Bangkok"
-                value={preferences.timezone}
-                onChange={(e) => setPreferences({ ...preferences, timezone: e.target.value })}
-                required
-                data-er-field="BUSINESS.timezone"
-              />
-
-              <TextInput
-                label="Currency"
-                placeholder="e.g., THB, USD"
-                value={preferences.currency}
-                onChange={(e) => setPreferences({ ...preferences, currency: e.target.value })}
-                required
-                data-er-field="BUSINESS.currency"
-              />
-
-              <TextInput
-                label="Language"
-                placeholder="e.g., English, Thai"
-                value={preferences.language}
-                onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
-                required
-                data-er-field="BUSINESS.language"
-              />
-
-              <NumberInput
-                label="Deposit policy (months)"
-                description="Invoice deposit will be calculated as +N month(s) and added as a line item"
-                value={depositMonths}
-                onChange={(val) => {
-                  const parsed = typeof val === 'number' ? val : Number(val);
-                  const next = Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 1;
-                  setDepositMonths(next);
-                  saveBusinessSettings({ depositMonths: next });
-                }}
-                min={0}
-                step={1}
-                allowDecimal={false}
-                data-er-field="BUSINESS.deposit_months"
-              />
-
-              <Paper
-                p="md"
-                radius="md"
-                style={{
-                  backgroundColor: 'var(--mantine-color-gray-0)',
-                  marginTop: '1rem'
-                }}
-              >
-                <Text size="xs" c="dimmed">
-                  <strong>Almost there!</strong> Review your information and click Complete Setup to
-                  finish creating your account.
-                </Text>
-              </Paper>
-            </Stack>
-          )}
+          </Modal>
 
           {/* Navigation Buttons */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: '2rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid var(--mantine-color-gray-2)'
-          }}>
-            <div>
-              {currentStep === 0 && onBack ? (
-                <Button
-                  variant="subtle"
-                  onClick={onBack}
-                  leftSection={<IconArrowLeft size={16} />}
-                >
-                  Back
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  onClick={handlePrevious}
-                  leftSection={<IconArrowLeft size={16} />}
-                >
-                  Previous
-                </Button>
-              )}
-            </div>
+          <div className="business-setup-footer">
+            {currentStep === 0 ? (
+              <Button variant="subtle" color="gray" onClick={handleExit}>
+                Exit Bourbon
+              </Button>
+            ) : (
+              <Button variant="subtle" color="gray" onClick={handleDisagree}>
+                Disagree
+              </Button>
+            )}
 
-            <div>
-              {currentStep < 3 ? (
-                <Button
-                  onClick={handleNext}
-                  rightSection={<IconArrowRight size={16} />}
-                >
-                  Next
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleComplete}
-                  leftSection={<IconCheck size={16} />}
-                >
-                  Complete Setup
-                </Button>
-              )}
-            </div>
+            {currentStep === 0 ? (
+              <Button onClick={handleReadAgreements} rightSection={<IconArrowRight size={16} />}>
+                Read Agreements
+              </Button>
+            ) : (
+              <Button onClick={handleComplete} leftSection={<IconCheck size={16} />}>
+                Agree with the Terms &amp; Condition
+              </Button>
+            )}
           </div>
         </Paper>
 
-        {/* Step Indicators */}
-        <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-          {[0, 1, 2, 3].map((index) => (
-            <div
-              key={index}
-              style={{
-                height: '0.5rem',
-                width: '0.5rem',
-                borderRadius: '50%',
-                backgroundColor: index === currentStep
-                  ? 'var(--mantine-color-blue-6)'
-                  : index < currentStep
-                    ? 'var(--mantine-color-blue-4)'
-                    : 'var(--mantine-color-gray-3)',
-                transition: 'background-color 0.3s'
-              }}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );

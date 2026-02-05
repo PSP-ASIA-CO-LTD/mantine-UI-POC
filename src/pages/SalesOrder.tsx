@@ -289,15 +289,41 @@ export function SalesOrderPage() {
 
     const residentForm = useForm({
         initialValues: {
+            prefix: '',
             firstName: '',
             lastName: '',
             dateOfBirth: '',
             gender: 'female' as const,
             idNumber: '',
+            hospitalNumber: '',
+            race: '',
+            nationality: '',
+            religion: '',
+            maritalStatus: '',
+            occupation: '',
+            bloodGroup: '',
+            fatherName: '',
+            motherName: '',
+            addressNumber: '',
+            addressMoo: '',
+            addressVillage: '',
+            addressSoi: '',
+            addressStreet: '',
+            addressSubDistrict: '',
+            addressDistrict: '',
+            addressProvince: '',
+            addressPostalCode: '',
+            phoneHome: '',
+            phoneMobile: '',
+            email: '',
             medicalConditions: '',
             allergies: '',
             dietaryRestrictions: '',
-            emergencyContact: ''
+            emergencyContact: '',
+            emergencyContactName: '',
+            emergencyContactRelationship: '',
+            emergencyContactAddressSameAsResident: true,
+            emergencyContactAddress: '',
         },
         validate: {
             firstName: (value) => value.length < 2 ? 'First name is required' : null,
@@ -374,7 +400,14 @@ export function SalesOrderPage() {
             ...residentForm.values,
             firstName: firstGuardian.firstName,
             lastName: firstGuardian.lastName,
-            emergencyContact: firstGuardian.phone
+            phoneMobile: firstGuardian.phone,
+            email: firstGuardian.email,
+            addressStreet: firstGuardian.address,
+            emergencyContactName: `${firstGuardian.firstName} ${firstGuardian.lastName}`.trim(),
+            emergencyContactRelationship: firstGuardian.relationship,
+            emergencyContactAddressSameAsResident: false,
+            emergencyContactAddress: firstGuardian.address,
+            emergencyContact: firstGuardian.phone,
         });
     };
 
@@ -404,15 +437,41 @@ export function SalesOrderPage() {
 
         // Set resident info
         residentForm.setValues({
+            prefix: '',
             firstName: 'สมศรี',
             lastName: 'ใจดี',
             dateOfBirth: '1948-05-15',
             gender: 'female',
             idNumber: '3-1001-00123-45-6',
+            hospitalNumber: '',
+            race: 'ไทย',
+            nationality: 'ไทย',
+            religion: 'พุทธ',
+            maritalStatus: 'married',
+            occupation: 'เกษียณ',
+            bloodGroup: 'O+',
+            fatherName: '',
+            motherName: '',
+            addressNumber: '99/1',
+            addressMoo: '5',
+            addressVillage: 'พฤกษาวิลล์',
+            addressSoi: 'สุขุมวิท 55',
+            addressStreet: 'ถ.สุขุมวิท',
+            addressSubDistrict: 'คลองตันเหนือ',
+            addressDistrict: 'วัฒนา',
+            addressProvince: 'กรุงเทพฯ',
+            addressPostalCode: '10110',
+            phoneHome: '02-123-4567',
+            phoneMobile: '081-234-5678',
+            email: 'somsri.jaidee@email.com',
             medicalConditions: 'เบาหวานชนิดที่ 2, ความดันโลหิตสูง, ข้อเข่าเสื่อม',
             allergies: 'Penicillin, ถั่วลิสง',
             dietaryRestrictions: 'อาหารลดโซเดียม, ลดน้ำตาล',
-            emergencyContact: '081-234-5678'
+            emergencyContact: '081-234-5678',
+            emergencyContactName: 'สมชาย ใจดี',
+            emergencyContactRelationship: 'son',
+            emergencyContactAddressSameAsResident: false,
+            emergencyContactAddress: '123/45 ถ.สุขุมวิท 55 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ 10110',
         });
 
         // Clear any validation errors
@@ -917,29 +976,37 @@ export function SalesOrderPage() {
                             </Button>
                         </Group>
 
-                        <Stack gap="md">
-                            <Grid>
-                                <Grid.Col span={6}>
-                                    <TextInput
-                                        label="First Name"
-                                        placeholder="Enter first name"
-                                        required
-                                        {...residentForm.getInputProps('firstName')}
-                                        data-er-field="RESIDENT.first_name"
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={6}>
-                                    <TextInput
-                                        label="Last Name"
-                                        placeholder="Enter last name"
-                                        required
-                                        {...residentForm.getInputProps('lastName')}
-                                        data-er-field="RESIDENT.last_name"
-                                    />
-                                </Grid.Col>
-                            </Grid>
-                            <Grid>
-                                <Grid.Col span={4}>
+	                        <Stack gap="md">
+	                            <Grid>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Prefix"
+	                                        placeholder="Mr., Mrs., นาง, น.ส."
+	                                        {...residentForm.getInputProps('prefix')}
+	                                        data-er-field="RESIDENT.prefix"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="First Name"
+	                                        placeholder="Enter first name"
+	                                        required
+	                                        {...residentForm.getInputProps('firstName')}
+	                                        data-er-field="RESIDENT.first_name"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Last Name"
+	                                        placeholder="Enter last name"
+	                                        required
+	                                        {...residentForm.getInputProps('lastName')}
+	                                        data-er-field="RESIDENT.last_name"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
+	                                <Grid.Col span={4}>
                                     <TextInput
                                         label="Date of Birth"
                                         type="date"
@@ -965,17 +1032,217 @@ export function SalesOrderPage() {
                                         label="ID Number"
                                         placeholder="National ID"
                                         {...residentForm.getInputProps('idNumber')}
-                                        data-er-field="RESIDENT.id_number"
-                                    />
-                                </Grid.Col>
-                            </Grid>
-                            <Textarea
-                                label="Medical Conditions"
-                                placeholder="List any medical conditions..."
-                                rows={2}
-                                {...residentForm.getInputProps('medicalConditions')}
-                                data-er-field="RESIDENT.medical_conditions"
-                            />
+	                                        data-er-field="RESIDENT.id_number"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Hospital No. (HN)"
+	                                        placeholder="External patient ID"
+	                                        {...residentForm.getInputProps('hospitalNumber')}
+	                                        data-er-field="RESIDENT.hospital_number"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Race"
+	                                        placeholder="e.g., ไทย"
+	                                        {...residentForm.getInputProps('race')}
+	                                        data-er-field="RESIDENT.race"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Nationality"
+	                                        placeholder="e.g., ไทย"
+	                                        {...residentForm.getInputProps('nationality')}
+	                                        data-er-field="RESIDENT.nationality"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Religion"
+	                                        placeholder="e.g., Christianity"
+	                                        {...residentForm.getInputProps('religion')}
+	                                        data-er-field="RESIDENT.religion"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={6}>
+	                                    <Select
+	                                        label="Marital Status"
+	                                        placeholder="Select status"
+	                                        data={[
+	                                            { value: 'single', label: 'Single' },
+	                                            { value: 'married', label: 'Married' },
+	                                            { value: 'other', label: 'Other' },
+	                                        ]}
+	                                        clearable
+	                                        {...residentForm.getInputProps('maritalStatus')}
+	                                        data-er-field="RESIDENT.marital_status"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Occupation"
+	                                        placeholder="e.g., รับจ้าง"
+	                                        {...residentForm.getInputProps('occupation')}
+	                                        data-er-field="RESIDENT.occupation"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Blood Group"
+	                                        placeholder="e.g., AB Rh+"
+	                                        {...residentForm.getInputProps('bloodGroup')}
+	                                        data-er-field="RESIDENT.blood_group"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Father's Name"
+	                                        placeholder="Full name"
+	                                        {...residentForm.getInputProps('fatherName')}
+	                                        data-er-field="RESIDENT.father_name"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Mother's Name"
+	                                        placeholder="Full name"
+	                                        {...residentForm.getInputProps('motherName')}
+	                                        data-er-field="RESIDENT.mother_name"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+
+	                            <Divider my="xs" label="Contact Info" labelPosition="center" />
+
+	                            <Grid>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Mobile Phone"
+	                                        placeholder="08X-XXX-XXXX"
+	                                        {...residentForm.getInputProps('phoneMobile')}
+	                                        data-er-field="RESIDENT.phone_mobile"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Home Phone"
+	                                        placeholder="02-XXX-XXXX"
+	                                        {...residentForm.getInputProps('phoneHome')}
+	                                        data-er-field="RESIDENT.phone_home"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <TextInput
+	                                label="Email"
+	                                placeholder="email@example.com"
+	                                type="email"
+	                                {...residentForm.getInputProps('email')}
+	                                data-er-field="RESIDENT.email"
+	                            />
+
+	                            <Divider my="xs" label="Address" labelPosition="center" />
+
+	                            <Grid>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Address No."
+	                                        placeholder="e.g., 36"
+	                                        {...residentForm.getInputProps('addressNumber')}
+	                                        data-er-field="RESIDENT.address_number"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Moo"
+	                                        placeholder="e.g., 9"
+	                                        {...residentForm.getInputProps('addressMoo')}
+	                                        data-er-field="RESIDENT.address_moo"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Village"
+	                                        placeholder="Village name"
+	                                        {...residentForm.getInputProps('addressVillage')}
+	                                        data-er-field="RESIDENT.address_village"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Street"
+	                                        placeholder="Street name"
+	                                        {...residentForm.getInputProps('addressStreet')}
+	                                        data-er-field="RESIDENT.address_street"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Soi"
+	                                        placeholder="Soi name / number"
+	                                        {...residentForm.getInputProps('addressSoi')}
+	                                        data-er-field="RESIDENT.address_soi"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Sub-district"
+	                                        placeholder="Sub-district"
+	                                        {...residentForm.getInputProps('addressSubDistrict')}
+	                                        data-er-field="RESIDENT.address_sub_district"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="District"
+	                                        placeholder="District"
+	                                        {...residentForm.getInputProps('addressDistrict')}
+	                                        data-er-field="RESIDENT.address_district"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Province"
+	                                        placeholder="Province"
+	                                        {...residentForm.getInputProps('addressProvince')}
+	                                        data-er-field="RESIDENT.address_province"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Postal Code"
+	                                        placeholder="e.g., 10170"
+	                                        {...residentForm.getInputProps('addressPostalCode')}
+	                                        data-er-field="RESIDENT.address_postal_code"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+
+	                            <Divider my="xs" label="Medical" labelPosition="center" />
+
+	                            <Textarea
+	                                label="Medical Conditions"
+	                                placeholder="List any medical conditions..."
+	                                rows={2}
+	                                {...residentForm.getInputProps('medicalConditions')}
+	                                data-er-field="RESIDENT.medical_conditions"
+	                            />
                             <Grid>
                                 <Grid.Col span={6}>
                                     <TextInput
@@ -991,17 +1258,65 @@ export function SalesOrderPage() {
                                         placeholder="E.g., low sodium, vegetarian"
                                         {...residentForm.getInputProps('dietaryRestrictions')}
                                         data-er-field="RESIDENT.dietary_restrictions"
-                                    />
-                                </Grid.Col>
-                            </Grid>
-                            <TextInput
-                                label="Emergency Contact"
-                                placeholder="Phone number"
-                                {...residentForm.getInputProps('emergencyContact')}
-                                data-er-field="RESIDENT.emergency_contact"
-                            />
-                        </Stack>
-                    </Card>
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+
+	                            <Divider my="xs" label="Emergency Contact" labelPosition="center" />
+
+	                            <Grid>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Emergency Contact Name"
+	                                        placeholder="Full name"
+	                                        {...residentForm.getInputProps('emergencyContactName')}
+	                                        data-er-field="RESIDENT.emergency_contact_name"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={6}>
+	                                    <Select
+	                                        label="Relationship to Resident"
+	                                        placeholder="Select relationship"
+	                                        data={[
+	                                            { value: 'father', label: 'Father' },
+	                                            { value: 'mother', label: 'Mother' },
+	                                            { value: 'son', label: 'Son' },
+	                                            { value: 'daughter', label: 'Daughter' },
+	                                            { value: 'spouse', label: 'Spouse' },
+	                                            { value: 'sibling', label: 'Sibling' },
+	                                            { value: 'relative', label: 'Relative' },
+	                                            { value: 'friend', label: 'Friend' },
+	                                            { value: 'employer', label: 'Employer' },
+	                                            { value: 'other', label: 'Other' },
+	                                        ]}
+	                                        clearable
+	                                        {...residentForm.getInputProps('emergencyContactRelationship')}
+	                                        data-er-field="RESIDENT.emergency_contact_relationship"
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <TextInput
+	                                label="Emergency Contact Phone"
+	                                placeholder="Phone number"
+	                                {...residentForm.getInputProps('emergencyContact')}
+	                                data-er-field="RESIDENT.emergency_contact"
+	                            />
+	                            <Checkbox
+	                                label="Emergency contact address is same as resident"
+	                                {...residentForm.getInputProps('emergencyContactAddressSameAsResident', { type: 'checkbox' })}
+	                                data-er-field="RESIDENT.emergency_contact_address_same"
+	                            />
+	                            {!residentForm.values.emergencyContactAddressSameAsResident && (
+	                                <Textarea
+	                                    label="Emergency Contact Address"
+	                                    placeholder="Full address"
+	                                    rows={2}
+	                                    {...residentForm.getInputProps('emergencyContactAddress')}
+	                                    data-er-field="RESIDENT.emergency_contact_address"
+	                                />
+	                            )}
+	                        </Stack>
+	                    </Card>
 
                     {/* Guardian Block */}
                     <Card padding="lg" radius="md" withBorder className="contact-form-card guardians-card">
@@ -1096,19 +1411,24 @@ export function SalesOrderPage() {
                                             onChange={(e) => updateGuardianField(index, 'address', e.target.value)}
                                             data-er-field="GUARDIAN.address"
                                         />
-                                        <Select
-                                            label="Relationship to Resident"
-                                            data={[
-                                                { value: 'son', label: 'Son' },
-                                                { value: 'daughter', label: 'Daughter' },
-                                                { value: 'spouse', label: 'Spouse' },
-                                                { value: 'relative', label: 'Relative' },
-                                                { value: 'other', label: 'Other' }
-                                            ]}
-                                            value={guardian.relationship}
-                                            onChange={(val) => updateGuardianField(index, 'relationship', val || 'other')}
-                                            data-er-field="GUARDIAN.relationship"
-                                        />
+	                                        <Select
+	                                            label="Relationship to Resident"
+	                                            data={[
+	                                                { value: 'father', label: 'Father' },
+	                                                { value: 'mother', label: 'Mother' },
+	                                                { value: 'son', label: 'Son' },
+	                                                { value: 'daughter', label: 'Daughter' },
+	                                                { value: 'spouse', label: 'Spouse' },
+	                                                { value: 'sibling', label: 'Sibling' },
+	                                                { value: 'relative', label: 'Relative' },
+	                                                { value: 'friend', label: 'Friend' },
+	                                                { value: 'employer', label: 'Employer' },
+	                                                { value: 'other', label: 'Other' }
+	                                            ]}
+	                                            value={guardian.relationship}
+	                                            onChange={(val) => updateGuardianField(index, 'relationship', val || 'other')}
+	                                            data-er-field="GUARDIAN.relationship"
+	                                        />
                                         <Checkbox
                                             label="This guardian pays for care"
                                             description="Check if this guardian contributes to payment"

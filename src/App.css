@@ -1,1 +1,55 @@
 /* App-level styles */
+
+.business-setup-split {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+.business-setup-pane {
+  padding: 1.5rem;
+}
+
+.business-setup-pane--contrast {
+  background: var(--mantine-color-gray-0);
+  border-radius: 12px;
+}
+
+.business-setup-terms {
+  padding: 1.5rem;
+}
+
+.business-setup-terms-body {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: var(--mantine-color-gray-0);
+  border-radius: 12px;
+}
+
+.business-setup-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0;
+  padding: 1.25rem 2rem;
+  border-top: 1px solid var(--mantine-color-gray-2);
+  background: #fff;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+@media (min-width: 62rem) {
+  .business-setup-split {
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .business-setup-pane {
+    padding: 1.75rem 2rem;
+  }
+
+  .business-setup-pane--contrast {
+    border-left: 1px solid var(--mantine-color-gray-2);
+    border-radius: 0 12px 12px 0;
+  }
+}

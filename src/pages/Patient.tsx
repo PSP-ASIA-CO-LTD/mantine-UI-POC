@@ -42,8 +42,16 @@ const getStatusColor = (status: SalesOrder['status']) => {
         active: 'blue',
         completed: 'teal',
         cancelled: 'red'
-    };
-    return colors[status];
+	};
+	return colors[status];
+};
+
+const humanizeToken = (token?: string | null) => {
+	if (!token) return '—';
+	return token
+		.split('_')
+		.map((part) => (part.length > 0 ? part[0].toUpperCase() + part.slice(1) : part))
+		.join(' ');
 };
 
 export function Patient() {
@@ -118,75 +126,220 @@ export function Patient() {
         return admissionsByResident.get(residentId) || [];
     };
 
-    const openResidentSidesheet = (resident: Resident) => {
-        const residentGuardians = getGuardiansForResident(resident);
-        const admissions = getAdmissionsForResident(resident.id);
+	const openResidentSidesheet = (resident: Resident) => {
+		const residentGuardians = getGuardiansForResident(resident);
+		const admissions = getAdmissionsForResident(resident.id);
 
-        const leftPane = (
-            <div className="patient-left-pane">
-                <div className="patient-left-details">
-                    {buildLeftSection(
-                        'Resident ID',
-                        <Text size="sm" fw={500} data-er-field="RESIDENT.id">
-                            {resident.id}
-                        </Text>
-                    )}
+		const addressLines = [
+			[resident.addressNumber, resident.addressMoo ? `Moo ${resident.addressMoo}` : null, resident.addressVillage]
+				.filter(Boolean)
+				.join(' '),
+			[resident.addressStreet, resident.addressSoi ? `Soi ${resident.addressSoi}` : null].filter(Boolean).join(' '),
+			[resident.addressSubDistrict, resident.addressDistrict, resident.addressProvince, resident.addressPostalCode]
+				.filter(Boolean)
+				.join(' '),
+		].filter((line) => line.trim().length > 0);
 
-                    <Divider my="md" />
+		const leftPane = (
+			<div className="patient-left-pane">
+				<div className="patient-left-details">
+					{buildLeftSection(
+						'Resident ID',
+						<Text size="sm" fw={500} data-er-field="RESIDENT.id">
+							{resident.id}
+						</Text>
+					)}
 
-                    {buildLeftSection(
-                        'Date of Birth',
-                        <Text size="sm" data-er-field="RESIDENT.date_of_birth">
-                            {formatDate(resident.dateOfBirth)}
-                        </Text>
-                    )}
+					{buildLeftSection(
+						'Hospital No. (HN)',
+						<Text size="sm" data-er-field="RESIDENT.hospital_number">
+							{resident.hospitalNumber || '—'}
+						</Text>
+					)}
 
-                    {buildLeftSection(
-                        'Gender',
-                        <Badge color="gray" size="lg" data-er-field="RESIDENT.gender">
-                            {resident.gender || '—'}
-                        </Badge>
-                    )}
+					{buildLeftSection(
+						'ID Number',
+						<Text size="sm" data-er-field="RESIDENT.id_number">
+							{resident.idNumber || '—'}
+						</Text>
+					)}
 
-                    {buildLeftSection(
-                        'ID Number',
-                        <Text size="sm" data-er-field="RESIDENT.id_number">
-                            {resident.idNumber || '—'}
-                        </Text>
-                    )}
+					<Divider my="md" />
 
-                    <Divider my="md" />
+					{buildLeftSection(
+						'Prefix',
+						<Text size="sm" data-er-field="RESIDENT.prefix">
+							{resident.prefix || '—'}
+						</Text>
+					)}
 
-                    {buildLeftSection(
-                        'Medical Conditions',
-                        <Text size="sm" c="dimmed" data-er-field="RESIDENT.medical_conditions">
-                            {resident.medicalConditions || '—'}
-                        </Text>
-                    )}
+					{buildLeftSection(
+						'Date of Birth',
+						<Text size="sm" data-er-field="RESIDENT.date_of_birth">
+							{formatDate(resident.dateOfBirth)}
+						</Text>
+					)}
 
-                    {buildLeftSection(
-                        'Allergies',
-                        <Text size="sm" c="dimmed" data-er-field="RESIDENT.allergies">
-                            {resident.allergies || '—'}
-                        </Text>
-                    )}
+					{buildLeftSection(
+						'Gender',
+						<Badge color="gray" size="lg" data-er-field="RESIDENT.gender">
+							{resident.gender || '—'}
+						</Badge>
+					)}
 
-                    {buildLeftSection(
-                        'Dietary Restrictions',
-                        <Text size="sm" c="dimmed" data-er-field="RESIDENT.dietary_restrictions">
-                            {resident.dietaryRestrictions || '—'}
-                        </Text>
-                    )}
+					{buildLeftSection(
+						'Race',
+						<Text size="sm" data-er-field="RESIDENT.race">
+							{resident.race || '—'}
+						</Text>
+					)}
 
-                    {buildLeftSection(
-                        'Emergency Contact',
-                        <Text size="sm" data-er-field="RESIDENT.emergency_contact">
-                            {resident.emergencyContact || '—'}
-                        </Text>
-                    )}
-                </div>
-            </div>
-        );
+					{buildLeftSection(
+						'Nationality',
+						<Text size="sm" data-er-field="RESIDENT.nationality">
+							{resident.nationality || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Religion',
+						<Text size="sm" data-er-field="RESIDENT.religion">
+							{resident.religion || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Marital Status',
+						<Text size="sm" data-er-field="RESIDENT.marital_status">
+							{humanizeToken(resident.maritalStatus)}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Occupation',
+						<Text size="sm" data-er-field="RESIDENT.occupation">
+							{resident.occupation || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Blood Group',
+						<Text size="sm" data-er-field="RESIDENT.blood_group">
+							{resident.bloodGroup || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						"Father's Name",
+						<Text size="sm" data-er-field="RESIDENT.father_name">
+							{resident.fatherName || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						"Mother's Name",
+						<Text size="sm" data-er-field="RESIDENT.mother_name">
+							{resident.motherName || '—'}
+						</Text>
+					)}
+
+					<Divider my="md" />
+
+					{buildLeftSection(
+						'Mobile Phone',
+						<Text size="sm" data-er-field="RESIDENT.phone_mobile">
+							{resident.phoneMobile || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Home Phone',
+						<Text size="sm" data-er-field="RESIDENT.phone_home">
+							{resident.phoneHome || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Email',
+						<Text size="sm" data-er-field="RESIDENT.email">
+							{resident.email || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Address',
+						addressLines.length > 0 ? (
+							<Stack gap={2} data-er-field="RESIDENT.address">
+								{addressLines.map((line, index) => (
+									<Text key={index} size="sm" c="dimmed">
+										{line}
+									</Text>
+								))}
+							</Stack>
+						) : (
+							<Text size="sm" c="dimmed" data-er-field="RESIDENT.address">
+								—
+							</Text>
+						)
+					)}
+
+					<Divider my="md" />
+
+					{buildLeftSection(
+						'Medical Conditions',
+						<Text size="sm" c="dimmed" data-er-field="RESIDENT.medical_conditions">
+							{resident.medicalConditions || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Allergies',
+						<Text size="sm" c="dimmed" data-er-field="RESIDENT.allergies">
+							{resident.allergies || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Dietary Restrictions',
+						<Text size="sm" c="dimmed" data-er-field="RESIDENT.dietary_restrictions">
+							{resident.dietaryRestrictions || '—'}
+						</Text>
+					)}
+
+					<Divider my="md" />
+
+					{buildLeftSection(
+						'Emergency Contact Name',
+						<Text size="sm" data-er-field="RESIDENT.emergency_contact_name">
+							{resident.emergencyContactName || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Emergency Contact Relationship',
+						<Text size="sm" data-er-field="RESIDENT.emergency_contact_relationship">
+							{humanizeToken(resident.emergencyContactRelationship)}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Emergency Contact Phone',
+						<Text size="sm" data-er-field="RESIDENT.emergency_contact">
+							{resident.emergencyContact || '—'}
+						</Text>
+					)}
+
+					{buildLeftSection(
+						'Emergency Contact Address',
+						<Text size="sm" c="dimmed" data-er-field="RESIDENT.emergency_contact_address">
+							{resident.emergencyContactAddressSameAsResident
+								? 'Same as resident address'
+								: resident.emergencyContactAddress || '—'}
+						</Text>
+					)}
+				</div>
+			</div>
+		);
 
         const rightPane = (
             <div className="patient-right-pane">
@@ -218,15 +371,16 @@ export function Patient() {
                                                 <IconPhone size={14} />
                                                 <Text size="sm">{guardian.phone || '—'}</Text>
                                             </Group>
-                                            <Group gap="xs">
-                                                <IconMail size={14} />
-                                                <Text size="sm">{guardian.email || '—'}</Text>
-                                            </Group>
-                                            <Text size="xs" c="dimmed">Relationship: {guardian.relationship || '—'}</Text>
-                                        </Stack>
-                                    )}
-                                />
-                            ))}
+	                                            <Group gap="xs">
+	                                                <IconMail size={14} />
+	                                                <Text size="sm">{guardian.email || '—'}</Text>
+	                                            </Group>
+	                                            <Text size="xs" c="dimmed">{guardian.address || '—'}</Text>
+	                                            <Text size="xs" c="dimmed">Relationship: {humanizeToken(guardian.relationship)}</Text>
+	                                        </Stack>
+	                                    )}
+	                                />
+	                            ))}
                         </Stack>
                     ) : (
                         <Text size="sm" c="dimmed">No guardians on file.</Text>
