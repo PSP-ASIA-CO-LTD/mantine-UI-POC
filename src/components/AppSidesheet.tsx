@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { Title, Button, Text } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import './AppSidesheet.css';
@@ -26,91 +26,99 @@ export function AppSidesheet({
     footer,
     children
 }: AppSidesheetProps) {
+    const titleId = useId();
+    const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+    const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+
     useEffect(() => {
-        if (opened) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
+        if (!opened) return;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
         return () => {
-            document.body.style.overflow = '';
+            document.body.style.overflow = previousOverflow;
         };
     }, [opened]);
+
+    useEffect(() => {
+        if (!opened) return;
+
+        previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
+        const frame = requestAnimationFrame(() => {
+            closeButtonRef.current?.focus();
+        });
+
+        return () => {
+            cancelAnimationFrame(frame);
+            previouslyFocusedElementRef.current?.focus?.();
+            previouslyFocusedElementRef.current = null;
+        };
+    }, [opened]);
+
+    useEffect(() => {
+        if (!opened) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape') return;
+            event.preventDefault();
+            onClose();
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [opened, onClose]);
+
+    const hasLeftPane = Boolean(leftPane);
 
     return (
         <>
             {/* Overlay */}
-            {opened && (
-                <div 
-                    className="sidesheet-overlay" 
-                    onClick={onClose}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        background: 'hsla(0, 0%, 0%, 0.3)',
-                        backdropFilter: 'blur(8px)',
-                        zIndex: 1040,
-                        opacity: opened ? 1 : 0,
-                        visibility: opened ? 'visible' : 'hidden',
-                        transition: 'opacity 0.4s ease, backdrop-filter 0.4s ease, visibility 0.4s',
-                    }}
-                />
-            )}
+            <div
+                className={`sidesheet-overlay ${opened ? 'active' : ''}`}
+                onClick={onClose}
+                aria-hidden="true"
+            />
 
             {/* Sidesheet */}
-            <div 
+            <aside
                 className={`sidesheet ${opened ? 'sidesheet-open' : ''}`}
-                style={{
-                    position: 'fixed',
-                    right: 0,
-                    top: 0,
-                    width: '80%',
-                    maxWidth: '1200px',
-                    height: '100vh',
-                    background: 'var(--mantine-color-body)',
-                    boxShadow: '-10px 0 30px hsla(0, 0%, 0%, 0.1)',
-                    zIndex: 1050,
-                    transform: opened ? 'translateX(0)' : 'translateX(100%)',
-                    transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                }}
+                role="dialog"
+                aria-modal="true"
+                aria-hidden={!opened}
+                aria-labelledby={titleId}
             >
                 {/* Header */}
-                <div className="sidesheet-header">
+                <header className="sidesheet-header">
                     <div className="sidesheet-header-content">
                         {subtitle && (
                             <Text size="sm" c="dimmed" className="sidesheet-subtitle">
                                 {subtitle}
                             </Text>
                         )}
-                        <Title order={2} className="sidesheet-title" {...(titleDataAttribute ? { 'data-er-field': titleDataAttribute } : {})}>{title}</Title>
+                        <Title
+                            id={titleId}
+                            order={2}
+                            className="sidesheet-title"
+                            {...(titleDataAttribute ? { 'data-er-field': titleDataAttribute } : {})}
+                        >
+                            {title}
+                        </Title>
                     </div>
                     <Button
+                        ref={closeButtonRef}
                         variant="subtle"
                         color="gray"
                         onClick={onClose}
                         className="sidesheet-close-btn"
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'hsl(0, 0%, 40%)',
-                            fontSize: '2.5em',
-                            lineHeight: 1,
-                            padding: 0,
-                            minWidth: 'auto',
-                            height: 'auto',
-                        }}
                     >
                         <IconX size={24} />
                     </Button>
-                </div>
+                </header>
 
                 {/* Main Content - Two Pane Layout */}
-                <div className="sidesheet-main">
+                <div className={`sidesheet-main ${hasLeftPane ? 'sidesheet-main--two' : ''}`}>
                     {leftPane && (
                         <div className="sidesheet-left-pane">
                             {leftPane}
@@ -125,11 +133,11 @@ export function AppSidesheet({
 
                 {/* Footer */}
                 {footer && (
-                    <div className="sidesheet-footer">
+                    <footer className="sidesheet-footer">
                         {footer}
-                    </div>
+                    </footer>
                 )}
-            </div>
+            </aside>
         </>
     );
 }

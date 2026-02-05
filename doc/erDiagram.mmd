@@ -1,35 +1,4 @@
 erDiagram
-  BUSINESS_PROFILE {
-    string id
-    number depositMonths
-    string createdAt
-    string updatedAt
-  }
-  BUSINESS_INFO {
-    string businessName
-    string businessType
-    string address
-    string phone
-  }
-  ADMIN_INFO {
-    string firstName
-    string lastName
-    string email
-    string password
-    string confirmPassword
-  }
-  FACILITY_INFO {
-    string numberOfBeds
-    string numberOfFloors
-    string operatingHours
-    string licenseNumber
-  }
-  BUSINESS_PREFERENCES {
-    string timezone
-    string currency
-    string language
-  }
-
   PACKAGE {
     string id
     string name
@@ -93,34 +62,14 @@ erDiagram
     string roomId
     string checkIn
     string checkOut
-    number adjustedDays
-    number basePrice
-    number adjustedPrice
     string status
-    string createdAt
-    string createdBy
-    string paidAt
-    string notes
   }
   INVOICE {
     string id
     string salesOrderId
     string guardianId
     string invoiceNumber
-    number subtotal
-    number tax
-    number total
     string status
-    string issuedAt
-    string paidAt
-    string paymentMethod
-    string notes
-  }
-  INVOICE_ITEM {
-    string description
-    number quantity
-    number unitPrice
-    number total
   }
   CONTRACT {
     string id
@@ -128,150 +77,44 @@ erDiagram
     string guardianId
     string residentId
     string contractNumber
-    string startDate
-    string endDate
-    string terms
-    string signedAt
-    string signedBy
     string status
-  }
-  CONTRACT_EMAIL_LOG {
-    string id
-    string to
-    string subject
-    string sentAt
-  }
-  STORED_CONTRACT {
-    string id
-    string contractNumber
-    string language
-    string status
-    string createdAt
-    string updatedAt
-    string signedAt
-    string signedByEmail
-    string allowedGuardianEmails
-    string compiledHtml
-  }
-  STORED_CONTRACT_SOURCE {
-    string id
-    string primaryContactGuardianId
-    string checkIn
-    string checkOut
-    number adjustedDays
-  }
-  STORED_CONTRACT_PRICING {
-    number subtotal
-    number tax
-    number total
-  }
-  ADDITIONAL_SERVICES {
-    boolean additionalBed
-    string specialAmenities
-    boolean selfProvidePampers
-    boolean selfProvideMedications
-  }
-  COMPLETE_SALES_ORDER_DATA {
-    string id
-    string status
-    string createdAt
-    string updatedAt
   }
   OPERATION_TASK {
     string id
     string salesOrderId
     string residentId
-    string residentName
-    string roomNumber
-    string serviceTitle
-    string serviceDept
-    string description
-    string scheduledDate
-    string scheduledTime
     string assignedTo
-    string assignedToName
-    string teamId
     string status
-    string completedAt
-    string completedBy
-    string notes
-    string priority
   }
   STAFF_SHIFT {
     string id
     string staffId
     string date
-    string startTime
-    string endTime
     string status
-  }
-  NOTIFICATION {
-    string id
-    string type
-    string title
-    string message
-    string relatedId
-    string createdAt
-    string readAt
   }
   TASK {
     string id
     string order_id
     string dept
-    string title
-    string date
     string status
   }
   ORDER {
     string id
     string package_id
     string room
-    string check_in
-    string check_out
     string status
   }
-  PACKAGE_SERVICE {
-    string packageId
-    string serviceId
-  }
 
-  BUSINESS_PROFILE ||--|| BUSINESS_INFO : "businessInfo"
-  BUSINESS_PROFILE ||--|| ADMIN_INFO : "adminInfo"
-  BUSINESS_PROFILE ||--|| FACILITY_INFO : "facilityInfo"
-  BUSINESS_PROFILE ||--|| BUSINESS_PREFERENCES : "preferences"
   DEPARTMENT ||--o{ SERVICE : "departmentId"
-  PACKAGE ||--o{ PACKAGE_SERVICE : "packageId"
-  SERVICE ||--o{ PACKAGE_SERVICE : "serviceId"
   PACKAGE ||--o{ SALES_ORDER : "packageId"
   ROOM ||--o{ SALES_ORDER : "roomId"
   GUARDIAN ||--o{ RESIDENT : "guardianId"
   RESIDENT ||--o{ SALES_ORDER : "residentId"
   GUARDIAN ||--o{ SALES_ORDER : "guardianId"
   SALES_ORDER ||--o{ INVOICE : "salesOrderId"
-  INVOICE ||--o{ INVOICE_ITEM : "items"
   SALES_ORDER ||--o{ CONTRACT : "salesOrderId"
   GUARDIAN ||--o{ CONTRACT : "guardianId"
   RESIDENT ||--o{ CONTRACT : "residentId"
   SALES_ORDER ||--o{ OPERATION_TASK : "salesOrderId"
   RESIDENT ||--o{ OPERATION_TASK : "residentId"
-  STAFF ||--o{ OPERATION_TASK : "assignedTo"
   STAFF ||--o{ STAFF_SHIFT : "staffId"
-  STORED_CONTRACT ||--|| STORED_CONTRACT_SOURCE : "source"
-  STORED_CONTRACT ||--|| STORED_CONTRACT_PRICING : "pricing"
-  STORED_CONTRACT ||--o{ CONTRACT_EMAIL_LOG : "emailLog"
-  STORED_CONTRACT_SOURCE ||--o{ GUARDIAN : "guardians"
-  STORED_CONTRACT_SOURCE ||--|| RESIDENT : "resident"
-  STORED_CONTRACT_SOURCE ||--|| ROOM : "room"
-  STORED_CONTRACT_SOURCE ||--|| PACKAGE : "package"
-  STORED_CONTRACT_SOURCE ||--|| SALES_ORDER : "salesOrder"
-  STORED_CONTRACT_SOURCE ||--|| INVOICE : "invoice"
-  STORED_CONTRACT_SOURCE ||--|| CONTRACT : "contract"
-  STORED_CONTRACT_SOURCE ||--|| ADDITIONAL_SERVICES : "additionalServices"
-  COMPLETE_SALES_ORDER_DATA ||--|| ADDITIONAL_SERVICES : "additionalServices"
-  COMPLETE_SALES_ORDER_DATA ||--o{ GUARDIAN : "guardians"
-  COMPLETE_SALES_ORDER_DATA ||--|| RESIDENT : "resident"
-  COMPLETE_SALES_ORDER_DATA ||--|| ROOM : "room"
-  COMPLETE_SALES_ORDER_DATA ||--|| PACKAGE : "package"
-  COMPLETE_SALES_ORDER_DATA ||--|| SALES_ORDER : "salesOrder"
-  COMPLETE_SALES_ORDER_DATA ||--|| INVOICE : "invoice"
-  COMPLETE_SALES_ORDER_DATA ||--|| CONTRACT : "contract"

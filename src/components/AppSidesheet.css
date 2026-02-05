@@ -4,12 +4,13 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: hsla(0, 0%, 0%, 0.1);
+    background: hsla(0, 0%, 0%, 0.3);
     backdrop-filter: blur(0px);
     z-index: 1040;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.4s ease, backdrop-filter 0.4s ease, visibility 0.4s;
+    pointer-events: none;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease, visibility 0s linear 0.4s;
 }
 
 .sidesheet-overlay.active {
@@ -17,6 +18,8 @@
     visibility: visible;
     backdrop-filter: blur(8px);
     background: hsla(0, 0%, 0%, 0.3);
+    pointer-events: auto;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease, visibility 0s linear 0s;
 }
 
 .sidesheet {
@@ -30,21 +33,30 @@
     box-shadow: -10px 0 30px hsla(0, 0%, 0%, 0.1);
     z-index: 1050;
     transform: translateX(100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
     will-change: transform;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.4s;
+
+    --sidesheet-pad-x: 2em;
+    --sidesheet-pad-y: 1.5em;
+    --sidesheet-pane-pad: 2em;
 }
 
 .sidesheet-open {
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0s;
 }
 
 .sidesheet-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 1.5em 2em;
+    padding: var(--sidesheet-pad-y) var(--sidesheet-pad-x);
     border-bottom: 0.0625em solid var(--mantine-color-gray-3);
     flex-shrink: 0;
     min-height: 80px;
@@ -88,27 +100,34 @@
 
 .sidesheet-main {
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 0;
     padding: 0;
+    min-height: 0;
+}
+
+.sidesheet-main--two {
+    grid-template-columns: 1fr 1fr;
 }
 
 .sidesheet-left-pane {
     display: flex;
     flex-direction: column;
     border-right: 0.0625em solid var(--mantine-color-gray-3);
-    padding: 2em;
-    overflow-y: auto;
+    padding: var(--sidesheet-pane-pad);
+    overflow: auto;
+    min-height: 0;
 }
 
 .sidesheet-right-pane {
     display: flex;
     flex-direction: column;
-    padding: 2em;
-    overflow-y: auto;
+    padding: var(--sidesheet-pane-pad);
+    overflow: auto;
     background: hsl(0, 0%, 98%);
+    min-height: 0;
 }
 
 #sidesheet-form {
@@ -119,8 +138,46 @@
 }
 
 .sidesheet-footer {
-    padding: 1.5em 2em;
+    padding: var(--sidesheet-pad-y) var(--sidesheet-pad-x);
     border-top: 0.0625em solid var(--mantine-color-gray-3);
     background: var(--mantine-color-body);
     flex-shrink: 0;
+}
+
+@media (max-width: 62em) {
+    .sidesheet {
+        width: 100%;
+        max-width: none;
+        --sidesheet-pad-x: 1.25em;
+        --sidesheet-pad-y: 1.25em;
+        --sidesheet-pane-pad: 1.25em;
+    }
+
+    .sidesheet-main {
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+    }
+
+    .sidesheet-left-pane {
+        border-right: none;
+        border-bottom: 0.0625em solid var(--mantine-color-gray-3);
+        overflow: visible;
+    }
+
+    .sidesheet-right-pane {
+        overflow: visible;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidesheet,
+    .sidesheet-overlay,
+    .sidesheet-close-btn {
+        transition: none !important;
+    }
+
+    .sidesheet-overlay {
+        backdrop-filter: none !important;
+    }
 }

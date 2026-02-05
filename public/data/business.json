@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "id": "business-1",
+    "businessInfo": {
+      "businessName": "Usable App Co.",
+      "businessType": "Spa",
+      "address": "36 Roongroj Mansion\nMoo 9 Soi Roongroj, Sala Thammasop",
+      "phone": "0618317773"
+    },
+    "adminInfo": {
+      "firstName": "Pattaya",
+      "lastName": "Upara",
+      "email": "admin@thaitravel.com",
+      "password": "ThaiTravel2024!",
+      "confirmPassword": "ThaiTravel2024!"
+    },
+    "facilityInfo": {
+      "numberOfBeds": "",
+      "numberOfFloors": "",
+      "operatingHours": "",
+      "licenseNumber": "1879107492784"
+    },
+    "preferences": {
+      "timezone": "",
+      "currency": "",
+      "language": ""
+    },
+    "depositMonths": 1,
+    "createdAt": "2026-02-05T05:35:10.463Z",
+    "updatedAt": "2026-02-05T06:21:00.821Z"
+  }
+]
