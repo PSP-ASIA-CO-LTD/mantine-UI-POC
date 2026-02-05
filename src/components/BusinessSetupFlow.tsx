@@ -170,7 +170,7 @@ export function BusinessSetupFlow({ onComplete }: BusinessSetupFlowProps) {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: 'calc(100vh - (var(--app-shell-padding) * 2))',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

@@ -15,6 +15,7 @@ import { IconSearch, IconEye, IconPhone, IconMail, IconCalendar } from '@tabler/
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { CardList } from '../components/CardList';
+import { SidesheetSection } from '../components/SidesheetSection';
 import { StyledTable } from '../components/StyledTable';
 import { buildLeftSection } from '../utils/sidesheetHelper';
 import type { Guardian, Resident, SalesOrder, Room } from '../types';
@@ -141,53 +142,52 @@ export function Patient() {
 		].filter((line) => line.trim().length > 0);
 
 		const leftPane = (
-			<div className="patient-left-pane">
-				<div className="patient-left-details">
-					{buildLeftSection(
-						'Resident ID',
-						<Text size="sm" fw={500} data-er-field="RESIDENT.id">
-							{resident.id}
-						</Text>
-					)}
+			<div className="patient-left-details">
+				{buildLeftSection(
+					'Resident ID',
+					<Text size="sm" fw={500} data-er-field="RESIDENT.id">
+						{resident.id}
+					</Text>
+				)}
 
-					{buildLeftSection(
-						'Hospital No. (HN)',
-						<Text size="sm" data-er-field="RESIDENT.hospital_number">
-							{resident.hospitalNumber || '—'}
-						</Text>
-					)}
+				{buildLeftSection(
+					'Hospital No. (HN)',
+					<Text size="sm" data-er-field="RESIDENT.hospital_number">
+						{resident.hospitalNumber || '—'}
+					</Text>
+				)}
 
-					{buildLeftSection(
-						'ID Number',
-						<Text size="sm" data-er-field="RESIDENT.id_number">
-							{resident.idNumber || '—'}
-						</Text>
-					)}
+				{buildLeftSection(
+					'ID Number',
+					<Text size="sm" data-er-field="RESIDENT.id_number">
+						{resident.idNumber || '—'}
+					</Text>
+				)}
 
-					<Divider my="md" />
+				<Divider my="md" />
 
-					{buildLeftSection(
-						'Prefix',
-						<Text size="sm" data-er-field="RESIDENT.prefix">
-							{resident.prefix || '—'}
-						</Text>
-					)}
+				{buildLeftSection(
+					'Prefix',
+					<Text size="sm" data-er-field="RESIDENT.prefix">
+						{resident.prefix || '—'}
+					</Text>
+				)}
 
-					{buildLeftSection(
-						'Date of Birth',
-						<Text size="sm" data-er-field="RESIDENT.date_of_birth">
-							{formatDate(resident.dateOfBirth)}
-						</Text>
-					)}
+				{buildLeftSection(
+					'Date of Birth',
+					<Text size="sm" data-er-field="RESIDENT.date_of_birth">
+						{formatDate(resident.dateOfBirth)}
+					</Text>
+				)}
 
-					{buildLeftSection(
-						'Gender',
-						<Badge color="gray" size="lg" data-er-field="RESIDENT.gender">
-							{resident.gender || '—'}
-						</Badge>
-					)}
+				{buildLeftSection(
+					'Gender',
+					<Badge color="gray" size="lg" data-er-field="RESIDENT.gender">
+						{resident.gender || '—'}
+					</Badge>
+				)}
 
-					{buildLeftSection(
+				{buildLeftSection(
 						'Race',
 						<Text size="sm" data-er-field="RESIDENT.race">
 							{resident.race || '—'}
@@ -337,14 +337,12 @@ export function Patient() {
 								: resident.emergencyContactAddress || '—'}
 						</Text>
 					)}
-				</div>
 			</div>
 		);
 
         const rightPane = (
-            <div className="patient-right-pane">
-                <div>
-                    <Text fw={600} mb="md">Guardians ({residentGuardians.length})</Text>
+            <>
+                <SidesheetSection title={`Guardians (${residentGuardians.length})`}>
                     {residentGuardians.length > 0 ? (
                         <Stack gap="sm">
                             {residentGuardians.map((guardian) => (
@@ -371,24 +369,23 @@ export function Patient() {
                                                 <IconPhone size={14} />
                                                 <Text size="sm">{guardian.phone || '—'}</Text>
                                             </Group>
-	                                            <Group gap="xs">
-	                                                <IconMail size={14} />
-	                                                <Text size="sm">{guardian.email || '—'}</Text>
-	                                            </Group>
-	                                            <Text size="xs" c="dimmed">{guardian.address || '—'}</Text>
-	                                            <Text size="xs" c="dimmed">Relationship: {humanizeToken(guardian.relationship)}</Text>
-	                                        </Stack>
-	                                    )}
-	                                />
-	                            ))}
+                                            <Group gap="xs">
+                                                <IconMail size={14} />
+                                                <Text size="sm">{guardian.email || '—'}</Text>
+                                            </Group>
+                                            <Text size="xs" c="dimmed">{guardian.address || '—'}</Text>
+                                            <Text size="xs" c="dimmed">Relationship: {humanizeToken(guardian.relationship)}</Text>
+                                        </Stack>
+                                    )}
+                                />
+                            ))}
                         </Stack>
                     ) : (
                         <Text size="sm" c="dimmed">No guardians on file.</Text>
                     )}
-                </div>
+                </SidesheetSection>
 
-                <div>
-                    <Text fw={600} mb="md">Admissions ({admissions.length})</Text>
+                <SidesheetSection title={`Admissions (${admissions.length})`}>
                     {admissions.length > 0 ? (
                         <Stack gap="md">
                             {admissions.map((order) => {
@@ -429,8 +426,8 @@ export function Patient() {
                     ) : (
                         <Text c="dimmed">No admissions yet.</Text>
                     )}
-                </div>
-            </div>
+                </SidesheetSection>
+            </>
         );
 
         open({
