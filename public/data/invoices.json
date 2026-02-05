@@ -46,5 +46,46 @@
     "paidAt": "2025-12-19T09:00:00Z",
     "paymentMethod": "credit_card",
     "notes": ""
+  },
+  {
+    "salesOrderId": "so-1770202920962",
+    "guardianId": "gdn-1770202911654-o3rqe",
+    "guardianName": "สมชาย ใจดี",
+    "residentName": "สมศรี ใจดี",
+    "items": [
+      {
+        "description": "20-day Elder Recreation (20 days)",
+        "quantity": 1,
+        "unitPrice": 85000,
+        "total": 85000
+      },
+      {
+        "description": "Room 202 (suite)",
+        "quantity": 1,
+        "unitPrice": 24000,
+        "total": 24000
+      },
+      {
+        "description": "Oxygen Concentrator (20 days)",
+        "quantity": 1,
+        "unitPrice": 6000,
+        "total": 6000
+      },
+      {
+        "description": "Deposit (+1 month)",
+        "quantity": 1,
+        "unitPrice": 172500,
+        "total": 172500
+      }
+    ],
+    "subtotal": 287500,
+    "tax": 20125,
+    "total": 307625,
+    "status": "paid",
+    "id": "inv-1770202921463",
+    "invoiceNumber": "INV-2026-0003",
+    "issuedAt": "2026-02-04T11:02:01.463Z",
+    "paidAt": "2026-02-04T11:02:03.148Z",
+    "paymentMethod": "cash"
   }
 ]

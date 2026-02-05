@@ -4,18 +4,19 @@ import {
     Group,
     Button,
     Grid,
-    Card,
     Text,
-    Stack,
-    Badge,
+    ActionIcon,
     Divider,
+    Card,
+    Badge,
+    Stack,
 } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
+import { CardList } from '../components/CardList';
 import { buildLeftSection } from '../utils/sidesheetHelper';
-import { IconMinus } from '@tabler/icons-react';
 import type { Package, Service } from '../types';
 
 export function Packages() {
@@ -83,65 +84,58 @@ export function Packages() {
 
         const rightPane = (
             <div>
-                <Text fw={600} mb="md">
-                    Services ({editableServices.length})
-                </Text>
-                {editableServices.map((service, idx) => (
-                    <Card key={service.id || idx} padding="md" mb="sm" withBorder data-er-field="PACKAGE_ITEM">
-                        <Stack gap="xs">
-                            <Group justify="space-between">
-                                <Text fw={500} data-er-field="TASK.title">{service.title}</Text>
+                <Group justify="space-between" mb="md">
+                    <Text fw={600}>
+                        Services ({editableServices.length})
+                    </Text>
 
-                                {isEditing ? (
-                                    <Button
-                                        size="xs"
-                                        color="red"
-                                        variant="light"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            removeService(idx);
-                                        }}
-                                        styles={{
-                                            root: {
-                                                width: 28,
-                                                height: 28,
-                                                borderRadius: '50%',
-                                                padding: 0,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                transition: 'background-color 0.2s ease',
-                                                '&:hover': {
-                                                    backgroundColor: '#ffe5e5',
-                                                },
-                                            },
-                                        }}
-
-                                    >
-                                        <IconMinus size={16} />
-                                    </Button>
-
-                                ) : (
-                                    <Badge size="sm" data-er-field="TASK.department_id">{service.dept}</Badge>
-                                )}
-                            </Group>
-
-                            <Text size="sm" c="dimmed" data-er-field="TASK.description">
-                                {service.description}
-                            </Text>
-
-                            <Group gap="xs">
-                                <Text size="xs" c="dimmed" data-er-field="TASK.interval">
-                                    {service.interval}
-                                </Text>
-                                <Text size="xs" c="dimmed">•</Text>
-                                <Text size="xs" c="dimmed" data-er-field="TASK.price">
-                                    ฿{service.price.toLocaleString()}
-                                </Text>
-                            </Group>
-                        </Stack>
-                    </Card>
-                ))}
+                    {isEditing && (
+                        <ActionIcon
+                            size={28}
+                            variant="light"
+                            color="green"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                            }}
+                            aria-label="Add service"
+                        >
+                            <IconPlus size={16} />
+                        </ActionIcon>
+                    )}
+                </Group>
+                {editableServices.length > 0 ? (
+                    editableServices.map((service, idx) => (
+                        <CardList
+                            key={service.id || idx}
+                            title={service.title}
+                            isEditing={isEditing}
+                            onRemove={() => removeService(idx)}
+                            cardDataErField="PACKAGE_ITEM"
+                            titleDataErField="TASK.title"
+                            description={service.description}
+                            descriptionDataErField="TASK.description"
+                            badge={(
+                                <Badge size="sm" data-er-field="TASK.department_id">
+                                    {service.dept}
+                                </Badge>
+                            )}
+                            meta={(
+                                <Group gap="xs">
+                                    <Text size="xs" c="dimmed" data-er-field="TASK.interval">
+                                        {service.interval}
+                                    </Text>
+                                    <Text size="xs" c="dimmed">•</Text>
+                                    <Text size="xs" c="dimmed" data-er-field="TASK.price">
+                                        ฿{service.price.toLocaleString()}
+                                    </Text>
+                                </Group>
+                            )}
+                            mb="sm"
+                        />
+                    ))
+                ) : (
+                    <Text size="sm" c="dimmed">No services yet.</Text>
+                )}
             </div>
         );
 

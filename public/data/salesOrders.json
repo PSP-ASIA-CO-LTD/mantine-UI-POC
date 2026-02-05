@@ -34,5 +34,22 @@
     "createdBy": "Manager Alice",
     "paidAt": "2025-12-19T09:00:00Z",
     "notes": "Premium package with nursing support"
+  },
+  {
+    "packageId": "pkg-1",
+    "packageName": "20-day Elder Recreation",
+    "residentId": "res-1770202912457",
+    "guardianId": "gdn-1770202911654-o3rqe",
+    "roomId": "room-202",
+    "checkIn": "2026-02-11",
+    "checkOut": "2026-03-02",
+    "adjustedDays": 20,
+    "basePrice": 85000,
+    "adjustedPrice": 85000,
+    "status": "paid",
+    "createdBy": "Manager Alice",
+    "id": "so-1770202920962",
+    "createdAt": "2026-02-04T11:02:00.962Z",
+    "paidAt": "2026-02-04T11:02:03.586Z"
   }
 ]

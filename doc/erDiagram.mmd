@@ -1,326 +1,277 @@
-flowchart TB
-    %% ==========================================
-    %% CLIENT & BUSINESS
-    %% ==========================================
-    CLIENT["<b>CLIENT</b>
-    ─────────────────
-    uuid <b>id</b> PK
-    string <b>name</b>
-    string <b>contact_info</b>"]
+erDiagram
+  BUSINESS_PROFILE {
+    string id
+    number depositMonths
+    string createdAt
+    string updatedAt
+  }
+  BUSINESS_INFO {
+    string businessName
+    string businessType
+    string address
+    string phone
+  }
+  ADMIN_INFO {
+    string firstName
+    string lastName
+    string email
+    string password
+    string confirmPassword
+  }
+  FACILITY_INFO {
+    string numberOfBeds
+    string numberOfFloors
+    string operatingHours
+    string licenseNumber
+  }
+  BUSINESS_PREFERENCES {
+    string timezone
+    string currency
+    string language
+  }
 
-    BUSINESS["<b>BUSINESS</b>
-    ─────────────────
-    uuid <b>id</b> PK
-    uuid <b>client_id</b> FK
-    string <b>business_name</b>
-    string <b>business_type</b>
-    string <b>address</b>
-    string <b>phone</b>
-    string <b>timezone</b>
-    string <b>currency</b>
-    string <b>language</b>
-    int <b>deposit_months</b>"]
+  PACKAGE {
+    string id
+    string name
+    number price
+    number duration
+    string description
+  }
+  SERVICE {
+    string id
+    string title
+    string departmentId
+    string interval
+    string description
+    number price
+  }
+  DEPARTMENT {
+    string id
+    string name
+    string code
+    string description
+  }
+  STAFF {
+    string id
+    string name
+    string role
+    string dept
+    string status
+  }
+  ROOM {
+    string id
+    string number
+    number floor
+    string type
+    string status
+    number pricePerDay
+  }
+  GUARDIAN {
+    string id
+    string firstName
+    string lastName
+    string phone
+    string email
+    string relationship
+    boolean pays
+    string residentId
+  }
+  RESIDENT {
+    string id
+    string firstName
+    string lastName
+    string dateOfBirth
+    string gender
+    string idNumber
+    string guardianId
+  }
+  SALES_ORDER {
+    string id
+    string packageId
+    string residentId
+    string guardianId
+    string roomId
+    string checkIn
+    string checkOut
+    number adjustedDays
+    number basePrice
+    number adjustedPrice
+    string status
+    string createdAt
+    string createdBy
+    string paidAt
+    string notes
+  }
+  INVOICE {
+    string id
+    string salesOrderId
+    string guardianId
+    string invoiceNumber
+    number subtotal
+    number tax
+    number total
+    string status
+    string issuedAt
+    string paidAt
+    string paymentMethod
+    string notes
+  }
+  INVOICE_ITEM {
+    string description
+    number quantity
+    number unitPrice
+    number total
+  }
+  CONTRACT {
+    string id
+    string salesOrderId
+    string guardianId
+    string residentId
+    string contractNumber
+    string startDate
+    string endDate
+    string terms
+    string signedAt
+    string signedBy
+    string status
+  }
+  CONTRACT_EMAIL_LOG {
+    string id
+    string to
+    string subject
+    string sentAt
+  }
+  STORED_CONTRACT {
+    string id
+    string contractNumber
+    string language
+    string status
+    string createdAt
+    string updatedAt
+    string signedAt
+    string signedByEmail
+    string allowedGuardianEmails
+    string compiledHtml
+  }
+  STORED_CONTRACT_SOURCE {
+    string id
+    string primaryContactGuardianId
+    string checkIn
+    string checkOut
+    number adjustedDays
+  }
+  STORED_CONTRACT_PRICING {
+    number subtotal
+    number tax
+    number total
+  }
+  ADDITIONAL_SERVICES {
+    boolean additionalBed
+    string specialAmenities
+    boolean selfProvidePampers
+    boolean selfProvideMedications
+  }
+  COMPLETE_SALES_ORDER_DATA {
+    string id
+    string status
+    string createdAt
+    string updatedAt
+  }
+  OPERATION_TASK {
+    string id
+    string salesOrderId
+    string residentId
+    string residentName
+    string roomNumber
+    string serviceTitle
+    string serviceDept
+    string description
+    string scheduledDate
+    string scheduledTime
+    string assignedTo
+    string assignedToName
+    string teamId
+    string status
+    string completedAt
+    string completedBy
+    string notes
+    string priority
+  }
+  STAFF_SHIFT {
+    string id
+    string staffId
+    string date
+    string startTime
+    string endTime
+    string status
+  }
+  NOTIFICATION {
+    string id
+    string type
+    string title
+    string message
+    string relatedId
+    string createdAt
+    string readAt
+  }
+  TASK {
+    string id
+    string order_id
+    string dept
+    string title
+    string date
+    string status
+  }
+  ORDER {
+    string id
+    string package_id
+    string room
+    string check_in
+    string check_out
+    string status
+  }
+  PACKAGE_SERVICE {
+    string packageId
+    string serviceId
+  }
 
-    %% ==========================================
-    %% VENUE (Building/Facility)
-    %% ==========================================
-    subgraph VenueDomain["🏢 Venue Domain"]
-        direction LR
-        VENUE["<b>VENUE</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>business_id</b> FK
-        string <b>venue_name</b>
-        string <b>address</b>
-        int <b>room_count</b>
-        int <b>number_of_beds</b>
-        int <b>number_of_floors</b>
-        string <b>operating_hours</b>
-        string <b>license_number</b>"]
-
-        ROOM["<b>ROOM</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>venue_id</b> FK
-        string <b>room_number</b>
-        int <b>floor</b>
-        string <b>room_type</b>
-        string <b>occupancy_status</b>
-        decimal <b>price_per_day</b>"]
-    end
-
-    %% ==========================================
-    %% ORGANIZATIONAL STRUCTURE
-    %% ==========================================
-    subgraph OrgDomain["👥 Organization Domain"]
-        direction TB
-        DEPARTMENT["<b>DEPARTMENT</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>business_id</b> FK
-        string <b>department_name</b>
-        text <b>description</b>"]
-
-        STAFF["<b>STAFF</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>department_id</b> FK
-        string <b>name</b>
-        string <b>role</b>
-        string <b>status</b>"]
-
-        STAFF_VENUE["<b>STAFF_VENUE</b>
-        ─────────────────
-        uuid <b>staff_id</b> FK
-        uuid <b>venue_id</b> FK
-        string <b>role_in_venue</b>"]
-
-        STAFF_SHIFT["<b>STAFF_SHIFT</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>staff_id</b> FK
-        string <b>staff_name</b>
-        string <b>dept</b>
-        date <b>date</b>
-        time <b>start_time</b>
-        time <b>end_time</b>
-        string <b>status</b>"]
-    end
-
-    %% ==========================================
-    %% SERVICE & TASK SYSTEM
-    %% ==========================================
-    subgraph ServiceDomain["🛠️ Service Domain"]
-        direction TB
-        TASK["<b>TASK (SERVICE)</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>department_id</b> FK
-        string <b>title</b>
-        text <b>description</b>
-        decimal <b>price</b>
-        string <b>unit_type</b> (per room/bed/visit)
-        string <b>interval</b> (frequency)
-        int <b>duration_minutes</b>"]
-
-        OPERATION_TASK["<b>OPERATION_TASK</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>sales_order_id</b> FK
-        uuid <b>resident_id</b> FK
-        string <b>resident_name</b>
-        string <b>room_number</b>
-        string <b>service_title</b>
-        string <b>service_dept</b>
-        text <b>description</b>
-        date <b>scheduled_date</b>
-        time <b>scheduled_time</b>
-        uuid <b>assigned_to</b> FK
-        string <b>assigned_to_name</b>
-        uuid <b>team_id</b> FK
-        string <b>status</b>
-        datetime <b>completed_at</b>
-        uuid <b>completed_by</b> FK
-        text <b>notes</b>
-        string <b>priority</b>"]
-    end
-
-    %% ==========================================
-    %% SALE SYSTEM (PACKAGES)
-    %% ==========================================
-    subgraph SaleDomain["💰 Sale System"]
-        direction TB
-        SALE_PACKAGE["<b>SALE PACKAGE</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>business_id</b> FK
-        uuid <b>created_by_staff_id</b> FK
-        string <b>name</b>
-        text <b>description</b>
-        decimal <b>price</b> (total price)
-        decimal <b>package_margin</b>
-        int <b>duration_days</b>
-        decimal <b>total_base_cost</b>"]
-
-        PACKAGE_ITEM["<b>PACKAGE_ITEM</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>package_id</b> FK
-        uuid <b>task_id</b> FK
-        int <b>total_occurrences</b>
-        int <b>room_multiplier</b>
-        decimal <b>unit_cost_at_sale</b>
-        decimal <b>total_item_cost</b>"]
-    end
-
-    %% ==========================================
-    %% RESIDENT & GUARDIAN SYSTEM
-    %% ==========================================
-    subgraph ResidentDomain["👤 Resident Domain"]
-        direction TB
-        GUARDIAN["<b>GUARDIAN</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        string <b>first_name</b>
-        string <b>last_name</b>
-        string <b>phone</b>
-        string <b>email</b>
-        string <b>address</b>
-        string <b>relationship</b>
-        boolean <b>pays</b>
-        datetime <b>created_at</b>"]
-
-        RESIDENT["<b>RESIDENT</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>guardian_id</b> FK
-        string <b>first_name</b>
-        string <b>last_name</b>
-        date <b>date_of_birth</b>
-        string <b>gender</b>
-        string <b>id_number</b>
-        text <b>medical_conditions</b>
-        text <b>allergies</b>
-        text <b>dietary_restrictions</b>
-        string <b>emergency_contact</b>
-        datetime <b>created_at</b>"]
-    end
-
-    %% ==========================================
-    %% SALES ORDER & BILLING SYSTEM
-    %% ==========================================
-    subgraph BillingDomain["💳 Billing Domain"]
-        direction TB
-        SALES_ORDER["<b>SALES_ORDER</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>package_id</b> FK
-        string <b>package_name</b>
-        uuid <b>resident_id</b> FK
-        uuid <b>guardian_id</b> FK
-        uuid <b>room_id</b> FK
-        date <b>check_in</b>
-        date <b>check_out</b>
-        int <b>adjusted_days</b>
-        decimal <b>base_price</b>
-        decimal <b>adjusted_price</b>
-        string <b>status</b>
-        datetime <b>created_at</b>
-        uuid <b>created_by</b> FK
-        datetime <b>paid_at</b>
-        text <b>notes</b>"]
-
-        ADDITIONAL_SERVICES["<b>ADDITIONAL_SERVICES</b>
-        ─────────────────
-        uuid <b>sales_order_id</b> FK
-        boolean <b>additional_bed</b>
-        json <b>special_amenities</b>
-        boolean <b>self_provide_pampers</b>
-        boolean <b>self_provide_medications</b>"]
-
-        INVOICE["<b>INVOICE</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>sales_order_id</b> FK
-        string <b>invoice_number</b>
-        uuid <b>guardian_id</b> FK
-        string <b>guardian_name</b>
-        string <b>resident_name</b>
-        decimal <b>subtotal</b>
-        decimal <b>tax</b>
-        decimal <b>total</b>
-        string <b>status</b>
-        datetime <b>issued_at</b>
-        datetime <b>paid_at</b>
-        string <b>payment_method</b>
-        text <b>notes</b>"]
-
-        INVOICE_ITEM["<b>INVOICE_ITEM</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>invoice_id</b> FK
-        string <b>description</b>
-        int <b>quantity</b>
-        decimal <b>unit_price</b>
-        decimal <b>total</b>"]
-
-        CONTRACT["<b>CONTRACT</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>sales_order_id</b> FK
-        string <b>contract_number</b>
-        uuid <b>guardian_id</b> FK
-        uuid <b>resident_id</b> FK
-        date <b>start_date</b>
-        date <b>end_date</b>
-        text <b>terms</b>
-        datetime <b>signed_at</b>
-        string <b>signed_by</b>
-        string <b>status</b>
-        string <b>language</b>
-        datetime <b>created_at</b>
-        datetime <b>updated_at</b>"]
-    end
-
-    %% ==========================================
-    %% RELATIONSHIPS
-    %% ==========================================
-    
-    CLIENT -->|1:N| BUSINESS
-    BUSINESS -->|1:N| VENUE
-    BUSINESS -->|1:N| DEPARTMENT
-    BUSINESS -->|1:N| SALE_PACKAGE
-    
-    VENUE -->|1:N| ROOM
-    DEPARTMENT -->|1:N| STAFF
-    DEPARTMENT -->|1:N| TASK
-    
-    STAFF -->|N:N| STAFF_VENUE
-    VENUE -->|N:N| STAFF_VENUE
-    STAFF -->|1:N| STAFF_SHIFT
-    
-    SALE_PACKAGE -->|1:N| PACKAGE_ITEM
-    PACKAGE_ITEM -->|N:1| TASK
-    
-    STAFF -->|Creates| SALE_PACKAGE
-    
-    GUARDIAN -->|1:N| RESIDENT
-    
-    RESIDENT -->|1:N| SALES_ORDER
-    GUARDIAN -->|1:N| SALES_ORDER
-    ROOM -->|1:N| SALES_ORDER
-    SALE_PACKAGE -->|1:N| SALES_ORDER
-    STAFF -->|Creates| SALES_ORDER
-    
-    SALES_ORDER -->|1:1| ADDITIONAL_SERVICES
-    SALES_ORDER -->|1:N| INVOICE
-    SALES_ORDER -->|1:N| CONTRACT
-    
-    INVOICE -->|1:N| INVOICE_ITEM
-    GUARDIAN -->|1:N| INVOICE
-    RESIDENT -->|1:N| CONTRACT
-    GUARDIAN -->|1:N| CONTRACT
-    
-    SALES_ORDER -->|1:N| OPERATION_TASK
-    RESIDENT -->|1:N| OPERATION_TASK
-    STAFF -->|1:N| OPERATION_TASK
-    
-    %% ==========================================
-    %% STYLING
-    %% ==========================================
-    classDef mainStyle fill:#f5f5f5,stroke:#333,stroke-width:2px
-    classDef clientStyle fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
-    classDef venueStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    classDef orgStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    classDef serviceStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    classDef saleStyle fill:#fff9c4,stroke:#f9a825,stroke-width:2px
-    classDef residentStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef billingStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    
-    class CLIENT,BUSINESS clientStyle
-    class VENUE,ROOM venueStyle
-    class DEPARTMENT,STAFF,STAFF_VENUE,STAFF_SHIFT orgStyle
-    class TASK,OPERATION_TASK serviceStyle
-    class SALE_PACKAGE,PACKAGE_ITEM saleStyle
-    class GUARDIAN,RESIDENT residentStyle
-    class SALES_ORDER,ADDITIONAL_SERVICES,INVOICE,INVOICE_ITEM,CONTRACT billingStyle
+  BUSINESS_PROFILE ||--|| BUSINESS_INFO : "businessInfo"
+  BUSINESS_PROFILE ||--|| ADMIN_INFO : "adminInfo"
+  BUSINESS_PROFILE ||--|| FACILITY_INFO : "facilityInfo"
+  BUSINESS_PROFILE ||--|| BUSINESS_PREFERENCES : "preferences"
+  DEPARTMENT ||--o{ SERVICE : "departmentId"
+  PACKAGE ||--o{ PACKAGE_SERVICE : "packageId"
+  SERVICE ||--o{ PACKAGE_SERVICE : "serviceId"
+  PACKAGE ||--o{ SALES_ORDER : "packageId"
+  ROOM ||--o{ SALES_ORDER : "roomId"
+  GUARDIAN ||--o{ RESIDENT : "guardianId"
+  RESIDENT ||--o{ SALES_ORDER : "residentId"
+  GUARDIAN ||--o{ SALES_ORDER : "guardianId"
+  SALES_ORDER ||--o{ INVOICE : "salesOrderId"
+  INVOICE ||--o{ INVOICE_ITEM : "items"
+  SALES_ORDER ||--o{ CONTRACT : "salesOrderId"
+  GUARDIAN ||--o{ CONTRACT : "guardianId"
+  RESIDENT ||--o{ CONTRACT : "residentId"
+  SALES_ORDER ||--o{ OPERATION_TASK : "salesOrderId"
+  RESIDENT ||--o{ OPERATION_TASK : "residentId"
+  STAFF ||--o{ OPERATION_TASK : "assignedTo"
+  STAFF ||--o{ STAFF_SHIFT : "staffId"
+  STORED_CONTRACT ||--|| STORED_CONTRACT_SOURCE : "source"
+  STORED_CONTRACT ||--|| STORED_CONTRACT_PRICING : "pricing"
+  STORED_CONTRACT ||--o{ CONTRACT_EMAIL_LOG : "emailLog"
+  STORED_CONTRACT_SOURCE ||--o{ GUARDIAN : "guardians"
+  STORED_CONTRACT_SOURCE ||--|| RESIDENT : "resident"
+  STORED_CONTRACT_SOURCE ||--|| ROOM : "room"
+  STORED_CONTRACT_SOURCE ||--|| PACKAGE : "package"
+  STORED_CONTRACT_SOURCE ||--|| SALES_ORDER : "salesOrder"
+  STORED_CONTRACT_SOURCE ||--|| INVOICE : "invoice"
+  STORED_CONTRACT_SOURCE ||--|| CONTRACT : "contract"
+  STORED_CONTRACT_SOURCE ||--|| ADDITIONAL_SERVICES : "additionalServices"
+  COMPLETE_SALES_ORDER_DATA ||--|| ADDITIONAL_SERVICES : "additionalServices"
+  COMPLETE_SALES_ORDER_DATA ||--o{ GUARDIAN : "guardians"
+  COMPLETE_SALES_ORDER_DATA ||--|| RESIDENT : "resident"
+  COMPLETE_SALES_ORDER_DATA ||--|| ROOM : "room"
+  COMPLETE_SALES_ORDER_DATA ||--|| PACKAGE : "package"
+  COMPLETE_SALES_ORDER_DATA ||--|| SALES_ORDER : "salesOrder"
+  COMPLETE_SALES_ORDER_DATA ||--|| INVOICE : "invoice"
+  COMPLETE_SALES_ORDER_DATA ||--|| CONTRACT : "contract"

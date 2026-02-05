@@ -18,5 +18,29 @@
     "address": "456 Rama IV Road, Bangkok 10500",
     "relationship": "son",
     "createdAt": "2025-12-18T14:30:00Z"
+  },
+  {
+    "firstName": "สมชาย",
+    "lastName": "ใจดี",
+    "phone": "081-234-5678",
+    "email": "somchai.jaidee@email.com",
+    "address": "123/45 ถ.สุขุมวิท 55 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ 10110",
+    "relationship": "son",
+    "pays": true,
+    "id": "gdn-1770202911654-o3rqe",
+    "createdAt": "2026-02-04T11:01:51.654Z",
+    "residentId": "res-1770202912457"
+  },
+  {
+    "firstName": "สมหญิง",
+    "lastName": "ใจดี",
+    "phone": "082-345-6789",
+    "email": "somying.jaidee@email.com",
+    "address": "88/9 หมู่บ้านพฤกษา ถ.รัตนาธิเบศร์ อ.เมือง จ.นนทบุรี 11000",
+    "relationship": "daughter",
+    "pays": true,
+    "id": "gdn-1770202912056-9xbgy",
+    "createdAt": "2026-02-04T11:01:52.056Z",
+    "residentId": "res-1770202912457"
   }
 ]

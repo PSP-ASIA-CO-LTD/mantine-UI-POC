@@ -1,0 +1,43 @@
+.patient-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-lg);
+}
+
+.patient-search {
+    min-width: 280px;
+}
+
+.patient-table-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.patient-table-row:hover {
+    background-color: var(--mantine-color-gray-0);
+}
+
+.patient-left-pane {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    gap: var(--mantine-spacing-lg);
+}
+
+.patient-left-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-sm);
+}
+
+.patient-right-pane {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-md);
+}
+
+@media (max-width: 900px) {
+    .patient-search {
+        width: 100%;
+    }
+}

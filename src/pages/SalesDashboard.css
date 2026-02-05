@@ -21,3 +21,7 @@
     background-color: hsl(211, 100%, 97%);
     border-color: hsl(211, 100%, 85%);
 }
+
+.sales-dashboard-row {
+    cursor: pointer;
+}

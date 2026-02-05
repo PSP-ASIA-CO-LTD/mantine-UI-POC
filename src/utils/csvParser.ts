@@ -24,11 +24,6 @@ const parse = async (url: string): Promise<any[]> => {
     }
 };
 
-const parseMembers = (memberString: string): string[] => {
-    if (!memberString) return [];
-    return memberString.split('|').map(m => m.trim());
-};
-
 export const buildDatabase = async (): Promise<Database> => {
     try {
         const [packagesData, staffData, teamsData, ordersData, tasksData] = await Promise.all([

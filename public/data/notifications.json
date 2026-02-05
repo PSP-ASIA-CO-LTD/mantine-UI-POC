@@ -16,5 +16,13 @@
     "relatedId": "so-2",
     "createdAt": "2025-12-19T09:00:00Z",
     "readAt": null
+  },
+  {
+    "type": "sale",
+    "title": "New Sale Completed",
+    "message": "20-day Elder Recreation sold to สมชาย ใจดี for resident สมศรี ใจดี. Total: ฿307,625",
+    "relatedId": "so-1770202920962",
+    "id": "ntf-1770202924992",
+    "createdAt": "2026-02-04T11:02:04.992Z"
   }
 ]

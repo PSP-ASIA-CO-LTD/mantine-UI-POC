@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Title,
@@ -8,11 +8,11 @@ import {
     Text,
     Stack,
     Badge,
-    Table,
     ActionIcon,
     Indicator,
     Popover,
     ScrollArea,
+    Divider,
 } from '@mantine/core';
 import {
     IconPlus,
@@ -25,27 +25,39 @@ import {
 } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
-import { notifications } from '@mantine/notifications';
-import type { SalesDashboardStats, Notification, SalesOrder } from '../types';
+import { useSidesheet } from '../contexts/SidesheetContext';
+import { StyledTable } from '../components/StyledTable';
+import { buildLeftSection } from '../utils/sidesheetHelper';
+import type { SalesDashboardStats, Notification, SalesOrder, Resident, Guardian, Room } from '../types';
 import './SalesDashboard.css';
 
 export function SalesDashboard() {
     const navigate = useNavigate();
-    const { getOrderBySalesOrderId, initNewDraft } = useSalesOrder();
+    const { initNewDraft } = useSalesOrder();
+    const { open } = useSidesheet();
     const [stats, setStats] = useState<SalesDashboardStats | null>(null);
     const [dashboardNotifications, setDashboardNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [residents, setResidents] = useState<Resident[]>([]);
+    const [guardians, setGuardians] = useState<Guardian[]>([]);
+    const [rooms, setRooms] = useState<Room[]>([]);
 
     const loadData = async () => {
         try {
-            const [statsData, notifData] = await Promise.all([
+            const [statsData, notifData, residentData, guardianData, roomData] = await Promise.all([
                 API.getSalesDashboardStats(),
-                API.getNotifications()
+                API.getNotifications(),
+                API.getResidents(),
+                API.getGuardians(),
+                API.getRooms(),
             ]);
             setStats(statsData);
             setDashboardNotifications(notifData);
             setUnreadCount(notifData.filter(n => !n.readAt).length);
+            setResidents(residentData);
+            setGuardians(guardianData);
+            setRooms(roomData);
         } catch (error) {
             console.error('Failed to load dashboard:', error);
         } finally {
@@ -89,17 +101,129 @@ export function SalesDashboard() {
         return colors[status];
     };
 
-    const handleViewContract = (salesOrderId: string) => {
-        const orderDraft = getOrderBySalesOrderId(salesOrderId);
-        if (orderDraft) {
-            navigate('/sales/order/contract', { state: { draftId: orderDraft.id } });
-        } else {
-            notifications.show({
-                title: 'Details Not Found',
-                message: 'Detailed document data for this order is not available on this device.',
-                color: 'orange'
-            });
-        }
+    const residentsById = useMemo(() => new Map(residents.map(resident => [resident.id, resident])), [residents]);
+    const guardiansById = useMemo(() => new Map(guardians.map(guardian => [guardian.id, guardian])), [guardians]);
+    const roomsById = useMemo(() => new Map(rooms.map(room => [room.id, room])), [rooms]);
+
+    const getResidentName = (residentId?: string) => {
+        if (!residentId) return 'Unknown resident';
+        const resident = residentsById.get(residentId);
+        return resident ? `${resident.firstName} ${resident.lastName}` : `Resident ${residentId}`;
+    };
+
+    const getGuardianName = (guardianId?: string) => {
+        if (!guardianId) return 'Unknown guardian';
+        const guardian = guardiansById.get(guardianId);
+        return guardian ? `${guardian.firstName} ${guardian.lastName}` : `Guardian ${guardianId}`;
+    };
+
+    const openSalesOrderSidesheet = (order: SalesOrder) => {
+        const resident = residentsById.get(order.residentId);
+        const guardian = guardiansById.get(order.guardianId);
+        const room = roomsById.get(order.roomId);
+
+        const leftPane = (
+            <div>
+                {buildLeftSection(
+                    'Order ID',
+                    <Text size="sm" fw={500}>
+                        {order.id}
+                    </Text>
+                )}
+
+                <Divider my="lg" />
+
+                {buildLeftSection(
+                    'Status',
+                    <Badge color={getStatusColor(order.status)} size="lg">
+                        {order.status.replace('_', ' ')}
+                    </Badge>
+                )}
+
+                <Divider my="lg" />
+
+                {buildLeftSection(
+                    'Package',
+                    <Text size="sm" fw={500}>
+                        {order.packageName}
+                    </Text>
+                )}
+
+                {buildLeftSection(
+                    'Stay',
+                    <Stack gap={2}>
+                        <Text size="sm">
+                            {formatDate(order.checkIn)} - {formatDate(order.checkOut)}
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                            {order.adjustedDays} days
+                        </Text>
+                    </Stack>
+                )}
+
+                {buildLeftSection(
+                    'Total',
+                    <Text size="sm" fw={600}>
+                        ฿{formatCurrency(order.adjustedPrice)}
+                    </Text>
+                )}
+
+                {buildLeftSection(
+                    'Ordered',
+                    <Text size="sm">
+                        {formatDate(order.createdAt)}
+                    </Text>
+                )}
+            </div>
+        );
+
+        const rightPane = (
+            <Stack>
+                <Card withBorder padding="md">
+                    <Text fw={600} mb="xs">Resident</Text>
+                    {resident ? (
+                        <Stack gap={2}>
+                            <Text size="sm" fw={500}>{resident.firstName} {resident.lastName}</Text>
+                            <Text size="xs" c="dimmed">ID: {resident.id}</Text>
+                        </Stack>
+                    ) : (
+                        <Text size="sm" c="dimmed">Resident details not available.</Text>
+                    )}
+                </Card>
+
+                <Card withBorder padding="md">
+                    <Text fw={600} mb="xs">Guardian</Text>
+                    {guardian ? (
+                        <Stack gap={2}>
+                            <Text size="sm" fw={500}>{guardian.firstName} {guardian.lastName}</Text>
+                            <Text size="xs" c="dimmed">{guardian.phone}</Text>
+                            <Text size="xs" c="dimmed">{guardian.email}</Text>
+                        </Stack>
+                    ) : (
+                        <Text size="sm" c="dimmed">Guardian details not available.</Text>
+                    )}
+                </Card>
+
+                <Card withBorder padding="md">
+                    <Text fw={600} mb="xs">Room</Text>
+                    {room ? (
+                        <Stack gap={2}>
+                            <Text size="sm" fw={500}>Room {room.number}</Text>
+                            <Text size="xs" c="dimmed">Floor {room.floor} · {room.type}</Text>
+                        </Stack>
+                    ) : (
+                        <Text size="sm" c="dimmed">Room assignment not available.</Text>
+                    )}
+                </Card>
+            </Stack>
+        );
+
+        open({
+            title: resident ? `${resident.firstName} ${resident.lastName}` : 'Sales Order',
+            subtitle: 'Sales Order Details',
+            leftPane,
+            rightPane,
+        });
     };
 
     if (loading) {
@@ -220,55 +344,73 @@ export function SalesDashboard() {
             <Card padding="lg" radius="md" withBorder mt="xl">
                 <Text fw={600} size="lg" mb="md">Recent Sales</Text>
                 {stats?.recentSales && stats.recentSales.length > 0 ? (
-                    <Table>
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th>Order ID</Table.Th>
-                                <Table.Th>Package</Table.Th>
-                                <Table.Th>Check-in</Table.Th>
-                                <Table.Th>Days</Table.Th>
-                                <Table.Th>Amount</Table.Th>
-                                <Table.Th>Status</Table.Th>
-                                <Table.Th></Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                            {stats.recentSales.map(order => (
-                                <Table.Tr key={order.id}>
-                                    <Table.Td>
-                                        <Text size="sm" fw={500}>{order.id}</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size="sm">{order.packageName}</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size="sm">{formatDate(order.checkIn)}</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size="sm">{order.adjustedDays} days</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size="sm" fw={500}>฿{formatCurrency(order.adjustedPrice)}</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Badge color={getStatusColor(order.status)} size="sm">
-                                            {order.status.replace('_', ' ')}
-                                        </Badge>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <ActionIcon
-                                            variant="subtle"
-                                            size="sm"
-                                            onClick={() => handleViewContract(order.id)}
-                                            title="View Contract"
-                                        >
-                                            <IconEye size={16} />
-                                        </ActionIcon>
-                                    </Table.Td>
-                                </Table.Tr>
-                            ))}
-                        </Table.Tbody>
-                    </Table>
+                    <StyledTable>
+                        <StyledTable.Thead>
+                            <StyledTable.Tr>
+                                <StyledTable.Th>Resident / Package</StyledTable.Th>
+                                <StyledTable.Th>Guardian</StyledTable.Th>
+                                <StyledTable.Th>Stay</StyledTable.Th>
+                                <StyledTable.Th>Total</StyledTable.Th>
+                                <StyledTable.Th>Status</StyledTable.Th>
+                                <StyledTable.Th></StyledTable.Th>
+                            </StyledTable.Tr>
+                        </StyledTable.Thead>
+                        <StyledTable.Tbody>
+                            {stats.recentSales.map(order => {
+                                const residentName = getResidentName(order.residentId);
+                                const guardianName = getGuardianName(order.guardianId);
+                                const guardian = guardiansById.get(order.guardianId);
+
+                                return (
+                                    <StyledTable.Tr
+                                        key={order.id}
+                                        className="sales-dashboard-row"
+                                        onClick={() => openSalesOrderSidesheet(order)}
+                                    >
+                                        <StyledTable.Td>
+                                            <Stack gap={2}>
+                                                <Text size="sm" fw={600}>{residentName}</Text>
+                                                <Text size="xs" c="dimmed">{order.packageName}</Text>
+                                            </Stack>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
+                                            <Stack gap={2}>
+                                                <Text size="sm" fw={500}>{guardianName}</Text>
+                                                <Text size="xs" c="dimmed">{guardian?.phone || '—'}</Text>
+                                            </Stack>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
+                                            <Stack gap={2}>
+                                                <Text size="sm">{formatDate(order.checkIn)} - {formatDate(order.checkOut)}</Text>
+                                                <Text size="xs" c="dimmed">{order.adjustedDays} days</Text>
+                                            </Stack>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
+                                            <Text size="sm" fw={600}>฿{formatCurrency(order.adjustedPrice)}</Text>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
+                                            <Badge color={getStatusColor(order.status)} size="sm">
+                                                {order.status.replace('_', ' ')}
+                                            </Badge>
+                                        </StyledTable.Td>
+                                        <StyledTable.Td>
+                                            <ActionIcon
+                                                variant="subtle"
+                                                size="sm"
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    openSalesOrderSidesheet(order);
+                                                }}
+                                                title="View details"
+                                            >
+                                                <IconEye size={16} />
+                                            </ActionIcon>
+                                        </StyledTable.Td>
+                                    </StyledTable.Tr>
+                                );
+                            })}
+                        </StyledTable.Tbody>
+                    </StyledTable>
                 ) : (
                     <Text c="dimmed" ta="center" py="xl">No recent sales</Text>
                 )}

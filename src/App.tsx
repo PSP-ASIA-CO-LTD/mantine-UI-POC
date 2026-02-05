@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AppShell } from '@mantine/core';
 import { AppNav } from './components/AppNav';
 import { BusinessSetup } from './pages/BusinessSetup';
@@ -12,6 +12,7 @@ import { SalesOrderInvoice } from './pages/SalesOrderInvoice';
 import { SalesOrderContract } from './pages/SalesOrderContract';
 import { PublicContractView } from './pages/PublicContractView';
 import { StaffTasks } from './pages/StaffTasks';
+import { Patient } from './pages/Patient';
 import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
 import { SalesOrderProvider } from './contexts/SalesOrderContext';
@@ -47,7 +48,7 @@ function AppLayout() {
             </AppShell.Navbar>
             <AppShell.Main>
                 <Routes>
-                    <Route path="/" element={<Navigate to="/sales" replace />} />
+                    <Route path="/" element={<SalesDashboard />} />
                     <Route path="/sales" element={<SalesDashboard />} />
                     <Route path="/sales/order" element={<SalesOrderPage />} />
                     <Route path="/sales/order/invoice" element={<SalesOrderInvoice />} />
@@ -55,10 +56,12 @@ function AppLayout() {
                     <Route path="/contract/:id" element={<PublicContractView />} />
                     <Route path="/business-setup" element={<BusinessSetup />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/package" element={<Packages />} />
                     <Route path="/packages" element={<Packages />} />
+                    <Route path="/department" element={<Departments />} />
                     <Route path="/departments" element={<Departments />} />
                     <Route path="/staff" element={<Staff />} />
-                    {/*<Route path="/patient" element={<Patient />} />*/}
+                    <Route path="/patient" element={<Patient />} />
                 </Routes>
             </AppShell.Main>
         </AppShell>
