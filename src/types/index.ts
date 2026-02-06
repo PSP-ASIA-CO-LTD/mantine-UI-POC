@@ -156,6 +156,8 @@ export interface Resident {
     addressNumber?: string;
     addressMoo?: string;
     residenceName?: string;
+    /** @deprecated use residenceName */
+    addressVillage?: string;
     addressSoi?: string;
     addressStreet?: string;
     addressSubDistrict?: string;
