@@ -65,6 +65,11 @@ interface GuardianFormValues {
     pays: boolean;
 }
 
+type ResidentFormValues = Omit<Resident, 'id' | 'createdAt' | 'prefix' | 'guardianId'> & {
+    prefix: Resident['prefix'] | null;
+    guardianId?: string;
+};
+
 interface CheckoutData {
     package: Package | null;
     adjustedDays: number;
@@ -303,7 +308,7 @@ export function SalesOrderPage() {
         ));
     };
 
-    const residentForm = useForm({
+    const residentForm = useForm<ResidentFormValues>({
         initialValues: {
             prefix: 'mrs',
             firstName: '',
@@ -520,6 +525,7 @@ export function SalesOrderPage() {
             // Use first guardian as the primary guardian for resident
             const resident = await saveResident({
                 ...residentForm.values,
+                prefix: residentForm.values.prefix || undefined,
                 gender: residentForm.values.gender as 'male' | 'female' | 'other',
                 guardianId: savedGuardians[0].id
             });
