@@ -25,6 +25,7 @@ import {
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { DateInput } from '@mantine/dates';
+import { useElementSize } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import {
     IconChevronDown,
@@ -78,6 +79,19 @@ interface CheckoutData {
     contract: Contract | null;
 }
 
+const formatStayEndDate = (checkIn: Date | null, days: number): string | null => {
+    if (!checkIn || !days) return null;
+    const endDate = new Date(checkIn);
+    endDate.setDate(endDate.getDate() + days - 1);
+    const datePart = endDate.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+    const weekday = endDate.toLocaleDateString('en-GB', { weekday: 'short' }).toLowerCase();
+    return `${datePart} (${weekday})`;
+};
+
 export function SalesOrderPage() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -105,6 +119,8 @@ export function SalesOrderPage() {
     // Derived state
     const loading = loadingPackages || loadingRooms;
     const processing = savingCustomer || processingOrder;
+    const { ref: salesOrderRef, width: salesOrderWidth } = useElementSize();
+    const isStayDurationTwoCol = salesOrderWidth > 0 && salesOrderWidth <= 1192;
 
     // Error handling
     useEffect(() => {
@@ -793,7 +809,7 @@ export function SalesOrderPage() {
     }
 
     return (
-        <div className="sales-order-page">
+        <div className="sales-order-page" ref={salesOrderRef}>
             <Group mb="xl">
                 {step !== 5 && <ActionIcon variant="subtle" size="lg" onClick={() => navigate('/sales')}>
                     <IconArrowLeft size={20} />
@@ -839,7 +855,13 @@ export function SalesOrderPage() {
             {/* Step 0: Package Selection */}
             {step === 0 && (
                 <div className="package-list">
-                    {packages.map(pkg => (
+                    {packages.map(pkg => {
+                        const adjustedDays = checkoutData.package?.id === pkg.id
+                            ? checkoutData.adjustedDays
+                            : pkg.duration;
+                        const endDateLabel = formatStayEndDate(checkoutData.checkIn, adjustedDays);
+
+                        return (
                         <Card
                             key={pkg.id}
                             padding="lg"
@@ -887,10 +909,10 @@ export function SalesOrderPage() {
                                 <Divider my="md" label="Adjust Stay Duration" labelPosition="center" />
 
                                 <Grid align="flex-end" mb="md">
-                                    <Grid.Col span={4}>
+                                    <Grid.Col span={isStayDurationTwoCol ? 6 : 4}>
                                         <NumberInput
                                             label="Number of Days"
-                                            value={checkoutData.package?.id === pkg.id ? checkoutData.adjustedDays : pkg.duration}
+                                            value={adjustedDays}
                                             onChange={(val) => {
                                                 if (checkoutData.package?.id !== pkg.id) {
                                                     setCheckoutData(prev => ({ ...prev, package: pkg, adjustedDays: Number(val) || pkg.duration }));
@@ -905,24 +927,25 @@ export function SalesOrderPage() {
                                             data-er-field="SALES_ORDER.adjusted_days"
                                         />
                                     </Grid.Col>
-                                    <Grid.Col span={4}>
+                                    <Grid.Col span={isStayDurationTwoCol ? 6 : 4}>
                                         <DateInput
                                             label="Check-in Date"
                                             placeholder="Select date"
                                             value={checkoutData.checkIn}
                                             onChange={handleSetCheckIn}
                                             minDate={new Date()}
+                                            description={endDateLabel ? `End date: ${endDateLabel}` : 'End date: —'}
                                             leftSection={<IconCalendar size={16} />}
                                             data-er-field="SALES_ORDER.check_in"
                                         />
                                     </Grid.Col>
-                                    <Grid.Col span={4}>
+                                    <Grid.Col span={isStayDurationTwoCol ? 6 : 4}>
                                         <Stack gap={4}>
                                             <Text size="sm" c="dimmed">Total Price</Text>
                                             <Text size="xl" fw={700} c="blue" data-er-field="SALES_ORDER.adjusted_price">
                                                 ฿{formatCurrency(calculatePrice(
                                                     pkg,
-                                                    checkoutData.package?.id === pkg.id ? checkoutData.adjustedDays : pkg.duration
+                                                    adjustedDays
                                                 ))}
                                             </Text>
                                         </Stack>
@@ -939,7 +962,8 @@ export function SalesOrderPage() {
                                 </Button>
                             </Collapse>
                         </Card>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 

@@ -13,6 +13,8 @@ import { SalesOrderContract } from './pages/SalesOrderContract';
 import { PublicContractView } from './pages/PublicContractView';
 import { StaffTasks } from './pages/StaffTasks';
 import { Patient } from './pages/Patient';
+import { Profile } from './pages/Profile';
+import { UiButtons } from './pages/UiButtons';
 import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
 import { SalesOrderProvider } from './contexts/SalesOrderContext';
@@ -62,6 +64,8 @@ function AppLayout() {
                     <Route path="/departments" element={<Departments />} />
                     <Route path="/staff" element={<Staff />} />
                     <Route path="/patient" element={<Patient />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/ui/buttons" element={<UiButtons />} />
                 </Routes>
             </AppShell.Main>
         </AppShell>

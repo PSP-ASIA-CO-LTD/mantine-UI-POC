@@ -5,7 +5,7 @@
 /* Stepper styling */
 .sales-order-page .mantine-Stepper-root {
     padding-block: var(--mantine-spacing-md);
-    padding-inline: var(--mantine-spacing-xs);
+    padding-inline: var(--mantine-spacing-lg);
     background: var(--mantine-color-white);
     border-radius: var(--mantine-radius-md);
     border: 1px solid var(--mantine-color-gray-2);
@@ -67,7 +67,7 @@
     box-shadow: var(--mantine-shadow-sm);
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1520px) {
     .sales-order-page .package-list {
         --_cols: 2;
     }
@@ -247,13 +247,19 @@
 
 .payment-buttons-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--_gap);
+}
+
+@media (max-width: 1100px) {
+    .payment-buttons-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
     .payment-buttons-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
     }
 }
 

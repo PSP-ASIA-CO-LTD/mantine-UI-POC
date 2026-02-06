@@ -87,5 +87,46 @@
     "issuedAt": "2026-02-04T11:02:01.463Z",
     "paidAt": "2026-02-04T11:02:03.148Z",
     "paymentMethod": "cash"
+  },
+  {
+    "salesOrderId": "so-1770273394194",
+    "guardianId": "gdn-1770273386882-e94co",
+    "guardianName": "สมหญิง ใจดี",
+    "residentName": "สมชาย ใจดี",
+    "items": [
+      {
+        "description": "Golden Years Premium (30 days)",
+        "quantity": 1,
+        "unitPrice": 120000,
+        "total": 120000
+      },
+      {
+        "description": "Room 202 (suite)",
+        "quantity": 1,
+        "unitPrice": 36000,
+        "total": 36000
+      },
+      {
+        "description": "Additional Bed (30 days)",
+        "quantity": 1,
+        "unitPrice": 15000,
+        "total": 15000
+      },
+      {
+        "description": "Deposit (+1 month)",
+        "quantity": 1,
+        "unitPrice": 171000,
+        "total": 171000
+      }
+    ],
+    "subtotal": 342000,
+    "tax": 23940,
+    "total": 365940,
+    "status": "paid",
+    "id": "inv-1770273394696",
+    "invoiceNumber": "INV-2026-0004",
+    "issuedAt": "2026-02-05T06:36:34.696Z",
+    "paidAt": "2026-02-05T06:37:44.933Z",
+    "paymentMethod": "cash"
   }
 ]

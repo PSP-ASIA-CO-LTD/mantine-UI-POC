@@ -1,0 +1,281 @@
+.button {
+    --button-bg: #000;
+    --button-fg: #fff;
+    --button-height: 46px;
+    --button-padding: 10px 25px;
+    --button-radius: 999px;
+    --button-inner-inset: 2px;
+
+    align-items: center;
+    background: var(--button-bg);
+    border: 0;
+    border-radius: var(--button-radius);
+    box-sizing: border-box;
+    color: var(--button-fg);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 15px;
+    height: var(--button-height);
+    justify-content: center;
+    min-height: var(--button-height);
+    outline: none;
+    overflow: hidden;
+    padding: var(--button-padding);
+    position: relative;
+    transition: transform 0.15s ease, opacity 0.3s ease;
+    user-select: none;
+    isolation: isolate;
+}
+
+.button.alternate {
+    --button-bg: #f1efea;
+    --button-inner-inset: 3px;
+
+    background: transparent;
+    color: inherit;
+}
+
+.button:not(:disabled):not(.disabled):active {
+    transform: translateY(1px);
+}
+
+.button:is(:disabled, .disabled) {
+    --button-bg: #7a7a7a;
+    --button-fg: #ffffff;
+    background: var(--button-bg);
+    color: var(--button-fg);
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.button:focus-visible {
+    box-shadow: 0 0 0 3px rgba(var(--button-accent-1), 0.35);
+}
+
+.button__content {
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
+    justify-content: center;
+    position: relative;
+    z-index: 4;
+}
+
+.button.primary .button__content {
+    text-shadow: rgba(0, 0, 0, 0.5) 0 0 8px;
+}
+
+.button.alternate .button__content {
+    font-weight: 700;
+    color: #6b6b6b;
+}
+
+.button.primary .button__content svg {
+    filter: drop-shadow(rgba(0, 0, 0, 0.5) 0 0 8px);
+}
+
+.button__inner {
+    background: var(--button-bg);
+    border-radius: inherit;
+    filter: blur(10px);
+    inset: var(--button-inner-inset);
+    opacity: 0;
+    position: absolute;
+    transform: scale(0.95);
+    transition: opacity 0.5s ease, filter 0.5s ease, transform 0.5s ease;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.button__highlight {
+    background: radial-gradient(
+        103.46% 134.6% at 64.66% 50%,
+        rgba(217, 217, 217, 0) 27.37%,
+        rgba(217, 217, 217, 0.3)
+    );
+    border-radius: inherit;
+    height: 100%;
+    opacity: 0;
+    position: absolute;
+    transition: opacity 0.4s ease;
+    width: 100%;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.button__glow {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    opacity: 0;
+    position: absolute;
+    transform: scale(3);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    width: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.button__blob {
+    border-radius: 50%;
+    filter: blur(12px);
+    height: 100px;
+    position: absolute;
+    transition: transform 2s ease;
+    width: 100px;
+    will-change: transform;
+}
+
+.button__blob--1 {
+    background: rgb(var(--button-accent-1));
+}
+
+.button__blob--2 {
+    background: rgb(var(--button-accent-2));
+}
+
+.button__blob--3 {
+    background: rgb(var(--button-accent-3));
+}
+
+.button__blob--4 {
+    background: rgb(var(--button-accent-4));
+}
+
+.button__blob--5 {
+    background: rgb(var(--button-accent-5));
+}
+
+.button__blob--6 {
+    background: rgb(var(--button-accent-6));
+}
+
+.button.primary[data-visible='true'] .button__glow,
+.button:hover:not(:disabled):not(.disabled) .button__glow {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.button.primary[data-visible='true'] .button__highlight,
+.button:hover:not(:disabled):not(.disabled) .button__highlight {
+    opacity: 1;
+}
+
+.button.primary[data-visible='true'] .button__inner,
+.button:hover:not(:disabled):not(.disabled) .button__inner {
+    filter: blur(0);
+    opacity: 1;
+    transform: scale(1);
+}
+
+.button.primary[data-variant='border'] .button__glow {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.button.primary[data-variant='border'] {
+    background: transparent;
+}
+
+.button.primary[data-variant='border']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--button-inner-inset);
+    background: var(--button-accent-gradient);
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+.button.primary[data-variant='border']:hover:not(:disabled):not(.disabled)::before {
+    opacity: 0;
+}
+
+.button.alternate[data-variant='border'] .button__glow {
+    opacity: 0;
+    transform: scale(3);
+}
+
+.button.primary[data-variant='border'] .button__highlight {
+    opacity: 1;
+}
+
+.button.alternate[data-variant='border'] .button__highlight {
+    opacity: 0;
+}
+
+.button.primary[data-variant='border'] .button__inner {
+    filter: blur(0);
+    opacity: 1;
+    transform: scale(1);
+}
+
+.button.alternate[data-variant='border'] .button__inner {
+    filter: blur(10px);
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.button.primary[data-variant='border']:hover:not(:disabled):not(.disabled) .button__glow {
+    transform: scale(0.8);
+}
+
+.button.alternate[data-variant='border']:hover:not(:disabled):not(.disabled) .button__glow {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.button.primary[data-variant='border']:hover:not(:disabled):not(.disabled) .button__inner {
+    filter: blur(10px);
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.button.alternate[data-variant='border']:hover:not(:disabled):not(.disabled) .button__inner {
+    filter: blur(0);
+    opacity: 1;
+    transform: scale(1);
+}
+
+.button.alternate[data-variant='border']:hover:not(:disabled):not(.disabled) .button__highlight {
+    opacity: 1;
+}
+
+.button:is(:disabled, .disabled) .button__glow,
+.button:is(:disabled, .disabled) .button__highlight,
+.button:is(:disabled, .disabled) .button__inner {
+    opacity: 0 !important;
+    filter: none !important;
+    transform: none !important;
+}
+
+.button:is(:disabled, .disabled)::before {
+    opacity: 0 !important;
+}
+
+.button:is(:disabled, .disabled) .button__content {
+    color: var(--button-fg);
+    text-shadow: none;
+}
+
+.button:is(:disabled, .disabled) .button__content svg {
+    filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button,
+    .button__inner,
+    .button__highlight,
+    .button__glow,
+    .button__blob {
+        transition: none !important;
+    }
+}
