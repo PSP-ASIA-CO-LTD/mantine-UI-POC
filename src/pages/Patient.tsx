@@ -131,7 +131,7 @@ export function Patient() {
 		const admissions = getAdmissionsForResident(resident.id);
 
 		const addressLines = [
-			[resident.addressNumber, resident.addressMoo ? `Moo ${resident.addressMoo}` : null, resident.addressVillage]
+			[resident.addressNumber, resident.addressMoo ? `Moo ${resident.addressMoo}` : null, resident.residenceName]
 				.filter(Boolean)
 				.join(' '),
 			[resident.addressStreet, resident.addressSoi ? `Soi ${resident.addressSoi}` : null].filter(Boolean).join(' '),
@@ -226,20 +226,6 @@ export function Patient() {
 						'Blood Group',
 						<Text size="sm" data-er-field="RESIDENT.blood_group">
 							{resident.bloodGroup || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						"Father's Name",
-						<Text size="sm" data-er-field="RESIDENT.father_name">
-							{resident.fatherName || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						"Mother's Name",
-						<Text size="sm" data-er-field="RESIDENT.mother_name">
-							{resident.motherName || '—'}
 						</Text>
 					)}
 

@@ -289,7 +289,7 @@ export function SalesOrderPage() {
 
     const residentForm = useForm({
         initialValues: {
-            prefix: '',
+            prefix: 'mrs',
             firstName: '',
             lastName: '',
             dateOfBirth: '',
@@ -437,7 +437,7 @@ export function SalesOrderPage() {
 
         // Set resident info
         residentForm.setValues({
-            prefix: '',
+            prefix: 'mrs',
             firstName: 'สมศรี',
             lastName: 'ใจดี',
             dateOfBirth: '1948-05-15',
@@ -978,15 +978,24 @@ export function SalesOrderPage() {
 
 	                        <Stack gap="md">
 	                            <Grid>
-	                                <Grid.Col span={4}>
-	                                    <TextInput
-	                                        label="Prefix"
-	                                        placeholder="Mr., Mrs., นาง, น.ส."
-	                                        {...residentForm.getInputProps('prefix')}
-	                                        data-er-field="RESIDENT.prefix"
-	                                    />
-	                                </Grid.Col>
-	                                <Grid.Col span={4}>
+                                    <Grid.Col span={4}>
+                                        <Select
+                                            label="Prefix"
+                                            placeholder="Select prefix"
+                                            data={[
+                                                { value: 'mr', label: 'Mr.' },
+                                                { value: 'mrs', label: 'Mrs.' },
+                                                { value: 'miss', label: 'Miss' },
+                                                { value: 'ms', label: 'Ms.' },
+                                                { value: 'dr', label: 'Dr.' },
+                                                { value: 'other', label: 'Other' },
+                                            ]}
+                                            {...residentForm.getInputProps('prefix')}
+                                            data-er-field="RESIDENT.prefix"
+                                        />
+                                    </Grid.Col>
+
+                                    <Grid.Col span={4}>
 	                                    <TextInput
 	                                        label="First Name"
 	                                        placeholder="Enter first name"
@@ -1104,24 +1113,6 @@ export function SalesOrderPage() {
 	                                    />
 	                                </Grid.Col>
 	                            </Grid>
-	                            <Grid>
-	                                <Grid.Col span={6}>
-	                                    <TextInput
-	                                        label="Father's Name"
-	                                        placeholder="Full name"
-	                                        {...residentForm.getInputProps('fatherName')}
-	                                        data-er-field="RESIDENT.father_name"
-	                                    />
-	                                </Grid.Col>
-	                                <Grid.Col span={6}>
-	                                    <TextInput
-	                                        label="Mother's Name"
-	                                        placeholder="Full name"
-	                                        {...residentForm.getInputProps('motherName')}
-	                                        data-er-field="RESIDENT.mother_name"
-	                                    />
-	                                </Grid.Col>
-	                            </Grid>
 
 	                            <Divider my="xs" label="Contact Info" labelPosition="center" />
 
@@ -1172,9 +1163,9 @@ export function SalesOrderPage() {
 	                                </Grid.Col>
 	                                <Grid.Col span={4}>
 	                                    <TextInput
-	                                        label="Village"
-	                                        placeholder="Village name"
-	                                        {...residentForm.getInputProps('addressVillage')}
+	                                        label="Village/Building"
+	                                        placeholder="Village or Building name"
+	                                        {...residentForm.getInputProps('residenceName')}
 	                                        data-er-field="RESIDENT.address_village"
 	                                    />
 	                                </Grid.Col>
