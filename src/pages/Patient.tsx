@@ -55,6 +55,19 @@ const humanizeToken = (token?: string | null) => {
 		.join(' ');
 };
 
+const formatPrefix = (prefix?: Resident['prefix'] | string | null) => {
+	if (!prefix) return '—';
+	const normalized = prefix.toString().trim().toLowerCase();
+	const map: Record<string, string> = {
+		mr: 'Mr.',
+		mrs: 'Mrs.',
+		miss: 'Miss',
+		ms: 'Ms.',
+		dr: 'Dr.'
+	};
+	return map[normalized] ?? prefix;
+};
+
 export function Patient() {
     const [residents, setResidents] = useState<Resident[]>([]);
     const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -132,7 +145,11 @@ export function Patient() {
 		const admissions = getAdmissionsForResident(resident.id);
 
 		const addressLines = [
-			[resident.addressNumber, resident.addressMoo ? `Moo ${resident.addressMoo}` : null, resident.addressVillage]
+			[
+				resident.addressNumber,
+				resident.addressMoo ? `Moo ${resident.addressMoo}` : null,
+				resident.residenceName || resident.addressVillage
+			]
 				.filter(Boolean)
 				.join(' '),
 			[resident.addressStreet, resident.addressSoi ? `Soi ${resident.addressSoi}` : null].filter(Boolean).join(' '),
@@ -169,7 +186,7 @@ export function Patient() {
 				{buildLeftSection(
 					'Prefix',
 					<Text size="sm" data-er-field="RESIDENT.prefix">
-						{resident.prefix || '—'}
+						{formatPrefix(resident.prefix)}
 					</Text>
 				)}
 
@@ -226,20 +243,6 @@ export function Patient() {
 						'Blood Group',
 						<Text size="sm" data-er-field="RESIDENT.blood_group">
 							{resident.bloodGroup || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						"Father's Name",
-						<Text size="sm" data-er-field="RESIDENT.father_name">
-							{resident.fatherName || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						"Mother's Name",
-						<Text size="sm" data-er-field="RESIDENT.mother_name">
-							{resident.motherName || '—'}
 						</Text>
 					)}
 

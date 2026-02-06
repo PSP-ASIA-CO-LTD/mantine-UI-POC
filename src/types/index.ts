@@ -142,7 +142,7 @@ export interface Resident {
     id: string;
     firstName: string;
     lastName: string;
-    prefix?: string;
+    prefix?: 'mr' | 'mrs' | 'miss' | 'ms' | 'dr' | 'other';
     dateOfBirth: string;
     gender: 'male' | 'female' | 'other';
     idNumber: string;
@@ -153,10 +153,10 @@ export interface Resident {
     maritalStatus?: string;
     occupation?: string;
     bloodGroup?: string;
-    fatherName?: string;
-    motherName?: string;
     addressNumber?: string;
     addressMoo?: string;
+    residenceName?: string;
+    /** @deprecated use residenceName */
     addressVillage?: string;
     addressSoi?: string;
     addressStreet?: string;
