@@ -6,10 +6,6 @@ import {
     Grid,
     Text,
     ActionIcon,
-    TextInput,
-    Textarea,
-    Select,
-    MultiSelect,
     List,
     Divider,
     Card,
@@ -21,6 +17,7 @@ import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { CardList } from '../components/CardList';
+import { TextInput, Textarea, Select, MultiSelect } from '../components/EditableFields';
 import { buildLeftSection } from '../utils/sidesheetHelper';
 import type { Department, Service, Staff } from '../types';
 

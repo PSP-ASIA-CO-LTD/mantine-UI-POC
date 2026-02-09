@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
-import { Title, Card, TextInput, Stack, Button, Group, Text } from '@mantine/core';
+import { Title, Card, Stack, Button, Group, Text } from '@mantine/core';
 import { API } from '../api';
+import { TextInput } from '../components/EditableFields';
 import type { BusinessProfile } from '../types';
 
 export function Profile() {

@@ -7,7 +7,6 @@ import {
     Text,
     Stack,
     Badge,
-    Select,
     ActionIcon,
     Checkbox,
     Collapse,
@@ -15,7 +14,6 @@ import {
     Divider,
     Progress,
     Modal,
-    Textarea,
     Grid,
     Tooltip,
     Loader,
@@ -33,6 +31,7 @@ import {
     IconUsers
 } from '@tabler/icons-react';
 import { API } from '../api';
+import { Select, Textarea } from '../components/EditableFields';
 import type { OperationTask, Staff, StaffShift } from '../types';
 import './StaffTasks.css';
 

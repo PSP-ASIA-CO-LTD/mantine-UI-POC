@@ -9,19 +9,21 @@ import {
     Text,
     Divider,
     Stack,
-    TextInput,
-    Select,
-    Textarea,
-    FileInput,
-    NumberInput,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
 import { IconPlus, IconDotsVertical } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { CardList } from '../components/CardList';
 import { StyledTable } from '../components/StyledTable';
+import {
+    TextInput,
+    Select,
+    Textarea,
+    FileInput,
+    NumberInput,
+    DateInput,
+} from '../components/EditableFields';
 import { buildLeftSection } from '../utils/sidesheetHelper';
 import type { Staff } from '../types';
 

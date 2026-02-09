@@ -1,0 +1,91 @@
+.editable-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.editable-field__label {
+    color: var(--mantine-color-gray-6);
+    font-weight: 500;
+}
+
+.editable-field__control {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    border-bottom: 1px solid var(--mantine-color-gray-2);
+    transition: border-color 0.2s ease;
+}
+
+.editable-field__input {
+    flex: 1;
+    width: 100%;
+    border: none !important;
+    border-bottom: none !important;
+    background: transparent !important;
+    padding: 0.45rem 0 0.45rem 0 !important;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--mantine-color-dark-7);
+    resize: none;
+}
+
+.editable-field__input:where(textarea) {
+    padding-bottom: 0.65rem !important;
+}
+
+.editable-field__input:focus {
+    outline: none;
+}
+
+.editable-field:hover .editable-field__input {
+    border-bottom-color: transparent !important;
+}
+
+.editable-field:focus-within .editable-field__input,
+.editable-field.is-editing .editable-field__input {
+    border-bottom-color: transparent !important;
+}
+
+.editable-field:hover .editable-field__control {
+    border-bottom-color: var(--mantine-color-gray-4) !important;
+}
+
+.editable-field:focus-within .editable-field__control,
+.editable-field.is-editing .editable-field__control {
+    border-bottom-color: var(--mantine-primary-color-filled, var(--mantine-color-blue-6)) !important;
+}
+
+.editable-field__actions {
+    position: absolute;
+    right: 0;
+    align-self: center;
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.editable-field:hover .editable-field__actions,
+.editable-field.is-editing .editable-field__actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.editable-field.is-disabled {
+    opacity: 0.6;
+}
+
+.editable-field.is-disabled .editable-field__actions {
+    display: none;
+}
+
+.editable-field--inline .editable-field__input {
+    padding-right: 3.25rem !important;
+}
+
+.editable-field--form .editable-field__input {
+    padding-right: 1.75rem !important;
+}

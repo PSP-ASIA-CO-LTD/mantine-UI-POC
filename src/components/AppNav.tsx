@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Stack, Text, Avatar, Group, Menu, UnstyledButton, Button } from '@mantine/core';
+import { Stack, Text, Avatar, Group, Menu, UnstyledButton } from '@mantine/core';
 import { 
     IconChartLine, 
     IconBox, 
@@ -27,21 +27,16 @@ export function AppNav() {
     const navigate = useNavigate();
     const { open, updateContent, close } = useSidesheet();
     const [companyProfile, setCompanyProfile] = useState<BusinessProfile | null>(null);
-    const [companyDraft, setCompanyDraft] = useState<BusinessProfile | null>(null);
     const [companyLoading, setCompanyLoading] = useState(false);
-    const [companySaving, setCompanySaving] = useState(false);
-    const [companyEditing, setCompanyEditing] = useState(false);
     const [companySheetOpen, setCompanySheetOpen] = useState(false);
 
     const handleCloseSheet = () => {
         setCompanySheetOpen(false);
-        setCompanyEditing(false);
         close();
     };
 
     const handleCompanySettings = async () => {
         setCompanySheetOpen(true);
-        setCompanyEditing(false);
         setCompanyLoading(true);
         open({
             title: 'Company Settings',
@@ -58,34 +53,19 @@ export function AppNav() {
         try {
             const profile = await API.getBusinessProfile();
             setCompanyProfile(profile);
-            setCompanyDraft(profile);
         } catch (error) {
             console.error('Failed to load company settings:', error);
             setCompanyProfile(null);
-            setCompanyDraft(null);
         } finally {
             setCompanyLoading(false);
         }
     };
 
-    const handleCancelEdit = () => {
-        setCompanyDraft(companyProfile);
-        setCompanyEditing(false);
-    };
-
-    const handleSave = async () => {
-        if (!companyDraft) return;
-        setCompanySaving(true);
-        try {
-            const saved = await API.saveBusinessProfile(companyDraft);
-            setCompanyProfile(saved);
-            setCompanyDraft(saved);
-            setCompanyEditing(false);
-        } catch (error) {
-            console.error('Failed to save company settings:', error);
-        } finally {
-            setCompanySaving(false);
-        }
+    const saveCompanyProfile = async (updater: (current: BusinessProfile) => BusinessProfile) => {
+        if (!companyProfile) return;
+        const next = updater(companyProfile);
+        const saved = await API.saveBusinessProfile(next);
+        setCompanyProfile(saved);
     };
 
     useEffect(() => {
@@ -109,7 +89,7 @@ export function AppNav() {
             return;
         }
 
-        if (!companyDraft) {
+        if (!companyProfile) {
             updateContent({
                 title: 'Company Settings',
                 leftPane: null,
@@ -120,59 +100,39 @@ export function AppNav() {
         }
 
         const { leftPane, rightPane } = buildCompanySettingsPanels({
-            profile: companyDraft,
-            editable: companyEditing,
-            onBusinessInfoChange: (field, value) => {
-                setCompanyDraft(prev => prev ? ({
-                    ...prev,
-                    businessInfo: {
-                        ...prev.businessInfo,
-                        [field]: value,
-                    },
-                }) : prev);
-            },
-            onAdminInfoChange: (field, value) => {
-                setCompanyDraft(prev => prev ? ({
-                    ...prev,
-                    adminInfo: {
-                        ...prev.adminInfo,
-                        [field]: value,
-                    },
-                }) : prev);
-            },
-            onFacilityInfoChange: (field, value) => {
-                setCompanyDraft(prev => prev ? ({
-                    ...prev,
-                    facilityInfo: {
-                        ...prev.facilityInfo,
-                        [field]: value,
-                    },
-                }) : prev);
-            },
-            onDepositMonthsChange: (value) => {
-                setCompanyDraft(prev => prev ? ({
-                    ...prev,
-                    depositMonths: value,
-                }) : prev);
-            },
+            profile: companyProfile,
+            onBusinessInfoSave: (field, value) => saveCompanyProfile((current) => ({
+                ...current,
+                businessInfo: {
+                    ...current.businessInfo,
+                    [field]: value,
+                },
+            })),
+            onAdminInfoSave: (field, value) => saveCompanyProfile((current) => ({
+                ...current,
+                adminInfo: {
+                    ...current.adminInfo,
+                    [field]: value,
+                },
+            })),
+            onFacilityInfoSave: (field, value) => saveCompanyProfile((current) => ({
+                ...current,
+                facilityInfo: {
+                    ...current.facilityInfo,
+                    [field]: value,
+                },
+            })),
+            onDepositMonthsSave: (value) => saveCompanyProfile((current) => ({
+                ...current,
+                depositMonths: value,
+            })),
         });
 
-        const footer = companyEditing ? (
-            <AppSidesheetFooter
-                onCancel={handleCancelEdit}
-                onSave={handleSave}
-                isLoading={companySaving}
-            />
-        ) : (
+        const footer = (
             <AppSidesheetFooter
                 onCancel={handleCloseSheet}
                 cancelLabel="Close"
                 showSave={false}
-                extraActions={(
-                    <Button variant="light" onClick={() => setCompanyEditing(true)}>
-                        Edit
-                    </Button>
-                )}
             />
         );
 
@@ -185,9 +145,7 @@ export function AppNav() {
     }, [
         companySheetOpen,
         companyLoading,
-        companyDraft,
-        companyEditing,
-        companySaving,
+        companyProfile,
         close,
         updateContent,
     ]);

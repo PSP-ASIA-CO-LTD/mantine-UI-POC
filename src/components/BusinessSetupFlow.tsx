@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { TextInput, Textarea, Button, Paper, Title, Text, Stack, Progress, Group, NumberInput, Select, PasswordInput, Modal } from '@mantine/core';
+import { Button, Paper, Title, Text, Stack, Progress, Group, Modal } from '@mantine/core';
 import { IconArrowRight, IconCheck } from '@tabler/icons-react';
 import { DEFAULT_BUSINESS_SETTINGS, saveBusinessSettings } from '../utils/businessSettings';
 import { API } from '../api';
+import { TextInput, Textarea, NumberInput, Select, PasswordInput } from './EditableFields';
 
 interface BusinessSetupFlowProps {
   onComplete?: () => void;
