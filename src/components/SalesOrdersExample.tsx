@@ -13,6 +13,7 @@ import {
   Stack,
 } from '@mantine/core';
 import { useState } from 'react';
+import { NumberInput, TextInput } from './EditableFields';
 
 /**
  * Example Component demonstrating graphql-hooks usage
@@ -167,8 +168,8 @@ export function SalesOrdersExample() {
           )}
 
           <Stack gap="md">
-            <input
-              type="text"
+            <TextInput
+              label="Order Number"
               placeholder="Order Number"
               value={newOrder.orderNumber}
               onChange={(e) =>
@@ -178,8 +179,8 @@ export function SalesOrdersExample() {
                 })
               }
             />
-            <input
-              type="text"
+            <TextInput
+              label="Customer Name"
               placeholder="Customer Name"
               value={newOrder.customerName}
               onChange={(e) =>
@@ -189,14 +190,15 @@ export function SalesOrdersExample() {
                 })
               }
             />
-            <input
-              type="number"
+            <NumberInput
+              label="Total Amount"
               placeholder="Total Amount"
               value={newOrder.totalAmount}
-              onChange={(e) =>
+              min={0}
+              onChange={(value) =>
                 setNewOrder({
                   ...newOrder,
-                  totalAmount: e.target.value as unknown as number,
+                  totalAmount: value === '' ? 0 : Number(value),
                 })
               }
             />

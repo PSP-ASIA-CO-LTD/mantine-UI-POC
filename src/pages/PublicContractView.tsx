@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ActionIcon, Button, Paper, Stack, Text, TextInput, Title, Group } from '@mantine/core';
+import { ActionIcon, Button, Paper, Stack, Text, Title, Group } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconArrowLeft, IconPrinter } from '@tabler/icons-react';
 import { API } from '../api';
 import { PageActionBar } from '../components/PageActionBar';
+import { TextInput } from '../components/EditableFields';
 import type { StoredContract } from '../types';
 import './PublicContractView.css';
 
@@ -128,4 +129,3 @@ export function PublicContractView() {
         </div>
     );
 }
-

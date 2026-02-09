@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+    width: 100%;
 }
 
 .editable-field__label {
@@ -29,6 +30,7 @@
     line-height: 1.4;
     color: var(--mantine-color-dark-7);
     resize: none;
+    display: block;
 }
 
 .editable-field__input:where(textarea) {
@@ -37,15 +39,6 @@
 
 .editable-field__input:focus {
     outline: none;
-}
-
-.editable-field:hover .editable-field__input {
-    border-bottom-color: transparent !important;
-}
-
-.editable-field:focus-within .editable-field__input,
-.editable-field.is-editing .editable-field__input {
-    border-bottom-color: transparent !important;
 }
 
 .editable-field:hover .editable-field__control {
@@ -88,4 +81,13 @@
 
 .editable-field--form .editable-field__input {
     padding-right: 1.75rem !important;
+    border-bottom: 1px solid var(--mantine-color-gray-2) !important;
+}
+
+.editable-field--form:hover .editable-field__input {
+    border-bottom-color: var(--mantine-color-gray-4) !important;
+}
+
+.editable-field--form:focus-within .editable-field__input {
+    border-bottom-color: var(--mantine-primary-color-filled, var(--mantine-color-blue-6)) !important;
 }

@@ -7,7 +7,6 @@ import {
     Text,
     Stack,
     Badge,
-    TextInput,
     ActionIcon,
     Avatar,
     Divider,
@@ -19,6 +18,7 @@ import { useSidesheet } from '../contexts/SidesheetContext';
 import { CardList } from '../components/CardList';
 import { SidesheetSection } from '../components/SidesheetSection';
 import { StyledTable } from '../components/StyledTable';
+import { TextInput } from '../components/EditableFields';
 import type { Guardian, Resident, SalesOrder, Room } from '../types';
 import './Patient.css';
 

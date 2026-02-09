@@ -81,8 +81,10 @@ export function InlineEditableField({
     };
 
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        if (type === 'textarea') return;
         if (event.key === 'Enter') {
+            if (type === 'textarea' && event.shiftKey) {
+                return;
+            }
             event.preventDefault();
             void handleSave();
         }
