@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
     Title,
     Group,
@@ -10,6 +11,7 @@ import {
     ActionIcon,
     Avatar,
     Divider,
+    Grid,
 } from '@mantine/core';
 import { IconSearch, IconEye, IconPhone, IconMail, IconCalendar } from '@tabler/icons-react';
 import { API } from '../api';
@@ -17,7 +19,6 @@ import { useSidesheet } from '../contexts/SidesheetContext';
 import { CardList } from '../components/CardList';
 import { SidesheetSection } from '../components/SidesheetSection';
 import { StyledTable } from '../components/StyledTable';
-import { buildLeftSection } from '../utils/sidesheetHelper';
 import type { Guardian, Resident, SalesOrder, Room } from '../types';
 import './Patient.css';
 
@@ -34,6 +35,20 @@ const formatCurrency = (amount?: number | null) => {
     if (!amount) return '0';
     return new Intl.NumberFormat('th-TH').format(amount);
 };
+
+const formatYesNo = (value?: boolean | null) => {
+    if (value === undefined || value === null) return '—';
+    return value ? 'Yes' : 'No';
+};
+
+const renderField = (label: string, content: ReactNode) => (
+    <div>
+        <Text size="xs" c="dimmed" fw={600}>
+            {label}
+        </Text>
+        {content}
+    </div>
+);
 
 const getStatusColor = (status: SalesOrder['status']) => {
     const colors: Record<SalesOrder['status'], string> = {
@@ -144,202 +159,306 @@ export function Patient() {
 		const residentGuardians = getGuardiansForResident(resident);
 		const admissions = getAdmissionsForResident(resident.id);
 
-		const addressLines = [
-			[
-				resident.addressNumber,
-				resident.addressMoo ? `Moo ${resident.addressMoo}` : null,
-				resident.residenceName || resident.addressVillage
-			]
-				.filter(Boolean)
-				.join(' '),
-			[resident.addressStreet, resident.addressSoi ? `Soi ${resident.addressSoi}` : null].filter(Boolean).join(' '),
-			[resident.addressSubDistrict, resident.addressDistrict, resident.addressProvince, resident.addressPostalCode]
-				.filter(Boolean)
-				.join(' '),
-		].filter((line) => line.trim().length > 0);
-
 		const leftPane = (
 			<div className="patient-left-details">
-				{buildLeftSection(
-					'Resident ID',
-					<Text size="sm" fw={500} data-er-field="RESIDENT.id">
-						{resident.id}
-					</Text>
-				)}
+                <Stack gap="md">
+                    <Grid gutter="md">
+                        <Grid.Col span={12}>
+                            {renderField(
+                                'Resident ID',
+                                <Text size="sm" fw={500} data-er-field="RESIDENT.id">
+                                    {resident.id}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Prefix',
+                                <Text size="sm" data-er-field="RESIDENT.prefix">
+                                    {formatPrefix(resident.prefix)}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'First Name',
+                                <Text size="sm" data-er-field="RESIDENT.first_name">
+                                    {resident.firstName || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Last Name',
+                                <Text size="sm" data-er-field="RESIDENT.last_name">
+                                    {resident.lastName || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Date of Birth',
+                                <Text size="sm" data-er-field="RESIDENT.date_of_birth">
+                                    {formatDate(resident.dateOfBirth)}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Gender',
+                                <Badge color="gray" size="sm" data-er-field="RESIDENT.gender">
+                                    {resident.gender || '—'}
+                                </Badge>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'ID Number',
+                                <Text size="sm" data-er-field="RESIDENT.id_number">
+                                    {resident.idNumber || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Hospital No. (HN)',
+                                <Text size="sm" data-er-field="RESIDENT.hospital_number">
+                                    {resident.hospitalNumber || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Race',
+                                <Text size="sm" data-er-field="RESIDENT.race">
+                                    {resident.race || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Nationality',
+                                <Text size="sm" data-er-field="RESIDENT.nationality">
+                                    {resident.nationality || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Religion',
+                                <Text size="sm" data-er-field="RESIDENT.religion">
+                                    {resident.religion || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Marital Status',
+                                <Text size="sm" data-er-field="RESIDENT.marital_status">
+                                    {humanizeToken(resident.maritalStatus)}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Occupation',
+                                <Text size="sm" data-er-field="RESIDENT.occupation">
+                                    {resident.occupation || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Blood Group',
+                                <Text size="sm" data-er-field="RESIDENT.blood_group">
+                                    {resident.bloodGroup || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                    </Grid>
 
-				{buildLeftSection(
-					'Hospital No. (HN)',
-					<Text size="sm" data-er-field="RESIDENT.hospital_number">
-						{resident.hospitalNumber || '—'}
-					</Text>
-				)}
+                    <Divider my="xs" label="Contact Info" labelPosition="center" />
 
-				{buildLeftSection(
-					'ID Number',
-					<Text size="sm" data-er-field="RESIDENT.id_number">
-						{resident.idNumber || '—'}
-					</Text>
-				)}
+                    <Grid gutter="md">
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Mobile Phone',
+                                <Text size="sm" data-er-field="RESIDENT.phone_mobile">
+                                    {resident.phoneMobile || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Home Phone',
+                                <Text size="sm" data-er-field="RESIDENT.phone_home">
+                                    {resident.phoneHome || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={12}>
+                            {renderField(
+                                'Email',
+                                <Text size="sm" data-er-field="RESIDENT.email">
+                                    {resident.email || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                    </Grid>
 
-				<Divider my="md" />
+                    <Divider my="xs" label="Address" labelPosition="center" />
 
-				{buildLeftSection(
-					'Prefix',
-					<Text size="sm" data-er-field="RESIDENT.prefix">
-						{formatPrefix(resident.prefix)}
-					</Text>
-				)}
+                    <Grid gutter="md">
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Address No.',
+                                <Text size="sm" data-er-field="RESIDENT.address_number">
+                                    {resident.addressNumber || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Moo',
+                                <Text size="sm" data-er-field="RESIDENT.address_moo">
+                                    {resident.addressMoo || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Village/Building',
+                                <Text size="sm" data-er-field="RESIDENT.address_village">
+                                    {resident.residenceName || resident.addressVillage || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Street',
+                                <Text size="sm" data-er-field="RESIDENT.address_street">
+                                    {resident.addressStreet || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Soi',
+                                <Text size="sm" data-er-field="RESIDENT.address_soi">
+                                    {resident.addressSoi || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Sub-district',
+                                <Text size="sm" data-er-field="RESIDENT.address_sub_district">
+                                    {resident.addressSubDistrict || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'District',
+                                <Text size="sm" data-er-field="RESIDENT.address_district">
+                                    {resident.addressDistrict || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Province',
+                                <Text size="sm" data-er-field="RESIDENT.address_province">
+                                    {resident.addressProvince || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            {renderField(
+                                'Postal Code',
+                                <Text size="sm" data-er-field="RESIDENT.address_postal_code">
+                                    {resident.addressPostalCode || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                    </Grid>
 
-				{buildLeftSection(
-					'Date of Birth',
-					<Text size="sm" data-er-field="RESIDENT.date_of_birth">
-						{formatDate(resident.dateOfBirth)}
-					</Text>
-				)}
+                    <Divider my="xs" label="Medical" labelPosition="center" />
 
-				{buildLeftSection(
-					'Gender',
-					<Badge color="gray" size="lg" data-er-field="RESIDENT.gender">
-						{resident.gender || '—'}
-					</Badge>
-				)}
+                    <Grid gutter="md">
+                        <Grid.Col span={12}>
+                            {renderField(
+                                'Medical Conditions',
+                                <Text size="sm" c="dimmed" data-er-field="RESIDENT.medical_conditions">
+                                    {resident.medicalConditions || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Allergies',
+                                <Text size="sm" c="dimmed" data-er-field="RESIDENT.allergies">
+                                    {resident.allergies || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Dietary Restrictions',
+                                <Text size="sm" c="dimmed" data-er-field="RESIDENT.dietary_restrictions">
+                                    {resident.dietaryRestrictions || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                    </Grid>
 
-				{buildLeftSection(
-						'Race',
-						<Text size="sm" data-er-field="RESIDENT.race">
-							{resident.race || '—'}
-						</Text>
-					)}
+                    <Divider my="xs" label="Emergency Contact" labelPosition="center" />
 
-					{buildLeftSection(
-						'Nationality',
-						<Text size="sm" data-er-field="RESIDENT.nationality">
-							{resident.nationality || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Religion',
-						<Text size="sm" data-er-field="RESIDENT.religion">
-							{resident.religion || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Marital Status',
-						<Text size="sm" data-er-field="RESIDENT.marital_status">
-							{humanizeToken(resident.maritalStatus)}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Occupation',
-						<Text size="sm" data-er-field="RESIDENT.occupation">
-							{resident.occupation || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Blood Group',
-						<Text size="sm" data-er-field="RESIDENT.blood_group">
-							{resident.bloodGroup || '—'}
-						</Text>
-					)}
-
-					<Divider my="md" />
-
-					{buildLeftSection(
-						'Mobile Phone',
-						<Text size="sm" data-er-field="RESIDENT.phone_mobile">
-							{resident.phoneMobile || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Home Phone',
-						<Text size="sm" data-er-field="RESIDENT.phone_home">
-							{resident.phoneHome || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Email',
-						<Text size="sm" data-er-field="RESIDENT.email">
-							{resident.email || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Address',
-						addressLines.length > 0 ? (
-							<Stack gap={2} data-er-field="RESIDENT.address">
-								{addressLines.map((line, index) => (
-									<Text key={index} size="sm" c="dimmed">
-										{line}
-									</Text>
-								))}
-							</Stack>
-						) : (
-							<Text size="sm" c="dimmed" data-er-field="RESIDENT.address">
-								—
-							</Text>
-						)
-					)}
-
-					<Divider my="md" />
-
-					{buildLeftSection(
-						'Medical Conditions',
-						<Text size="sm" c="dimmed" data-er-field="RESIDENT.medical_conditions">
-							{resident.medicalConditions || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Allergies',
-						<Text size="sm" c="dimmed" data-er-field="RESIDENT.allergies">
-							{resident.allergies || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Dietary Restrictions',
-						<Text size="sm" c="dimmed" data-er-field="RESIDENT.dietary_restrictions">
-							{resident.dietaryRestrictions || '—'}
-						</Text>
-					)}
-
-					<Divider my="md" />
-
-					{buildLeftSection(
-						'Emergency Contact Name',
-						<Text size="sm" data-er-field="RESIDENT.emergency_contact_name">
-							{resident.emergencyContactName || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Emergency Contact Relationship',
-						<Text size="sm" data-er-field="RESIDENT.emergency_contact_relationship">
-							{humanizeToken(resident.emergencyContactRelationship)}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Emergency Contact Phone',
-						<Text size="sm" data-er-field="RESIDENT.emergency_contact">
-							{resident.emergencyContact || '—'}
-						</Text>
-					)}
-
-					{buildLeftSection(
-						'Emergency Contact Address',
-						<Text size="sm" c="dimmed" data-er-field="RESIDENT.emergency_contact_address">
-							{resident.emergencyContactAddressSameAsResident
-								? 'Same as resident address'
-								: resident.emergencyContactAddress || '—'}
-						</Text>
-					)}
+                    <Grid gutter="md">
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Emergency Contact Name',
+                                <Text size="sm" data-er-field="RESIDENT.emergency_contact_name">
+                                    {resident.emergencyContactName || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            {renderField(
+                                'Relationship to Resident',
+                                <Text size="sm" data-er-field="RESIDENT.emergency_contact_relationship">
+                                    {humanizeToken(resident.emergencyContactRelationship)}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={12}>
+                            {renderField(
+                                'Emergency Contact Phone',
+                                <Text size="sm" data-er-field="RESIDENT.emergency_contact">
+                                    {resident.emergencyContact || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={12}>
+                            {renderField(
+                                'Emergency Contact Address Same as Resident',
+                                <Text size="sm" data-er-field="RESIDENT.emergency_contact_address_same">
+                                    {formatYesNo(resident.emergencyContactAddressSameAsResident)}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                        <Grid.Col span={12}>
+                            {renderField(
+                                'Emergency Contact Address',
+                                <Text size="sm" c="dimmed" data-er-field="RESIDENT.emergency_contact_address">
+                                    {resident.emergencyContactAddressSameAsResident
+                                        ? 'Same as resident address'
+                                        : resident.emergencyContactAddress || '—'}
+                                </Text>
+                            )}
+                        </Grid.Col>
+                    </Grid>
+                </Stack>
 			</div>
 		);
 
@@ -353,7 +472,8 @@ export function Patient() {
                                     key={guardian.id}
                                     title={(
                                         <Text fw={600} size="sm">
-                                            {guardian.firstName} {guardian.lastName}
+                                            <span data-er-field="GUARDIAN.first_name">{guardian.firstName || '—'}</span>{' '}
+                                            <span data-er-field="GUARDIAN.last_name">{guardian.lastName || '—'}</span>
                                         </Text>
                                     )}
                                     badge={(
@@ -370,14 +490,19 @@ export function Patient() {
                                         <Stack gap={4}>
                                             <Group gap="xs">
                                                 <IconPhone size={14} />
-                                                <Text size="sm">{guardian.phone || '—'}</Text>
+                                                <Text size="sm" data-er-field="GUARDIAN.phone">{guardian.phone || '—'}</Text>
                                             </Group>
                                             <Group gap="xs">
                                                 <IconMail size={14} />
-                                                <Text size="sm">{guardian.email || '—'}</Text>
+                                                <Text size="sm" data-er-field="GUARDIAN.email">{guardian.email || '—'}</Text>
                                             </Group>
-                                            <Text size="xs" c="dimmed">{guardian.address || '—'}</Text>
-                                            <Text size="xs" c="dimmed">Relationship: {humanizeToken(guardian.relationship)}</Text>
+                                            <Text size="xs" c="dimmed" data-er-field="GUARDIAN.address">{guardian.address || '—'}</Text>
+                                            <Text size="xs" c="dimmed" data-er-field="GUARDIAN.relationship">
+                                                Relationship: {humanizeToken(guardian.relationship)}
+                                            </Text>
+                                            <Text size="xs" c="dimmed" data-er-field="GUARDIAN.pays">
+                                                Pays: {guardian.pays ? 'Yes' : 'No'}
+                                            </Text>
                                         </Stack>
                                     )}
                                 />
