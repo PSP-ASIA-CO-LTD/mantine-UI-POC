@@ -132,16 +132,19 @@ interface InlineFieldProps {
     onSave: (value: InlineValue) => Promise<void> | void;
     children: (props: {
         isEditing: boolean;
+        setIsEditing: (val: boolean) => void;
         draftValue: InlineValue;
         setDraftValue: (val: InlineValue) => void;
-        handleSave: () => void;
+        handleSave: (val?: InlineValue) => void;
         handleCancel: () => void;
         isSaving: boolean;
     }) => React.ReactNode;
     disabled?: boolean;
     className?: string;
     hideEditButton?: boolean;
+    hideActionButtons?: boolean;
     locked?: boolean;
+    disableClickToEdit?: boolean;
 }
 
 export function InlineField({
@@ -152,7 +155,9 @@ export function InlineField({
     disabled = false,
     className,
     hideEditButton = false,
+    hideActionButtons = false,
     locked = false,
+    disableClickToEdit = false,
 }: InlineFieldProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -166,16 +171,22 @@ export function InlineField({
 
     const hasChanges = String(value) !== String(draftValue);
 
-    const handleSave = async () => {
+    const handleSave = async (valueOverride?: InlineValue) => {
         if (isSaving || locked) return;
-        if (!hasChanges) {
+        
+        const valueToSave = valueOverride !== undefined ? valueOverride : draftValue;
+        const actualHasChanges = valueOverride !== undefined 
+            ? String(value) !== String(valueOverride)
+            : hasChanges;
+
+        if (!actualHasChanges) {
             setIsEditing(false);
             return;
         }
 
         try {
             setIsSaving(true);
-            await onSave(draftValue);
+            await onSave(valueToSave);
             setIsEditing(false);
         } catch (error) {
             console.error(`Failed to save ${label}:`, error);
@@ -196,19 +207,27 @@ export function InlineField({
         isEditing ? 'is-editing' : '',
         disabled ? 'is-disabled' : '',
         locked ? 'editable-field--locked' : '',
+        hideActionButtons ? 'editable-field--no-actions' : '',
         className
     ].filter(Boolean).join(' ');
+
+    const handleControlClick = () => {
+        if (!isEditing && !disabled && !locked && !disableClickToEdit && hideEditButton) {
+            setIsEditing(true);
+        }
+    };
 
     return (
         <div className={rootClasses}>
             <Text size="sm" className="editable-field__label">{label}</Text>
             <div 
                 className="editable-field__control"
-                onClick={() => !isEditing && !disabled && !locked && hideEditButton && setIsEditing(true)}
-                style={{ cursor: !isEditing && hideEditButton && !disabled && !locked ? 'pointer' : 'default' }}
+                onClick={handleControlClick}
+                style={{ cursor: !isEditing && hideEditButton && !disabled && !locked && !disableClickToEdit ? 'pointer' : 'default' }}
             >
                 {children({
                     isEditing,
+                    setIsEditing,
                     draftValue,
                     setDraftValue,
                     handleSave,
@@ -227,7 +246,7 @@ export function InlineField({
                                 <IconPencil size={16} />
                             </ActionIcon>
                         )
-                    ) : isEditing ? (
+                    ) : isEditing && !hideActionButtons ? (
                         <>
                             <ActionIcon
                                 variant="subtle"
@@ -255,7 +274,10 @@ export function InlineField({
     );
 }
 
-const commonInputClassNames = { input: 'editable-field__input' };
+const commonInputClassNames = { 
+    root: 'editable-field__mantine-root',
+    input: 'editable-field__input' 
+};
 
 // ==================== 1. INPUT FIELDS ====================
 
@@ -331,16 +353,31 @@ export function InlineLockedInput({ label, value, ...props }: TextInputProps) {
 
 export function InlineSelect({ label, value, onSave, ...props }: SelectProps & { onSave: (val: string | null) => Promise<void> | void }) {
     return (
-        <InlineField label={label as string} value={value as string} onSave={(val) => onSave(val as string | null)} disabled={props.disabled} hideEditButton>
-            {({ draftValue, setDraftValue, isEditing }) => (
+        <InlineField 
+            label={label as string} 
+            value={value as string} 
+            onSave={(val) => onSave(val as string | null)} 
+            disabled={props.disabled} 
+            hideEditButton 
+            hideActionButtons
+            disableClickToEdit
+        >
+            {({ draftValue, setDraftValue, handleSave, setIsEditing }) => (
                 <MantineSelect
                     {...props}
                     variant="unstyled"
                     value={draftValue as string}
-                    onChange={setDraftValue}
-                    readOnly={!isEditing}
-                    pointer={isEditing}
+                    onChange={(val) => {
+                        setDraftValue(val);
+                        handleSave(val);
+                    }}
+                    onFocus={() => setIsEditing(true)}
+                    onBlur={() => setIsEditing(false)}
+                    onDropdownOpen={() => setIsEditing(true)}
+                    onDropdownClose={() => setIsEditing(false)}
+                    pointer={!props.disabled}
                     classNames={commonInputClassNames}
+                    comboboxProps={{ withinPortal: true, zIndex: 1000, ...props.comboboxProps }}
                 />
             )}
         </InlineField>
@@ -351,16 +388,29 @@ export function InlineSelect({ label, value, onSave, ...props }: SelectProps & {
 
 export function InlineDateInput({ label, value, onSave, ...props }: DateInputProps & { onSave: (val: Date | null) => Promise<void> | void }) {
     return (
-        <InlineField label={label as string} value={value as Date} onSave={(val) => onSave(val as Date | null)} disabled={props.disabled} hideEditButton>
-            {({ draftValue, setDraftValue, isEditing }) => (
+        <InlineField 
+            label={label as string} 
+            value={value as Date} 
+            onSave={(val) => onSave(val as Date | null)} 
+            disabled={props.disabled} 
+            hideEditButton 
+            hideActionButtons
+            disableClickToEdit
+        >
+            {({ draftValue, setDraftValue, handleSave, setIsEditing }) => (
                 <MantineDateInput
                     {...props}
                     variant="unstyled"
                     value={draftValue ? new Date(draftValue as string | number | Date) : null}
-                    onChange={(val) => setDraftValue(val as Date | null)}
-                    readOnly={!isEditing}
-                    pointer={isEditing}
+                    onChange={(val) => {
+                        setDraftValue(val);
+                        handleSave(val);
+                    }}
+                    onFocus={() => setIsEditing(true)}
+                    onBlur={() => setIsEditing(false)}
+                    pointer={!props.disabled}
                     classNames={commonInputClassNames}
+                    popoverProps={{ withinPortal: true, zIndex: 1000, ...props.popoverProps }}
                 />
             )}
         </InlineField>

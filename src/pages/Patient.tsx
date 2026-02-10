@@ -185,9 +185,9 @@ export function Patient() {
                         <Grid.Col span={4}>
                             <InlineSelect
                                 label="Prefix"
-                                value={resident.prefix}
+                                value={resident.prefix || null}
                                 data={prefixOptions}
-                                onSave={(val) => handleUpdateResident(resident.id, { prefix: val as Resident['prefix'] })}
+                                onSave={(val) => handleUpdateResident(resident.id, { prefix: (val as Resident['prefix']) || undefined })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
@@ -214,9 +214,9 @@ export function Patient() {
                         <Grid.Col span={4}>
                             <InlineSelect
                                 label="Gender"
-                                value={resident.gender}
+                                value={resident.gender || null}
                                 data={genderOptions}
-                                onSave={(val) => handleUpdateResident(resident.id, { gender: val as Resident['gender'] })}
+                                onSave={(val) => handleUpdateResident(resident.id, { gender: (val as Resident['gender']) || undefined })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
@@ -257,9 +257,9 @@ export function Patient() {
                         <Grid.Col span={6}>
                             <InlineSelect
                                 label="Marital Status"
-                                value={resident.maritalStatus}
+                                value={resident.maritalStatus || null}
                                 data={maritalStatusOptions}
-                                onSave={(val) => handleUpdateResident(resident.id, { maritalStatus: val || '' })}
+                                onSave={(val) => handleUpdateResident(resident.id, { maritalStatus: val || undefined })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
