@@ -371,13 +371,11 @@ export function InlineSelect({ label, value, onSave, ...props }: SelectProps & {
                         setDraftValue(val);
                         handleSave(val);
                     }}
-                    onFocus={() => setIsEditing(true)}
-                    onBlur={() => setIsEditing(false)}
                     onDropdownOpen={() => setIsEditing(true)}
                     onDropdownClose={() => setIsEditing(false)}
                     pointer={!props.disabled}
                     classNames={commonInputClassNames}
-                    comboboxProps={{ withinPortal: true, zIndex: 1000, ...props.comboboxProps }}
+                    comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}
                 />
             )}
         </InlineField>
@@ -406,11 +404,11 @@ export function InlineDateInput({ label, value, onSave, ...props }: DateInputPro
                         setDraftValue(val);
                         handleSave(val);
                     }}
-                    onFocus={() => setIsEditing(true)}
-                    onBlur={() => setIsEditing(false)}
+                    onDropdownOpen={() => setIsEditing(true)}
+                    onDropdownClose={() => setIsEditing(false)}
                     pointer={!props.disabled}
                     classNames={commonInputClassNames}
-                    popoverProps={{ withinPortal: true, zIndex: 1000, ...props.popoverProps }}
+                    popoverProps={{ withinPortal: true, zIndex: 3000, ...props.popoverProps }}
                 />
             )}
         </InlineField>

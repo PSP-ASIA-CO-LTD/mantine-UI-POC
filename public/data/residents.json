@@ -25,7 +25,8 @@
     "dietaryRestrictions": "None",
     "emergencyContact": "089-999-8888",
     "guardianId": "gdn-2",
-    "createdAt": "2025-12-18T15:00:00Z"
+    "createdAt": "2025-12-18T15:00:00Z",
+    "prefix": "mr"
   },
   {
     "firstName": "สมศรี",
