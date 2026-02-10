@@ -6,8 +6,11 @@
 }
 
 .editable-field__label {
-    color: var(--mantine-color-gray-6);
-    font-weight: 500;
+    color: var(--mantine-primary-color-filled);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 0.7rem !important;
 }
 
 .editable-field__control {
@@ -15,8 +18,20 @@
     display: flex;
     align-items: stretch;
     width: 100%;
-    border-bottom: 1px solid var(--mantine-color-gray-2);
+    border-bottom: 1px solid var(--mantine-color-gray-3);
     transition: border-color 0.2s ease;
+}
+
+.editable-field--locked .editable-field__control {
+    border-bottom: 1px dashed var(--mantine-color-gray-3);
+    background-color: var(--mantine-color-gray-0);
+    border-radius: 4px;
+    padding-left: 0.5rem;
+}
+
+.editable-field--locked .editable-field__input {
+    color: var(--mantine-color-gray-6);
+    cursor: default;
 }
 
 .editable-field__input {

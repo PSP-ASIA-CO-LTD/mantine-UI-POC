@@ -20,6 +20,7 @@ import { StyledTable } from '../components/StyledTable';
 import {
     TextInput,
     InlineTextInput,
+    InlineLockedInput,
     InlineSelect,
     InlineDateInput,
     InlineTextarea
@@ -176,11 +177,9 @@ export function Patient() {
                 <Stack gap="md">
                     <Grid gutter="md">
                         <Grid.Col span={12}>
-                            <InlineTextInput
+                            <InlineLockedInput
                                 label="Resident ID"
                                 value={resident.id}
-                                onSave={() => {}}
-                                disabled
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>

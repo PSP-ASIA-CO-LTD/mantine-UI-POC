@@ -140,6 +140,8 @@ interface InlineFieldProps {
     }) => React.ReactNode;
     disabled?: boolean;
     className?: string;
+    hideEditButton?: boolean;
+    locked?: boolean;
 }
 
 export function InlineField({
@@ -149,6 +151,8 @@ export function InlineField({
     children,
     disabled = false,
     className,
+    hideEditButton = false,
+    locked = false,
 }: InlineFieldProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -163,7 +167,7 @@ export function InlineField({
     const hasChanges = String(value) !== String(draftValue);
 
     const handleSave = async () => {
-        if (isSaving) return;
+        if (isSaving || locked) return;
         if (!hasChanges) {
             setIsEditing(false);
             return;
@@ -186,10 +190,23 @@ export function InlineField({
         setIsEditing(false);
     };
 
+    const rootClasses = [
+        'editable-field',
+        'editable-field--inline',
+        isEditing ? 'is-editing' : '',
+        disabled ? 'is-disabled' : '',
+        locked ? 'editable-field--locked' : '',
+        className
+    ].filter(Boolean).join(' ');
+
     return (
-        <div className={`editable-field editable-field--inline${isEditing ? ' is-editing' : ''}${disabled ? ' is-disabled' : ''} ${className || ''}`}>
+        <div className={rootClasses}>
             <Text size="sm" className="editable-field__label">{label}</Text>
-            <div className="editable-field__control">
+            <div 
+                className="editable-field__control"
+                onClick={() => !isEditing && !disabled && !locked && hideEditButton && setIsEditing(true)}
+                style={{ cursor: !isEditing && hideEditButton && !disabled && !locked ? 'pointer' : 'default' }}
+            >
                 {children({
                     isEditing,
                     draftValue,
@@ -199,21 +216,23 @@ export function InlineField({
                     isSaving,
                 })}
                 <div className="editable-field__actions">
-                    {!isEditing ? (
-                        <ActionIcon
-                            variant="subtle"
-                            onClick={() => !disabled && setIsEditing(true)}
-                            disabled={disabled}
-                            size="sm"
-                        >
-                            <IconPencil size={16} />
-                        </ActionIcon>
-                    ) : (
+                    {!isEditing && !locked ? (
+                        !hideEditButton && (
+                            <ActionIcon
+                                variant="subtle"
+                                onClick={() => !disabled && setIsEditing(true)}
+                                disabled={disabled}
+                                size="sm"
+                            >
+                                <IconPencil size={16} />
+                            </ActionIcon>
+                        )
+                    ) : isEditing ? (
                         <>
                             <ActionIcon
                                 variant="subtle"
                                 color="green"
-                                onClick={handleSave}
+                                onClick={(e) => { e.stopPropagation(); handleSave(); }}
                                 disabled={isSaving}
                                 size="sm"
                             >
@@ -222,14 +241,14 @@ export function InlineField({
                             <ActionIcon
                                 variant="subtle"
                                 color="red"
-                                onClick={handleCancel}
+                                onClick={(e) => { e.stopPropagation(); handleCancel(); }}
                                 disabled={isSaving}
                                 size="sm"
                             >
                                 <IconX size={16} />
                             </ActionIcon>
                         </>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>
@@ -237,6 +256,8 @@ export function InlineField({
 }
 
 const commonInputClassNames = { input: 'editable-field__input' };
+
+// ==================== 1. INPUT FIELDS ====================
 
 export function InlineTextInput({ label, value, onSave, ...props }: TextInputProps & { onSave: (val: string) => Promise<void> | void }) {
     return (
@@ -252,43 +273,6 @@ export function InlineTextInput({ label, value, onSave, ...props }: TextInputPro
                         if (e.key === 'Enter') handleSave();
                         if (e.key === 'Escape') handleCancel();
                     }}
-                    classNames={commonInputClassNames}
-                />
-            )}
-        </InlineField>
-    );
-}
-
-export function InlineTextarea({ label, value, onSave, ...props }: TextareaProps & { onSave: (val: string) => Promise<void> | void }) {
-    return (
-        <InlineField label={label as string} value={value as string} onSave={(val) => onSave(val as string)} disabled={props.disabled}>
-            {({ draftValue, setDraftValue, isEditing }) => (
-                <MantineTextarea
-                    {...props}
-                    variant="unstyled"
-                    value={(draftValue as string) || ''}
-                    onChange={(e) => setDraftValue(e.currentTarget.value)}
-                    readOnly={!isEditing}
-                    autosize
-                    minRows={1}
-                    classNames={commonInputClassNames}
-                />
-            )}
-        </InlineField>
-    );
-}
-
-export function InlineSelect({ label, value, onSave, ...props }: SelectProps & { onSave: (val: string | null) => Promise<void> | void }) {
-    return (
-        <InlineField label={label as string} value={value as string} onSave={(val) => onSave(val as string | null)} disabled={props.disabled}>
-            {({ draftValue, setDraftValue, isEditing }) => (
-                <MantineSelect
-                    {...props}
-                    variant="unstyled"
-                    value={draftValue as string}
-                    onChange={setDraftValue}
-                    readOnly={!isEditing}
-                    pointer={isEditing}
                     classNames={commonInputClassNames}
                 />
             )}
@@ -318,17 +302,85 @@ export function InlineNumberInput({ label, value, onSave, ...props }: NumberInpu
     );
 }
 
+// ==================== 2. LOCKED INPUT FIELDS ====================
+
+export function InlineLockedInput({ label, value, ...props }: TextInputProps) {
+    return (
+        <InlineField 
+            label={label as string} 
+            value={value as string} 
+            onSave={() => {}} 
+            disabled={true}
+            locked={true}
+            hideEditButton={true}
+        >
+            {({ draftValue }) => (
+                <MantineTextInput
+                    {...props}
+                    variant="unstyled"
+                    value={(draftValue as string) || ''}
+                    readOnly
+                    classNames={commonInputClassNames}
+                />
+            )}
+        </InlineField>
+    );
+}
+
+// ==================== 3. SELECTION FIELDS ====================
+
+export function InlineSelect({ label, value, onSave, ...props }: SelectProps & { onSave: (val: string | null) => Promise<void> | void }) {
+    return (
+        <InlineField label={label as string} value={value as string} onSave={(val) => onSave(val as string | null)} disabled={props.disabled} hideEditButton>
+            {({ draftValue, setDraftValue, isEditing }) => (
+                <MantineSelect
+                    {...props}
+                    variant="unstyled"
+                    value={draftValue as string}
+                    onChange={setDraftValue}
+                    readOnly={!isEditing}
+                    pointer={isEditing}
+                    classNames={commonInputClassNames}
+                />
+            )}
+        </InlineField>
+    );
+}
+
+// ==================== 4. DATE PICKER FIELDS ====================
+
 export function InlineDateInput({ label, value, onSave, ...props }: DateInputProps & { onSave: (val: Date | null) => Promise<void> | void }) {
     return (
-        <InlineField label={label as string} value={value as Date} onSave={(val) => onSave(val as Date | null)} disabled={props.disabled}>
+        <InlineField label={label as string} value={value as Date} onSave={(val) => onSave(val as Date | null)} disabled={props.disabled} hideEditButton>
             {({ draftValue, setDraftValue, isEditing }) => (
                 <MantineDateInput
                     {...props}
                     variant="unstyled"
-                    value={draftValue ? new Date(draftValue as any) : null}
-                    onChange={(val) => setDraftValue(val as any)}
+                    value={draftValue ? new Date(draftValue as string | number | Date) : null}
+                    onChange={(val) => setDraftValue(val as Date | null)}
                     readOnly={!isEditing}
                     pointer={isEditing}
+                    classNames={commonInputClassNames}
+                />
+            )}
+        </InlineField>
+    );
+}
+
+// ==================== 5. TEXT AREA FIELDS ====================
+
+export function InlineTextarea({ label, value, onSave, ...props }: TextareaProps & { onSave: (val: string) => Promise<void> | void }) {
+    return (
+        <InlineField label={label as string} value={value as string} onSave={(val) => onSave(val as string)} disabled={props.disabled}>
+            {({ draftValue, setDraftValue, isEditing }) => (
+                <MantineTextarea
+                    {...props}
+                    variant="unstyled"
+                    value={(draftValue as string) || ''}
+                    onChange={(e) => setDraftValue(e.currentTarget.value)}
+                    readOnly={!isEditing}
+                    autosize
+                    minRows={1}
                     classNames={commonInputClassNames}
                 />
             )}
