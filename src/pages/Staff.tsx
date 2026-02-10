@@ -9,20 +9,23 @@ import {
     Text,
     Divider,
     Stack,
+} from '@mantine/core';
+import { IconPlus, IconDotsVertical } from '@tabler/icons-react';
+import { API } from '../api';
+import { useSidesheet } from '../contexts/SidesheetContext';
+import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
+import { StyledTable } from '../components/StyledTable';
+import {
     TextInput,
     Select,
     Textarea,
     FileInput,
     NumberInput,
-} from '@mantine/core';
-import { DateInput } from '@mantine/dates';
-import { IconPlus, IconDotsVertical } from '@tabler/icons-react';
-import { API } from '../api';
-import { useSidesheet } from '../contexts/SidesheetContext';
-import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
-import { CardList } from '../components/CardList';
-import { StyledTable } from '../components/StyledTable';
-import { buildLeftSection } from '../utils/sidesheetHelper';
+    DateInput,
+    InlineTextInput,
+    InlineSelect,
+    InlineLockedInput,
+} from '../components/EditableFields';
 import type { Staff } from '../types';
 
 export function Staff() {
@@ -58,91 +61,57 @@ export function Staff() {
         loadStaff();
     }, []);
 
-    const handleDeleteStaff = async (id: string) => {
-        try {
-            await API.deleteStaff(id);
-            setStaff((prev) => prev.filter((s) => s.id !== id));
-            close();
-        } catch (error) {
-            console.error('Failed to delete staff:', error);
-        }
-    };
-
     const openStaffSidesheet = (member: Staff) => {
-
         const leftPane = (
-            <div>
-                {buildLeftSection(
-                    'Staff ID',
-                    <Text size="sm" fw={500} data-er-field="STAFF.id">
-                        {member.id}
-                    </Text>
-                )}
+            <Stack gap="md">
+                <InlineLockedInput
+                    label="Staff ID"
+                    value={member.id}
+                />
 
-                <Divider my="xl" />
+                <InlineTextInput
+                    label="Full Name"
+                    value={member.name}
+                    onSave={(val) => handleUpdateStaff(member.id, { name: val })}
+                />
 
-                {buildLeftSection(
-                    'Department',
-                    <Badge color="gray" size="lg" data-er-field="STAFF.department_id">
-                        {member.dept}
-                    </Badge>
-                )}
+                <InlineSelect
+                    label="Department"
+                    value={member.dept}
+                    data={departments}
+                    onSave={(val) => handleUpdateStaff(member.id, { dept: val || '' })}
+                />
 
-                <Divider my="xl" />
-
-                {buildLeftSection(
-                    'Status',
-                    <Badge color="green" size="lg" data-er-field="STAFF.status">
-                        {member.status}
-                    </Badge>
-                )}
-            </div>
+                <InlineSelect
+                    label="Status"
+                    value={member.status}
+                    data={['Active', 'On Leave', 'Resigned']}
+                    onSave={(val) => handleUpdateStaff(member.id, { status: val || 'Active' })}
+                />
+            </Stack>
         );
 
-        const assignments = member.role ? [{ role: member.role, dept: member.dept }] : [];
         const rightPane = (
             <div>
                 <Group justify="space-between" mb="md">
                     <Text fw={600}>
-                        Departments ({assignments.length})
+                        Professional Info
                     </Text>
-
-                    {isEditing && (
-                        <ActionIcon
-                            size={28}
-                            variant="light"
-                            color="green"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                            }}
-                            aria-label="Add department"
-                        >
-                            <IconPlus size={16} />
-                        </ActionIcon>
-                    )}
                 </Group>
 
-                {assignments.length > 0 ? (
-                    assignments.map((assignment) => (
-                        <CardList
-                            key={`${assignment.role}-${assignment.dept}`}
-                            title={assignment.role}
-                            titleDataErField="STAFF.role"
-                            badge={(
-                                <Badge size="sm" data-er-field="STAFF.department_id">
-                                    {assignment.dept}
-                                </Badge>
-                            )}
-                            isEditing={isEditing}
-                            onRemove={() => handleDeleteStaff(member.id)}
-                            description={`Department: ${assignment.dept}`}
-                            descriptionDataErField="STAFF.department_id"
-                            mb="sm"
-                        />
-                    ))
-                ) : (
-                    <Text size="sm" c="dimmed">No departments assigned.</Text>
-                )}
+                <Stack gap="md">
+                    <InlineTextInput
+                        label="Job Title / Position"
+                        value={member.role}
+                        onSave={(val) => handleUpdateStaff(member.id, { role: val })}
+                    />
+                    <InlineSelect
+                        label="Assigned Department"
+                        value={member.dept}
+                        data={departments}
+                        onSave={(val) => handleUpdateStaff(member.id, { dept: val || '' })}
+                    />
+                </Stack>
             </div>
         );
         const footer = (
@@ -151,16 +120,8 @@ export function Staff() {
                     setIsEditing(false);
                     close();
                 }}
-                onSave={() => {
-                    if (!isEditing) {
-                        setIsEditing(true);
-                        return;
-                    }
-
-                    close();
-                    setIsEditing(false);
-                }}
-                saveLabel={isEditing ? 'Save Changes' : 'Edit Staff'}
+                onSave={close}
+                saveLabel="Done"
             />
         );
 

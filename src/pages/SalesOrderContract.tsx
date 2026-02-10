@@ -7,12 +7,10 @@ import {
     Group,
     Modal,
     Paper,
-    Select,
     Stack,
     Switch,
     Table,
     Text,
-    TextInput,
     Title,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -20,6 +18,7 @@ import { IconArrowLeft, IconCheck, IconMail, IconPrinter } from '@tabler/icons-r
 import { useStoredContract } from '../hooks/useStoredContract';
 import { useNotifications } from '../hooks/useNotifications';
 import { PageActionBar } from '../components/PageActionBar';
+import { Select, TextInput } from '../components/EditableFields';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
 import type { ContractLanguage, StoredContract, Contract } from '../types';
 import './SalesOrderContract.css';
@@ -847,4 +846,3 @@ export function SalesOrderContract() {
         </div>
     );
 }
-

@@ -15,6 +15,7 @@ import { StaffTasks } from './pages/StaffTasks';
 import { Patient } from './pages/Patient';
 import { Profile } from './pages/Profile';
 import { UiButtons } from './pages/UiButtons';
+import { UiFields } from './pages/UiFields';
 import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
 import { SalesOrderProvider } from './contexts/SalesOrderContext';
@@ -66,6 +67,7 @@ function AppLayout() {
                     <Route path="/patient" element={<Patient />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/ui/buttons" element={<UiButtons />} />
+                    <Route path="/ui/fields" element={<UiFields />} />
                 </Routes>
             </AppShell.Main>
         </AppShell>

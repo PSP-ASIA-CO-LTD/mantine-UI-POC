@@ -1,6 +1,4 @@
 import {
-    TextInput,
-    PasswordInput,
     Paper,
     Title,
     Text,
@@ -12,6 +10,7 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom'; // add Import
+import { TextInput, PasswordInput } from '../components/EditableFields';
 
 export function Login() {
     const navigate = useNavigate();

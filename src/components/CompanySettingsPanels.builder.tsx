@@ -1,53 +1,49 @@
-import { Title, Stack, TextInput, Textarea, Card, Text, NumberInput } from '@mantine/core';
+import { Title, Stack, Card, Text } from '@mantine/core';
 import { SidesheetSection } from './SidesheetSection';
 import type { BusinessProfile } from '../types';
+import { InlineEditableField } from './InlineEditableField';
 
 interface CompanySettingsPanelOptions {
     profile: BusinessProfile;
-    editable?: boolean;
-    onBusinessInfoChange?: (field: keyof BusinessProfile['businessInfo'], value: string) => void;
-    onAdminInfoChange?: (field: keyof BusinessProfile['adminInfo'], value: string) => void;
-    onFacilityInfoChange?: (field: keyof BusinessProfile['facilityInfo'], value: string) => void;
-    onDepositMonthsChange?: (value: number) => void;
+    onBusinessInfoSave?: (field: keyof BusinessProfile['businessInfo'], value: string) => Promise<void> | void;
+    onAdminInfoSave?: (field: keyof BusinessProfile['adminInfo'], value: string) => Promise<void> | void;
+    onFacilityInfoSave?: (field: keyof BusinessProfile['facilityInfo'], value: string) => Promise<void> | void;
+    onDepositMonthsSave?: (value: number) => Promise<void> | void;
 }
 
 export function buildCompanySettingsPanels({
     profile,
-    editable = false,
-    onBusinessInfoChange,
-    onAdminInfoChange,
-    onFacilityInfoChange,
-    onDepositMonthsChange,
+    onBusinessInfoSave,
+    onAdminInfoSave,
+    onFacilityInfoSave,
+    onDepositMonthsSave,
 }: CompanySettingsPanelOptions) {
     const leftPane = (
         <Stack gap="lg">
             <div>
                 <Title order={4}>Business Details</Title>
                 <Stack gap="sm" mt="sm">
-                    <TextInput
+                    <InlineEditableField
                         label="Business Name"
                         value={profile.businessInfo.businessName}
-                        readOnly={!editable}
-                        onChange={editable ? (event) => onBusinessInfoChange?.('businessName', event.currentTarget.value) : undefined}
+                        onSave={(value) => onBusinessInfoSave?.('businessName', String(value))}
                     />
-                    <TextInput
+                    <InlineEditableField
                         label="Business Type"
                         value={profile.businessInfo.businessType}
-                        readOnly={!editable}
-                        onChange={editable ? (event) => onBusinessInfoChange?.('businessType', event.currentTarget.value) : undefined}
+                        onSave={(value) => onBusinessInfoSave?.('businessType', String(value))}
                     />
-                    <Textarea
+                    <InlineEditableField
                         label="Address"
+                        type="textarea"
                         value={profile.businessInfo.address}
-                        readOnly={!editable}
-                        onChange={editable ? (event) => onBusinessInfoChange?.('address', event.currentTarget.value) : undefined}
-                        minRows={2}
+                        onSave={(value) => onBusinessInfoSave?.('address', String(value))}
                     />
-                    <TextInput
+                    <InlineEditableField
                         label="Phone Number"
+                        type="tel"
                         value={profile.businessInfo.phone}
-                        readOnly={!editable}
-                        onChange={editable ? (event) => onBusinessInfoChange?.('phone', event.currentTarget.value) : undefined}
+                        onSave={(value) => onBusinessInfoSave?.('phone', String(value))}
                     />
                 </Stack>
             </div>
@@ -55,23 +51,21 @@ export function buildCompanySettingsPanels({
             <div>
                 <Title order={4}>Administrator</Title>
                 <Stack gap="sm" mt="sm">
-                    <TextInput
+                    <InlineEditableField
                         label="First Name"
                         value={profile.adminInfo.firstName}
-                        readOnly={!editable}
-                        onChange={editable ? (event) => onAdminInfoChange?.('firstName', event.currentTarget.value) : undefined}
+                        onSave={(value) => onAdminInfoSave?.('firstName', String(value))}
                     />
-                    <TextInput
+                    <InlineEditableField
                         label="Last Name"
                         value={profile.adminInfo.lastName}
-                        readOnly={!editable}
-                        onChange={editable ? (event) => onAdminInfoChange?.('lastName', event.currentTarget.value) : undefined}
+                        onSave={(value) => onAdminInfoSave?.('lastName', String(value))}
                     />
-                    <TextInput
+                    <InlineEditableField
                         label="Email"
+                        type="email"
                         value={profile.adminInfo.email}
-                        readOnly={!editable}
-                        onChange={editable ? (event) => onAdminInfoChange?.('email', event.currentTarget.value) : undefined}
+                        onSave={(value) => onAdminInfoSave?.('email', String(value))}
                     />
                 </Stack>
             </div>
@@ -79,75 +73,48 @@ export function buildCompanySettingsPanels({
             <div>
                 <Title order={4}>Facility & Billing</Title>
                 <Stack gap="sm" mt="sm">
-                    <TextInput
+                    <InlineEditableField
                         label="License Number"
                         value={profile.facilityInfo.licenseNumber}
-                        readOnly={!editable}
-                        onChange={editable ? (event) => onFacilityInfoChange?.('licenseNumber', event.currentTarget.value) : undefined}
+                        onSave={(value) => onFacilityInfoSave?.('licenseNumber', String(value))}
                     />
-                    {editable ? (
-                        <NumberInput
-                            label="Deposit policy (months)"
-                            value={profile.depositMonths}
-                            min={0}
-                            onChange={(value) => onDepositMonthsChange?.(typeof value === 'number' ? value : Number(value) || 0)}
-                        />
-                    ) : (
-                        <TextInput
-                            label="Deposit policy (months)"
-                            value={String(profile.depositMonths)}
-                            readOnly
-                        />
-                    )}
+                    <InlineEditableField
+                        label="Deposit policy (months)"
+                        type="number"
+                        value={profile.depositMonths}
+                        onSave={(value) => onDepositMonthsSave?.(typeof value === 'number' ? value : Number(value) || 0)}
+                    />
                 </Stack>
             </div>
         </Stack>
     );
 
-    const rightPane = editable ? (
-        <SidesheetSection title="Building Details" actions={<Text size="xs" c="dimmed">Building 1</Text>}>
+    const rightPane = (
+        <SidesheetSection
+            title="Buildings"
+            actions={<Text size="xs" c="dimmed">Building 1</Text>}
+        >
             <Card padding="lg" radius="md" withBorder>
                 <Stack gap="sm">
-                    <TextInput
+                    <InlineEditableField
                         label="Number of Beds"
                         value={profile.facilityInfo.numberOfBeds}
-                        onChange={(event) => onFacilityInfoChange?.('numberOfBeds', event.currentTarget.value)}
+                        onSave={(value) => onFacilityInfoSave?.('numberOfBeds', String(value))}
                     />
-                    <TextInput
+                    <InlineEditableField
                         label="Number of Floors"
                         value={profile.facilityInfo.numberOfFloors}
-                        onChange={(event) => onFacilityInfoChange?.('numberOfFloors', event.currentTarget.value)}
+                        onSave={(value) => onFacilityInfoSave?.('numberOfFloors', String(value))}
                     />
-                    <TextInput
+                    <InlineEditableField
                         label="Operating Hours"
                         value={profile.facilityInfo.operatingHours}
-                        onChange={(event) => onFacilityInfoChange?.('operatingHours', event.currentTarget.value)}
+                        onSave={(value) => onFacilityInfoSave?.('operatingHours', String(value))}
                     />
                 </Stack>
             </Card>
-        </SidesheetSection>
-    ) : (
-        <SidesheetSection title="Buildings">
-            <Stack gap="md">
-                {[profile.facilityInfo].map((facility, index) => (
-                    <Card key={index} padding="lg" radius="md" withBorder>
-                        <Stack gap="xs">
-                            <Text fw={600}>Building {index + 1}</Text>
-                            <Text size="sm" c="dimmed">License Number</Text>
-                            <Text size="sm">{facility.licenseNumber || 'Not provided'}</Text>
-                            <Text size="sm" c="dimmed">Number of Beds</Text>
-                            <Text size="sm">{facility.numberOfBeds || 'Not provided'}</Text>
-                            <Text size="sm" c="dimmed">Number of Floors</Text>
-                            <Text size="sm">{facility.numberOfFloors || 'Not provided'}</Text>
-                            <Text size="sm" c="dimmed">Operating Hours</Text>
-                            <Text size="sm">{facility.operatingHours || 'Not provided'}</Text>
-                        </Stack>
-                    </Card>
-                ))}
-            </Stack>
         </SidesheetSection>
     );
 
     return { leftPane, rightPane };
 }
-

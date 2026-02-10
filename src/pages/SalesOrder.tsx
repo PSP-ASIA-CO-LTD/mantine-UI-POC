@@ -8,10 +8,6 @@ import {
     Text,
     Stack,
     Badge,
-    TextInput,
-    Select,
-    NumberInput,
-    Textarea,
     Stepper,
     Divider,
     Grid,
@@ -24,7 +20,6 @@ import {
     Modal,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { DateInput } from '@mantine/dates';
 import { useElementSize } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import {
@@ -52,6 +47,7 @@ import { useSalesOrder } from '../contexts/SalesOrderContext';
 import type { Package, Room, Guardian, Resident, SalesOrder, Invoice, Contract, AdditionalServices } from '../types';
 import { getBusinessSettings } from '../utils/businessSettings';
 import { buildInvoiceItems, calculateInvoiceTotals } from '../utils/invoiceCalculator';
+import { TextInput, Select, NumberInput, Textarea, DateInput } from '../components/EditableFields';
 import './SalesOrder.css';
 
 interface GuardianFormValues {
@@ -64,6 +60,11 @@ interface GuardianFormValues {
     relationship: string;
     pays: boolean;
 }
+
+type ResidentFormValues = Omit<Resident, 'id' | 'createdAt' | 'prefix' | 'guardianId'> & {
+    prefix: Resident['prefix'] | null;
+    guardianId?: string;
+};
 
 interface CheckoutData {
     package: Package | null;
@@ -303,7 +304,7 @@ export function SalesOrderPage() {
         ));
     };
 
-    const residentForm = useForm({
+    const residentForm = useForm<ResidentFormValues>({
         initialValues: {
             prefix: 'mrs',
             firstName: '',
@@ -520,6 +521,7 @@ export function SalesOrderPage() {
             // Use first guardian as the primary guardian for resident
             const resident = await saveResident({
                 ...residentForm.values,
+                prefix: residentForm.values.prefix || undefined,
                 gender: residentForm.values.gender as 'male' | 'female' | 'other',
                 guardianId: savedGuardians[0].id
             });

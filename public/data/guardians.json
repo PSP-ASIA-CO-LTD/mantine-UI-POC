@@ -90,5 +90,29 @@
     "id": "gdn-1770273386882-e94co",
     "createdAt": "2026-02-05T06:36:26.882Z",
     "residentId": "res-1770273387284"
+  },
+  {
+    "firstName": "สมชาย",
+    "lastName": "ใจดี",
+    "phone": "081-234-5678",
+    "email": "somchai.jaidee@email.com",
+    "address": "123/45 ถ.สุขุมวิท 55 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ 10110",
+    "relationship": "son",
+    "pays": true,
+    "id": "gdn-1770611620767-2t1op",
+    "createdAt": "2026-02-09T04:33:40.767Z",
+    "residentId": "res-1770611621570"
+  },
+  {
+    "firstName": "สมหญิง",
+    "lastName": "ใจดี",
+    "phone": "082-345-6789",
+    "email": "somying.jaidee@email.com",
+    "address": "88/9 หมู่บ้านพฤกษา ถ.รัตนาธิเบศร์ อ.เมือง จ.นนทบุรี 11000",
+    "relationship": "daughter",
+    "pays": true,
+    "id": "gdn-1770611621168-3wxoq",
+    "createdAt": "2026-02-09T04:33:41.168Z",
+    "residentId": "res-1770611621570"
   }
 ]

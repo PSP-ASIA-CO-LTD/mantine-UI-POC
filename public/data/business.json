@@ -2,7 +2,7 @@
   {
     "id": "business-1",
     "businessInfo": {
-      "businessName": "Usable App Co.",
+      "businessName": "Usable App Co. (Updated)",
       "businessType": "Spa",
       "address": "36 Roongroj Mansion\nMoo 9 Soi Roongroj, Sala Thammasop",
       "phone": "0618317773"
@@ -27,6 +27,8 @@
     },
     "depositMonths": 1,
     "createdAt": "2026-02-05T05:35:10.463Z",
-    "updatedAt": "2026-02-05T06:21:00.821Z"
+    "updatedAt": "2026-02-09T07:05:35.228Z"
+  }
+]
   }
 ]
