@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
 import {
     Title,
     Group,
@@ -18,7 +17,13 @@ import { useSidesheet } from '../contexts/SidesheetContext';
 import { CardList } from '../components/CardList';
 import { SidesheetSection } from '../components/SidesheetSection';
 import { StyledTable } from '../components/StyledTable';
-import { TextInput } from '../components/EditableFields';
+import {
+    TextInput,
+    InlineTextInput,
+    InlineSelect,
+    InlineDateInput,
+    InlineTextarea
+} from '../components/EditableFields';
 import type { Guardian, Resident, SalesOrder, Room } from '../types';
 import './Patient.css';
 
@@ -35,20 +40,6 @@ const formatCurrency = (amount?: number | null) => {
     if (!amount) return '0';
     return new Intl.NumberFormat('th-TH').format(amount);
 };
-
-const formatYesNo = (value?: boolean | null) => {
-    if (value === undefined || value === null) return '—';
-    return value ? 'Yes' : 'No';
-};
-
-const renderField = (label: string, content: ReactNode) => (
-    <div>
-        <Text size="xs" c="dimmed" fw={600}>
-            {label}
-        </Text>
-        {content}
-    </div>
-);
 
 const getStatusColor = (status: SalesOrder['status']) => {
     const colors: Record<SalesOrder['status'], string> = {
@@ -70,18 +61,26 @@ const humanizeToken = (token?: string | null) => {
 		.join(' ');
 };
 
-const formatPrefix = (prefix?: Resident['prefix'] | string | null) => {
-	if (!prefix) return '—';
-	const normalized = prefix.toString().trim().toLowerCase();
-	const map: Record<string, string> = {
-		mr: 'Mr.',
-		mrs: 'Mrs.',
-		miss: 'Miss',
-		ms: 'Ms.',
-		dr: 'Dr.'
-	};
-	return map[normalized] ?? prefix;
-};
+const prefixOptions = [
+    { value: 'mr', label: 'Mr.' },
+    { value: 'mrs', label: 'Mrs.' },
+    { value: 'miss', label: 'Miss' },
+    { value: 'ms', label: 'Ms.' },
+    { value: 'dr', label: 'Dr.' },
+];
+
+const genderOptions = [
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'other', label: 'Other' },
+];
+
+const maritalStatusOptions = [
+    { value: 'single', label: 'Single' },
+    { value: 'married', label: 'Married' },
+    { value: 'divorced', label: 'Divorced' },
+    { value: 'widowed', label: 'Widowed' },
+];
 
 export function Patient() {
     const [residents, setResidents] = useState<Resident[]>([]);
@@ -113,6 +112,19 @@ export function Patient() {
         };
         loadData();
     }, []);
+
+    const handleUpdateResident = async (id: string, updates: Partial<Resident>) => {
+        try {
+            const updated = await API.updateResident(id, updates);
+            if (updated) {
+                setResidents(prev => prev.map(r => r.id === id ? updated : r));
+                // Refresh the sidesheet with updated data
+                openResidentSidesheet(updated);
+            }
+        } catch (error) {
+            console.error('Failed to update resident:', error);
+        }
+    };
 
     const roomsById = useMemo(() => {
         return new Map(rooms.map((room) => [room.id, room]));
@@ -164,116 +176,106 @@ export function Patient() {
                 <Stack gap="md">
                     <Grid gutter="md">
                         <Grid.Col span={12}>
-                            {renderField(
-                                'Resident ID',
-                                <Text size="sm" fw={500} data-er-field="RESIDENT.id">
-                                    {resident.id}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Resident ID"
+                                value={resident.id}
+                                onSave={() => {}}
+                                disabled
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Prefix',
-                                <Text size="sm" data-er-field="RESIDENT.prefix">
-                                    {formatPrefix(resident.prefix)}
-                                </Text>
-                            )}
+                            <InlineSelect
+                                label="Prefix"
+                                value={resident.prefix}
+                                data={prefixOptions}
+                                onSave={(val) => handleUpdateResident(resident.id, { prefix: val as Resident['prefix'] })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'First Name',
-                                <Text size="sm" data-er-field="RESIDENT.first_name">
-                                    {resident.firstName || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="First Name"
+                                value={resident.firstName}
+                                onSave={(val) => handleUpdateResident(resident.id, { firstName: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Last Name',
-                                <Text size="sm" data-er-field="RESIDENT.last_name">
-                                    {resident.lastName || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Last Name"
+                                value={resident.lastName}
+                                onSave={(val) => handleUpdateResident(resident.id, { lastName: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Date of Birth',
-                                <Text size="sm" data-er-field="RESIDENT.date_of_birth">
-                                    {formatDate(resident.dateOfBirth)}
-                                </Text>
-                            )}
+                            <InlineDateInput
+                                label="Date of Birth"
+                                value={resident.dateOfBirth ? new Date(resident.dateOfBirth) : null}
+                                onSave={(val) => handleUpdateResident(resident.id, { dateOfBirth: val?.toISOString() || '' })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Gender',
-                                <Badge color="gray" size="sm" data-er-field="RESIDENT.gender">
-                                    {resident.gender || '—'}
-                                </Badge>
-                            )}
+                            <InlineSelect
+                                label="Gender"
+                                value={resident.gender}
+                                data={genderOptions}
+                                onSave={(val) => handleUpdateResident(resident.id, { gender: val as Resident['gender'] })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'ID Number',
-                                <Text size="sm" data-er-field="RESIDENT.id_number">
-                                    {resident.idNumber || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="ID Number"
+                                value={resident.idNumber}
+                                onSave={(val) => handleUpdateResident(resident.id, { idNumber: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Hospital No. (HN)',
-                                <Text size="sm" data-er-field="RESIDENT.hospital_number">
-                                    {resident.hospitalNumber || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Hospital No. (HN)"
+                                value={resident.hospitalNumber}
+                                onSave={(val) => handleUpdateResident(resident.id, { hospitalNumber: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Race',
-                                <Text size="sm" data-er-field="RESIDENT.race">
-                                    {resident.race || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Race"
+                                value={resident.race}
+                                onSave={(val) => handleUpdateResident(resident.id, { race: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Nationality',
-                                <Text size="sm" data-er-field="RESIDENT.nationality">
-                                    {resident.nationality || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Nationality"
+                                value={resident.nationality}
+                                onSave={(val) => handleUpdateResident(resident.id, { nationality: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Religion',
-                                <Text size="sm" data-er-field="RESIDENT.religion">
-                                    {resident.religion || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Religion"
+                                value={resident.religion}
+                                onSave={(val) => handleUpdateResident(resident.id, { religion: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Marital Status',
-                                <Text size="sm" data-er-field="RESIDENT.marital_status">
-                                    {humanizeToken(resident.maritalStatus)}
-                                </Text>
-                            )}
+                            <InlineSelect
+                                label="Marital Status"
+                                value={resident.maritalStatus}
+                                data={maritalStatusOptions}
+                                onSave={(val) => handleUpdateResident(resident.id, { maritalStatus: val || '' })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Occupation',
-                                <Text size="sm" data-er-field="RESIDENT.occupation">
-                                    {resident.occupation || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Occupation"
+                                value={resident.occupation}
+                                onSave={(val) => handleUpdateResident(resident.id, { occupation: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Blood Group',
-                                <Text size="sm" data-er-field="RESIDENT.blood_group">
-                                    {resident.bloodGroup || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Blood Group"
+                                value={resident.bloodGroup}
+                                onSave={(val) => handleUpdateResident(resident.id, { bloodGroup: val })}
+                            />
                         </Grid.Col>
                     </Grid>
 
@@ -281,28 +283,25 @@ export function Patient() {
 
                     <Grid gutter="md">
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Mobile Phone',
-                                <Text size="sm" data-er-field="RESIDENT.phone_mobile">
-                                    {resident.phoneMobile || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Mobile Phone"
+                                value={resident.phoneMobile}
+                                onSave={(val) => handleUpdateResident(resident.id, { phoneMobile: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Home Phone',
-                                <Text size="sm" data-er-field="RESIDENT.phone_home">
-                                    {resident.phoneHome || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Home Phone"
+                                value={resident.phoneHome}
+                                onSave={(val) => handleUpdateResident(resident.id, { phoneHome: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={12}>
-                            {renderField(
-                                'Email',
-                                <Text size="sm" data-er-field="RESIDENT.email">
-                                    {resident.email || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Email"
+                                value={resident.email}
+                                onSave={(val) => handleUpdateResident(resident.id, { email: val })}
+                            />
                         </Grid.Col>
                     </Grid>
 
@@ -310,76 +309,67 @@ export function Patient() {
 
                     <Grid gutter="md">
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Address No.',
-                                <Text size="sm" data-er-field="RESIDENT.address_number">
-                                    {resident.addressNumber || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Address No."
+                                value={resident.addressNumber}
+                                onSave={(val) => handleUpdateResident(resident.id, { addressNumber: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Moo',
-                                <Text size="sm" data-er-field="RESIDENT.address_moo">
-                                    {resident.addressMoo || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Moo"
+                                value={resident.addressMoo}
+                                onSave={(val) => handleUpdateResident(resident.id, { addressMoo: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Village/Building',
-                                <Text size="sm" data-er-field="RESIDENT.address_village">
-                                    {resident.residenceName || resident.addressVillage || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Village/Building"
+                                value={resident.residenceName || resident.addressVillage}
+                                onSave={(val) => handleUpdateResident(resident.id, { residenceName: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Street',
-                                <Text size="sm" data-er-field="RESIDENT.address_street">
-                                    {resident.addressStreet || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Street"
+                                value={resident.addressStreet}
+                                onSave={(val) => handleUpdateResident(resident.id, { addressStreet: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Soi',
-                                <Text size="sm" data-er-field="RESIDENT.address_soi">
-                                    {resident.addressSoi || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Soi"
+                                value={resident.addressSoi}
+                                onSave={(val) => handleUpdateResident(resident.id, { addressSoi: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Sub-district',
-                                <Text size="sm" data-er-field="RESIDENT.address_sub_district">
-                                    {resident.addressSubDistrict || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Sub-district"
+                                value={resident.addressSubDistrict}
+                                onSave={(val) => handleUpdateResident(resident.id, { addressSubDistrict: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'District',
-                                <Text size="sm" data-er-field="RESIDENT.address_district">
-                                    {resident.addressDistrict || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="District"
+                                value={resident.addressDistrict}
+                                onSave={(val) => handleUpdateResident(resident.id, { addressDistrict: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Province',
-                                <Text size="sm" data-er-field="RESIDENT.address_province">
-                                    {resident.addressProvince || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Province"
+                                value={resident.addressProvince}
+                                onSave={(val) => handleUpdateResident(resident.id, { addressProvince: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={4}>
-                            {renderField(
-                                'Postal Code',
-                                <Text size="sm" data-er-field="RESIDENT.address_postal_code">
-                                    {resident.addressPostalCode || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Postal Code"
+                                value={resident.addressPostalCode}
+                                onSave={(val) => handleUpdateResident(resident.id, { addressPostalCode: val })}
+                            />
                         </Grid.Col>
                     </Grid>
 
@@ -387,28 +377,25 @@ export function Patient() {
 
                     <Grid gutter="md">
                         <Grid.Col span={12}>
-                            {renderField(
-                                'Medical Conditions',
-                                <Text size="sm" c="dimmed" data-er-field="RESIDENT.medical_conditions">
-                                    {resident.medicalConditions || '—'}
-                                </Text>
-                            )}
+                            <InlineTextarea
+                                label="Medical Conditions"
+                                value={resident.medicalConditions}
+                                onSave={(val) => handleUpdateResident(resident.id, { medicalConditions: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Allergies',
-                                <Text size="sm" c="dimmed" data-er-field="RESIDENT.allergies">
-                                    {resident.allergies || '—'}
-                                </Text>
-                            )}
+                            <InlineTextarea
+                                label="Allergies"
+                                value={resident.allergies}
+                                onSave={(val) => handleUpdateResident(resident.id, { allergies: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Dietary Restrictions',
-                                <Text size="sm" c="dimmed" data-er-field="RESIDENT.dietary_restrictions">
-                                    {resident.dietaryRestrictions || '—'}
-                                </Text>
-                            )}
+                            <InlineTextarea
+                                label="Dietary Restrictions"
+                                value={resident.dietaryRestrictions}
+                                onSave={(val) => handleUpdateResident(resident.id, { dietaryRestrictions: val })}
+                            />
                         </Grid.Col>
                     </Grid>
 
@@ -416,46 +403,43 @@ export function Patient() {
 
                     <Grid gutter="md">
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Emergency Contact Name',
-                                <Text size="sm" data-er-field="RESIDENT.emergency_contact_name">
-                                    {resident.emergencyContactName || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Emergency Contact Name"
+                                value={resident.emergencyContactName}
+                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContactName: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            {renderField(
-                                'Relationship to Resident',
-                                <Text size="sm" data-er-field="RESIDENT.emergency_contact_relationship">
-                                    {humanizeToken(resident.emergencyContactRelationship)}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Relationship to Resident"
+                                value={resident.emergencyContactRelationship}
+                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContactRelationship: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={12}>
-                            {renderField(
-                                'Emergency Contact Phone',
-                                <Text size="sm" data-er-field="RESIDENT.emergency_contact">
-                                    {resident.emergencyContact || '—'}
-                                </Text>
-                            )}
+                            <InlineTextInput
+                                label="Emergency Contact Phone"
+                                value={resident.emergencyContact}
+                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContact: val })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={12}>
-                            {renderField(
-                                'Emergency Contact Address Same as Resident',
-                                <Text size="sm" data-er-field="RESIDENT.emergency_contact_address_same">
-                                    {formatYesNo(resident.emergencyContactAddressSameAsResident)}
-                                </Text>
-                            )}
+                            <InlineSelect
+                                label="Emergency Contact Address Same as Resident"
+                                value={resident.emergencyContactAddressSameAsResident ? 'yes' : 'no'}
+                                data={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]}
+                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContactAddressSameAsResident: val === 'yes' })}
+                            />
                         </Grid.Col>
                         <Grid.Col span={12}>
-                            {renderField(
-                                'Emergency Contact Address',
-                                <Text size="sm" c="dimmed" data-er-field="RESIDENT.emergency_contact_address">
-                                    {resident.emergencyContactAddressSameAsResident
-                                        ? 'Same as resident address'
-                                        : resident.emergencyContactAddress || '—'}
-                                </Text>
-                            )}
+                            <InlineTextarea
+                                label="Emergency Contact Address"
+                                value={resident.emergencyContactAddressSameAsResident
+                                    ? 'Same as resident address'
+                                    : resident.emergencyContactAddress || ''}
+                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContactAddress: val })}
+                                disabled={resident.emergencyContactAddressSameAsResident}
+                            />
                         </Grid.Col>
                     </Grid>
                 </Stack>

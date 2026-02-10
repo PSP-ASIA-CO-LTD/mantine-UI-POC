@@ -526,6 +526,18 @@ export const API = {
         return newResident;
     },
 
+    updateResident: async (id: string, data: Partial<Resident>): Promise<Resident | null> => {
+        await loadAllJSON();
+        await delay(300);
+        const index = residents.findIndex(r => r.id === id);
+        if (index !== -1) {
+            residents[index] = { ...residents[index], ...data };
+            persist(STORAGE_KEYS.residents, residents);
+            return residents[index];
+        }
+        return null;
+    },
+
     getRooms: async (): Promise<Room[]> => {
         await loadAllJSON();
         await delay();
