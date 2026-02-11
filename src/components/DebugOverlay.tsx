@@ -13,29 +13,25 @@ interface FieldInfo {
 
 // Entity color mapping based on ER diagram domains
 const entityColors: Record<string, string> = {
-    // Client & Business Domain
-    CLIENT: '#8e24aa',
+    // Business & Setup
     BUSINESS: '#8e24aa',
-    // Venue Domain
-    VENUE: '#c2185b',
-    ROOM: '#c2185b',
     // Organization Domain
     DEPARTMENT: '#f57c00',
     STAFF: '#f57c00',
-    STAFF_VENUE: '#f57c00',
     STAFF_SHIFT: '#f57c00',
+    // Venue Domain
+    VENUE: '#c2185b',
+    ROOM: '#c2185b',
     // Service Domain
+    SALE_PACKAGE: '#388e3c',
     TASK: '#388e3c',
     OPERATION_TASK: '#388e3c',
-    // Sale System
-    SALE_PACKAGE: '#f9a825',
-    PACKAGE_ITEM: '#f9a825',
     // Resident Domain
-    GUARDIAN: '#1976d2',
     RESIDENT: '#1976d2',
+    GUARDIAN: '#1976d2',
     // Billing Domain
-    SALES_ORDER: '#f57c00',
-    ADDITIONAL_SERVICES: '#f57c00',
+    SALES_ORDER: '#f9a825',
+    ADDITIONAL_SERVICES: '#f9a825',
     INVOICE: '#f9a825',
     INVOICE_ITEM: '#f9a825',
     CONTRACT: '#f9a825',

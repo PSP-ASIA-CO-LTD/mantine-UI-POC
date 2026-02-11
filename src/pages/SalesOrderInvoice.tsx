@@ -19,6 +19,7 @@ import {
     IconMail,
     IconDownload,
 } from '@tabler/icons-react';
+import { RecurrenceDisplay } from '../components/RecurrenceIcon';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
 import type { Package, Room, Guardian, Resident, Invoice, AdditionalServices } from '../types';
 import { buildInvoiceItems, calculateInvoiceTotals } from '../utils/invoiceCalculator';
@@ -341,7 +342,9 @@ export function SalesOrderInvoice() {
                         {state.package.services.slice(0, 6).map((service, idx) => (
                             <div key={idx} className="service-item">
                                 <Text size="xs">• {service.title}</Text>
-                                <Badge size="xs" variant="light">{service.interval}</Badge>
+                                <div style={{ transform: 'scale(0.85)', transformOrigin: 'right' }}>
+                                    <RecurrenceDisplay interval={service.interval} />
+                                </div>
                             </div>
                         ))}
                         {state.package.services.length > 6 && (

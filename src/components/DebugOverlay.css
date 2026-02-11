@@ -2,7 +2,7 @@
 .debug-toggle-btn {
     position: fixed;
     top: 20px;
-    right: 20px;
+    left: 20px;
     z-index: 100000;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
@@ -56,74 +56,38 @@ body.debug-mode [data-er-field]::after {
 }
 
 /* Domain-specific colors using CSS classes */
-body.debug-mode [data-er-field^="PACKAGE"] {
-    --debug-color: #388e3c;
-}
-
-body.debug-mode [data-er-field^="SERVICE"] {
-    --debug-color: #388e3c;
-}
-
 body.debug-mode [data-er-field^="BUSINESS"] {
     --debug-color: #8e24aa;
 }
 
-body.debug-mode [data-er-field^="DEPARTMENT"] {
-    --debug-color: #8e24aa;
-}
-
-body.debug-mode [data-er-field^="EMPLOYEE"] {
-    --debug-color: #f57c00;
-}
-
-body.debug-mode [data-er-field^="RESIDENT"] {
-    --debug-color: #1976d2;
-}
-
-body.debug-mode [data-er-field^="FACILITY"] {
-    --debug-color: #c2185b;
-}
-
-body.debug-mode [data-er-field^="ROOM"] {
-    --debug-color: #c2185b;
-}
-
-body.debug-mode [data-er-field^="CONTRACT"],
-body.debug-mode [data-er-field^="BILLING"],
-body.debug-mode [data-er-field^="PAYMENT"],
-body.debug-mode [data-er-field^="INVOICE"],
-body.debug-mode [data-er-field^="INVOICE_ITEM"] {
-    --debug-color: #f9a825;
-}
-
-body.debug-mode [data-er-field^="GUARDIAN"],
-body.debug-mode [data-er-field^="RESIDENT"] {
-    --debug-color: #1976d2;
-}
-
-body.debug-mode [data-er-field^="SALES_ORDER"],
-body.debug-mode [data-er-field^="ADDITIONAL_SERVICES"] {
-    --debug-color: #f57c00;
-}
-
-body.debug-mode [data-er-field^="OPERATION_TASK"] {
-    --debug-color: #388e3c;
-}
-
+body.debug-mode [data-er-field^="DEPARTMENT"],
+body.debug-mode [data-er-field^="STAFF"],
 body.debug-mode [data-er-field^="STAFF_SHIFT"] {
     --debug-color: #f57c00;
 }
 
-body.debug-mode [data-er-field^="MEDICATION"],
-body.debug-mode [data-er-field^="PRESCRIPTION"] {
-    --debug-color: #7b1fa2;
+body.debug-mode [data-er-field^="VENUE"],
+body.debug-mode [data-er-field^="ROOM"] {
+    --debug-color: #c2185b;
 }
 
-body.debug-mode [data-er-field^="PRODUCT"],
-body.debug-mode [data-er-field^="INVENTORY"],
-body.debug-mode [data-er-field^="VENDOR"],
-body.debug-mode [data-er-field^="PURCHASE"] {
-    --debug-color: #00897b;
+body.debug-mode [data-er-field^="SALE_PACKAGE"],
+body.debug-mode [data-er-field^="TASK"],
+body.debug-mode [data-er-field^="OPERATION_TASK"] {
+    --debug-color: #388e3c;
+}
+
+body.debug-mode [data-er-field^="RESIDENT"],
+body.debug-mode [data-er-field^="GUARDIAN"] {
+    --debug-color: #1976d2;
+}
+
+body.debug-mode [data-er-field^="SALES_ORDER"],
+body.debug-mode [data-er-field^="ADDITIONAL_SERVICES"],
+body.debug-mode [data-er-field^="INVOICE"],
+body.debug-mode [data-er-field^="INVOICE_ITEM"],
+body.debug-mode [data-er-field^="CONTRACT"] {
+    --debug-color: #f9a825;
 }
 
 /* Field item hover in panel */

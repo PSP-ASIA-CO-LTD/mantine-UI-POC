@@ -345,7 +345,7 @@ export function StaffTasks() {
                                 <Text c="dimmed" ta="center" py="md">No pending tasks</Text>
                             ) : (
                                 groupedTasks.pending.map(task => (
-                                    <Paper key={task.id} p="sm" withBorder className="task-item">
+                                    <Paper key={task.id} p="sm" withBorder className="task-item" data-er-field="OPERATION_TASK">
                                         <Group justify="space-between">
                                             <Group gap="sm">
                                                 <Checkbox 
@@ -353,19 +353,19 @@ export function StaffTasks() {
                                                 />
                                                 <div>
                                                     <Group gap="xs" mb={4}>
-                                                        <Text fw={500}>{task.serviceTitle}</Text>
-                                                        <Badge size="xs" color={getPriorityColor(task.priority)}>
+                                                        <Text fw={500} data-er-field="OPERATION_TASK.service_title">{task.serviceTitle}</Text>
+                                                        <Badge size="xs" color={getPriorityColor(task.priority)} data-er-field="OPERATION_TASK.priority">
                                                             {task.priority}
                                                         </Badge>
                                                     </Group>
                                                     <Text size="sm" c="dimmed">
-                                                        {task.residentName} • Room {task.roomNumber}
+                                                        <span data-er-field="OPERATION_TASK.resident_id">{task.residentName}</span> • Room {task.roomNumber}
                                                     </Text>
-                                                    <Text size="xs" c="dimmed">{task.description}</Text>
+                                                    <Text size="xs" c="dimmed" data-er-field="OPERATION_TASK.status">{task.description}</Text>
                                                 </div>
                                             </Group>
                                             <Group gap="xs">
-                                                <Badge variant="light">{task.serviceDept}</Badge>
+                                                <Badge variant="light" data-er-field="OPERATION_TASK.service_dept">{task.serviceDept}</Badge>
                                                 {task.assignedToName ? (
                                                     <Tooltip label="Click to reassign">
                                                         <Badge 
@@ -421,7 +421,7 @@ export function StaffTasks() {
                                 <Text c="dimmed" ta="center" py="md">No tasks in progress</Text>
                             ) : (
                                 groupedTasks.in_progress.map(task => (
-                                    <Paper key={task.id} p="sm" withBorder className="task-item in-progress">
+                                    <Paper key={task.id} p="sm" withBorder className="task-item in-progress" data-er-field="OPERATION_TASK">
                                         <Group justify="space-between">
                                             <Group gap="sm">
                                                 <Checkbox 
@@ -429,16 +429,16 @@ export function StaffTasks() {
                                                 />
                                                 <div>
                                                     <Group gap="xs" mb={4}>
-                                                        <Text fw={500}>{task.serviceTitle}</Text>
-                                                        <Badge size="xs" color="blue">In Progress</Badge>
+                                                        <Text fw={500} data-er-field="OPERATION_TASK.service_title">{task.serviceTitle}</Text>
+                                                        <Badge size="xs" color="blue" data-er-field="OPERATION_TASK.status">In Progress</Badge>
                                                     </Group>
                                                     <Text size="sm" c="dimmed">
-                                                        {task.residentName} • Room {task.roomNumber}
+                                                        <span data-er-field="OPERATION_TASK.resident_id">{task.residentName}</span> • Room {task.roomNumber}
                                                     </Text>
                                                 </div>
                                             </Group>
                                             <Group gap="xs">
-                                                <Badge variant="light">{task.serviceDept}</Badge>
+                                                <Badge variant="light" data-er-field="OPERATION_TASK.service_dept">{task.serviceDept}</Badge>
                                                 {task.assignedToName && (
                                                     <Badge variant="outline">{task.assignedToName}</Badge>
                                                 )}
@@ -478,14 +478,14 @@ export function StaffTasks() {
                                 <Text c="dimmed" ta="center" py="md">No completed tasks</Text>
                             ) : (
                                 groupedTasks.completed.map(task => (
-                                    <Paper key={task.id} p="sm" withBorder className="task-item completed">
+                                    <Paper key={task.id} p="sm" withBorder className="task-item completed" data-er-field="OPERATION_TASK">
                                         <Group justify="space-between">
                                             <Group gap="sm">
                                                 <IconCheck size={20} color="var(--mantine-color-green-6)" />
                                                 <div>
-                                                    <Text fw={500} td="line-through" c="dimmed">{task.serviceTitle}</Text>
+                                                    <Text fw={500} td="line-through" c="dimmed" data-er-field="OPERATION_TASK.service_title">{task.serviceTitle}</Text>
                                                     <Text size="sm" c="dimmed">
-                                                        {task.residentName} • Room {task.roomNumber}
+                                                        <span data-er-field="OPERATION_TASK.resident_id">{task.residentName}</span> • Room {task.roomNumber}
                                                     </Text>
                                                     {task.notes && (
                                                         <Text size="xs" c="dimmed" fs="italic">Note: {task.notes}</Text>
@@ -493,11 +493,12 @@ export function StaffTasks() {
                                                 </div>
                                             </Group>
                                             <Group gap="xs">
+                                                <Badge size="xs" color="green" data-er-field="OPERATION_TASK.status">Completed</Badge>
                                                 {task.completedBy && (
                                                     <Text size="xs" c="dimmed">by {task.assignedToName}</Text>
                                                 )}
                                                 {task.completedAt && (
-                                                    <Text size="xs" c="dimmed">
+                                                    <Text size="xs" c="dimmed" data-er-field="OPERATION_TASK.scheduled_date">
                                                         {new Date(task.completedAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                                                     </Text>
                                                 )}

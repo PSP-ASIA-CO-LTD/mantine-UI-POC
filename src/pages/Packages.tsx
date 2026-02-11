@@ -17,6 +17,7 @@ import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { CardList } from '../components/CardList';
 import { buildLeftSection } from '../utils/sidesheetHelper';
+import { RecurrenceDisplay } from '../components/RecurrenceIcon';
 import type { Package, Service } from '../types';
 
 export function Packages() {
@@ -107,28 +108,29 @@ export function Packages() {
                     editableServices.map((service, idx) => (
                         <CardList
                             key={service.id || idx}
-                            title={service.title}
+                            title={(
+                                <Group justify="space-between" align="center" wrap="nowrap" w="100%">
+                                    <Text fw={500}>{service.title}</Text>
+                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }} data-er-field="TASK.department_id">{service.dept}</Badge>
+                                </Group>
+                            )}
                             isEditing={isEditing}
                             onRemove={() => removeService(idx)}
                             cardDataErField="PACKAGE_ITEM"
                             titleDataErField="TASK.title"
-                            description={service.description}
-                            descriptionDataErField="TASK.description"
-                            badge={(
-                                <Badge size="sm" data-er-field="TASK.department_id">
-                                    {service.dept}
-                                </Badge>
-                            )}
-                            meta={(
-                                <Group gap="xs">
-                                    <Text size="xs" c="dimmed" data-er-field="TASK.interval">
-                                        {service.interval}
-                                    </Text>
-                                    <Text size="xs" c="dimmed">•</Text>
-                                    <Text size="xs" c="dimmed" data-er-field="TASK.price">
-                                        ฿{service.price.toLocaleString()}
-                                    </Text>
+                            description={(
+                                <Group justify="space-between" wrap="nowrap" align="center" w="100%">
+                                    <Text size="xs" c="dimmed" style={{ flex: 1 }}>{service.description}</Text>
+                                    <div data-er-field="TASK.interval" style={{ transform: 'scale(0.9)', transformOrigin: 'right' }}>
+                                        <RecurrenceDisplay interval={service.interval} />
+                                    </div>
                                 </Group>
+                            )}
+                            descriptionDataErField="TASK.description"
+                            meta={(
+                                <Text size="xs" c="dimmed" ta="right" mt={-4} data-er-field="TASK.price">
+                                    ฿{service.price.toLocaleString()}
+                                </Text>
                             )}
                             mb="sm"
                         />

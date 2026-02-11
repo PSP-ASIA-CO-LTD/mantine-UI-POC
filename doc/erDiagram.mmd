@@ -1,6 +1,6 @@
 flowchart TB
     %% ==========================================
-    %% BUSINESS (Standalone)
+    %% BUSINESS & SETUP
     %% ==========================================
     BUSINESS["<b>BUSINESS</b>
     ─────────────────
@@ -9,52 +9,50 @@ flowchart TB
     string <b>business_type</b>
     string <b>address</b>
     string <b>phone</b>
-    int <b>number_of_beds</b>
-    int <b>number_of_floors</b>
-    string <b>operating_hours</b>
-    string <b>license_number</b>
-    string <b>timezone</b>
-    string <b>currency</b>
-    string <b>language</b>"]
+    int <b>deposit_months</b>
+    datetime <b>created_at</b>
+    datetime <b>updated_at</b>"]
     
     %% ==========================================
-    %% BUSINESS DOMAIN (Department, Position, Task)
+    %% ORGANIZATION DOMAIN
     %% ==========================================
-    subgraph BusinessDomain["🏢 Business Domain"]
+    subgraph OrganizationDomain["🏢 Organization Domain"]
         direction TB
         DEPARTMENT["<b>DEPARTMENT</b>
         ─────────────────
         uuid <b>id</b> PK
         uuid <b>business_id</b> FK
         string <b>department_name</b>
+        string <b>code</b>
         string <b>description</b>"]
         
-        POSITION["<b>POSITION</b>
+        STAFF["<b>STAFF</b>
         ─────────────────
         uuid <b>id</b> PK
         uuid <b>department_id</b> FK
-        string <b>position_name</b>
-        text <b>description</b>"]
+        string <b>name</b>
+        string <b>role</b>
+        string <b>status</b>
+        string <b>email</b>
+        string <b>phone</b>
+        date <b>hire_date</b>"]
         
-        TASK["<b>TASK</b>
+        STAFF_SHIFT["<b>STAFF_SHIFT</b>
         ─────────────────
         uuid <b>id</b> PK
-        uuid <b>employee_id</b> FK
-        uuid <b>department_id</b> FK
-        uuid <b>task_type_id</b> FK
-        string <b>title</b>
-        text <b>description</b>
-        string <b>priority</b>
-        datetime <b>due_date</b>
+        uuid <b>staff_id</b> FK
+        date <b>date</b>
+        time <b>start_time</b>
+        time <b>end_time</b>
         string <b>status</b>"]
     end
     
     %% ==========================================
-    %% FACILITY DOMAIN
+    %% VENUE DOMAIN
     %% ==========================================
-    subgraph FacilityDomain["🏠 Facility Domain"]
+    subgraph VenueDomain["🏠 Venue Domain"]
         direction TB
-        FACILITY["<b>FACILITY</b>
+        VENUE["<b>VENUE</b>
         ─────────────────
         uuid <b>id</b> PK
         uuid <b>business_id</b> FK
@@ -65,116 +63,53 @@ flowchart TB
         string <b>postal_code</b>
         string <b>phone</b>
         string <b>email</b>
-        int <b>capacity</b>
-        string <b>facility_type</b>"]
+        string <b>license_number</b>
+        int <b>capacity</b>"]
         
-        ROOM_BED["<b>ROOM_BED</b>
+        ROOM["<b>ROOM</b>
         ─────────────────
         uuid <b>id</b> PK
         uuid <b>facility_id</b> FK
         string <b>room_number</b>
-        string <b>bed_number</b>
         string <b>room_type</b>
-        int <b>floor_number</b>
-        string <b>occupancy_status</b>
-        json <b>amenities</b>"]
-        
-        MAINTENANCE_REQUEST["<b>MAINTENANCE_REQUEST</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>room_bed_id</b> FK
-        date <b>request_date</b>
-        string <b>issue_description</b>
-        string <b>priority</b>
-        string <b>status</b>
-        date <b>completion_date</b>
-        string <b>resolution_notes</b>"]
+        int <b>floor</b>
+        decimal <b>price_per_day</b>
+        string <b>status</b>"]
     end
     
     %% ==========================================
-    %% PACKAGE DOMAIN
+    %% SERVICE & TASK DOMAIN
     %% ==========================================
-    subgraph PackageDomain["📦 Package Domain"]
+    subgraph ServiceDomain["🛠️ Service Domain"]
         direction TB
-        PACKAGE["<b>PACKAGE</b>
+        SALE_PACKAGE["<b>SALE_PACKAGE</b>
         ─────────────────
         uuid <b>id</b> PK
         uuid <b>business_id</b> FK
-        string <b>package_name</b>
+        string <b>name</b>
         text <b>description</b>
-        decimal <b>selling_price</b>
-        decimal <b>margin_price</b>
-        int <b>duration_months</b>
-        string <b>status</b>"]
+        decimal <b>price</b>
+        int <b>duration_days</b>"]
         
-        SERVICE["<b>SERVICE</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        string <b>service_name</b>
-        text <b>description</b>
-        string <b>service_type</b>
-        decimal <b>unit_price</b>
-        int <b>duration_minutes</b>
-        string <b>status</b>"]
-        
-        PACKAGE_SERVICE["<b>PACKAGE_SERVICE</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>package_id</b> FK
-        uuid <b>service_id</b> FK
-        int <b>quantity_included</b>"]
-        
-        PACKAGE_TASK["<b>PACKAGE_TASK</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>package_id</b> FK
-        uuid <b>task_type_id</b> FK
-        int <b>quantity_included</b>"]
-    end
-    
-    %% ==========================================
-    %% EMPLOYEE DOMAIN
-    %% ==========================================
-    subgraph EmployeeDomain["👤 Employee Domain"]
-        direction TB
-        EMPLOYEE["<b>EMPLOYEE</b>
+        TASK["<b>TASK</b>
         ─────────────────
         uuid <b>id</b> PK
         uuid <b>department_id</b> FK
-        uuid <b>position_id</b> FK
-        string <b>first_name</b>
-        string <b>last_name</b>
-        string <b>email</b>
-        string <b>phone</b>
-        date <b>hire_date</b>
-        string <b>employment_status</b>
-        string <b>photo_url</b>"]
+        string <b>title</b>
+        string <b>interval</b>
+        decimal <b>price</b>
+        string <b>status</b>"]
         
-        SHIFT["<b>SHIFT</b>
+        OPERATION_TASK["<b>OPERATION_TASK</b>
         ─────────────────
         uuid <b>id</b> PK
-        uuid <b>employee_id</b> FK
-        date <b>shift_date</b>
-        time <b>start_time</b>
-        time <b>end_time</b>
-        string <b>shift_type</b>
-        string <b>status</b>
-        text <b>notes</b>"]
-        
-        TASK_TYPE["<b>TASK_TYPE</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        string <b>type_name</b>
-        text <b>description</b>
-        string <b>default_priority</b>"]
-        
-        TASK_LOG["<b>TASK_LOG</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>task_id</b> FK
-        datetime <b>action_date</b>
-        string <b>action_type</b>
-        text <b>notes</b>"]
+        uuid <b>sales_order_id</b> FK
+        uuid <b>resident_id</b> FK
+        string <b>service_title</b>
+        string <b>service_dept</b>
+        datetime <b>scheduled_date</b>
+        string <b>priority</b>
+        string <b>status</b>"]
     end
     
     %% ==========================================
@@ -185,365 +120,124 @@ flowchart TB
         RESIDENT["<b>RESIDENT</b>
         ─────────────────
         uuid <b>id</b> PK
-        uuid <b>room_bed_id</b> FK
+        string <b>prefix</b>
         string <b>first_name</b>
         string <b>last_name</b>
         date <b>date_of_birth</b>
         string <b>gender</b>
-        string <b>photo_url</b>
+        string <b>id_number</b>
+        string <b>hospital_number</b>
+        string <b>medical_conditions</b>
+        string <b>allergies</b>
+        string <b>dietary_restrictions</b>
         string <b>emergency_contact_name</b>
-        string <b>emergency_contact_phone</b>"]
+        string <b>emergency_contact</b>
+        uuid <b>guardian_id</b> FK"]
         
-        RESIDENT_PACKAGE["<b>RESIDENT_PACKAGE</b>
+        GUARDIAN["<b>GUARDIAN</b>
         ─────────────────
         uuid <b>id</b> PK
-        uuid <b>resident_id</b> FK
-        uuid <b>package_id</b> FK
-        date <b>start_date</b>
-        date <b>end_date</b>
-        string <b>status</b>"]
-        
-        CARE_PLAN["<b>CARE_PLAN</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>resident_id</b> FK
-        string <b>plan_name</b>
-        text <b>description</b>
-        date <b>start_date</b>
-        date <b>end_date</b>
-        string <b>status</b>"]
-        
-        MEDICAL_RECORD["<b>MEDICAL_RECORD</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>resident_id</b> FK
-        date <b>record_date</b>
-        text <b>diagnosis</b>
-        text <b>treatment</b>
-        text <b>notes</b>"]
-        
-        PRESCRIPTION["<b>PRESCRIPTION</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>resident_id</b> FK
-        uuid <b>medication_id</b> FK
-        string <b>dosage</b>
-        string <b>frequency</b>
-        string <b>route</b>
-        date <b>start_date</b>
-        date <b>end_date</b>
-        string <b>status</b>
-        text <b>special_instructions</b>"]
-        
-        VITAL_SIGNS["<b>VITAL_SIGNS</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>resident_id</b> FK
-        datetime <b>measurement_date</b>
-        int <b>bp_systolic</b>
-        int <b>bp_diastolic</b>
-        int <b>heart_rate</b>
-        decimal <b>temperature</b>
-        int <b>respiratory_rate</b>
-        int <b>oxygen_saturation</b>
-        decimal <b>weight</b>
-        text <b>notes</b>"]
-        
-        ACTIVITY_LOG["<b>ACTIVITY_LOG</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>resident_id</b> FK
-        string <b>activity_type</b>
-        datetime <b>activity_date</b>
-        int <b>duration_minutes</b>
-        text <b>description</b>"]
-        
-        CARE_ACTIVITY["<b>CARE_ACTIVITY</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>care_plan_id</b> FK
-        string <b>activity_name</b>
-        text <b>description</b>
-        string <b>frequency</b>
-        time <b>scheduled_time</b>
-        string <b>status</b>"]
-        
-        THERAPY_SESSION["<b>THERAPY_SESSION</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>care_plan_id</b> FK
-        string <b>therapy_type</b>
-        datetime <b>session_date</b>
-        int <b>duration_minutes</b>
-        text <b>notes</b>
-        int <b>progress_rating</b>"]
-        
-        ADMINISTRATION_LOG["<b>ADMINISTRATION_LOG</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>resident_id</b> FK
-        uuid <b>prescription_id</b> FK
-        uuid <b>employee_id</b> FK
-        datetime <b>administered_date</b>
-        time <b>administered_time</b>
-        string <b>dosage_given</b>
-        string <b>status</b>
-        text <b>notes</b>"]
-        
-        FAMILY_MEMBER["<b>FAMILY_MEMBER</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>resident_id</b> FK
         string <b>first_name</b>
         string <b>last_name</b>
+        string <b>phone</b>
+        string <b>email</b>
+        string <b>address</b>
         string <b>relationship</b>
-        string <b>phone</b>
-        string <b>email</b>
-        string <b>address</b>
-        bool <b>is_emergency_contact</b>
-        string <b>photo_url</b>"]
-        
-        MESSAGE["<b>MESSAGE</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>family_member_id</b> FK
-        string <b>sender_type</b>
-        text <b>message_content</b>
-        datetime <b>sent_date</b>
-        bool <b>is_read</b>"]
-        
-        VISIT_LOG["<b>VISIT_LOG</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>family_member_id</b> FK
-        date <b>visit_date</b>
-        time <b>check_in_time</b>
-        time <b>check_out_time</b>
-        string <b>purpose</b>
-        text <b>notes</b>"]
+        bool <b>pays</b>"]
     end
     
     %% ==========================================
-    %% MEDICATION DOMAIN
+    %% BILLING & CONTRACT DOMAIN
     %% ==========================================
-    subgraph MedicationDomain["💊 Medication Domain"]
+    subgraph BillingDomain["💰 Billing Domain"]
         direction TB
-        MEDICATION["<b>MEDICATION</b>
+        SALES_ORDER["<b>SALES_ORDER</b>
         ─────────────────
         uuid <b>id</b> PK
-        string <b>medication_name</b>
-        string <b>generic_name</b>
-        string <b>medication_type</b>
-        string <b>manufacturer</b>
-        text <b>description</b>
-        text <b>side_effects</b>
-        text <b>contraindications</b>
-        string <b>storage_requirements</b>"]
-    end
-    
-    %% ==========================================
-    %% INVENTORY DOMAIN
-    %% ==========================================
-    subgraph InventoryDomain["📋 Inventory Domain"]
-        direction TB
-        PRODUCT["<b>PRODUCT</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        string <b>product_name</b>
-        text <b>description</b>
-        string <b>category</b>
-        string <b>unit_of_measure</b>
-        decimal <b>unit_cost</b>
-        string <b>supplier_name</b>
-        string <b>sku</b>
-        string <b>barcode</b>
-        string <b>status</b>"]
-        
-        INVENTORY["<b>INVENTORY</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>product_id</b> FK
-        int <b>quantity_on_hand</b>
-        int <b>quantity_reserved</b>
-        int <b>reorder_level</b>
-        int <b>reorder_quantity</b>
-        string <b>location</b>
-        date <b>last_restocked_date</b>"]
-        
-        VENDOR["<b>VENDOR</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        string <b>vendor_name</b>
-        string <b>contact_person</b>
-        string <b>phone</b>
-        string <b>email</b>
-        string <b>address</b>
-        string <b>payment_terms</b>
-        string <b>status</b>"]
-        
-        PURCHASE_ORDER["<b>PURCHASE_ORDER</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>vendor_id</b> FK
-        string <b>order_number</b>
-        date <b>order_date</b>
-        date <b>expected_delivery_date</b>
-        decimal <b>total_amount</b>
-        string <b>status</b>
-        text <b>notes</b>"]
-        
-        PURCHASE_ORDER_ITEM["<b>PURCHASE_ORDER_ITEM</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>purchase_order_id</b> FK
-        uuid <b>product_id</b> FK
-        int <b>quantity</b>
-        decimal <b>unit_price</b>"]
-        
-        GOODS_RECEIPT["<b>GOODS_RECEIPT</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>purchase_order_id</b> FK
-        date <b>receipt_date</b>
-        int <b>quantity_received</b>
-        string <b>condition</b>
-        text <b>notes</b>"]
-    end
-    
-    %% ==========================================
-    %% FINANCIAL DOMAIN
-    %% ==========================================
-    subgraph FinancialDomain["💰 Financial Domain"]
-        direction TB
-        CONTRACT["<b>CONTRACT</b>
-        ─────────────────
-        uuid <b>id</b> PK
+        uuid <b>package_id</b> FK
         uuid <b>resident_id</b> FK
-        string <b>contract_number</b>
-        date <b>start_date</b>
-        date <b>end_date</b>
-        decimal <b>monthly_rate</b>
-        string <b>payment_terms</b>
-        decimal <b>deposit_amount</b>
-        string <b>status</b>
-        date <b>signed_date</b>
-        string <b>contract_document_url</b>"]
-        
-        BILLING["<b>BILLING</b>
-        ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>contract_id</b> FK
-        date <b>billing_period_start</b>
-        date <b>billing_period_end</b>
-        decimal <b>amount_due</b>
-        decimal <b>amount_paid</b>
-        decimal <b>balance</b>
-        date <b>due_date</b>
+        uuid <b>room_id</b> FK
+        date <b>check_in</b>
+        date <b>check_out</b>
+        int <b>adjusted_days</b>
+        decimal <b>adjusted_price</b>
         string <b>status</b>"]
         
-        PAYMENT["<b>PAYMENT</b>
+        ADDITIONAL_SERVICES["<b>ADDITIONAL_SERVICES</b>
         ─────────────────
-        uuid <b>id</b> PK
-        uuid <b>billing_id</b> FK
-        datetime <b>payment_date</b>
-        decimal <b>amount</b>
-        string <b>payment_method</b>
-        string <b>transaction_reference</b>
-        text <b>notes</b>"]
+        bool <b>additional_bed</b>
+        json <b>special_amenities</b>
+        bool <b>self_provide_pampers</b>
+        bool <b>self_provide_medications</b>"]
         
         INVOICE["<b>INVOICE</b>
         ─────────────────
         uuid <b>id</b> PK
-        uuid <b>billing_id</b> FK
+        uuid <b>sales_order_id</b> FK
         string <b>invoice_number</b>
-        date <b>invoice_date</b>
-        decimal <b>total_amount</b>
-        decimal <b>tax_amount</b>
-        decimal <b>discount_amount</b>
-        string <b>invoice_document_url</b>"]
+        decimal <b>subtotal</b>
+        decimal <b>tax</b>
+        decimal <b>total</b>
+        string <b>status</b>
+        date <b>issued_at</b>"]
+        
+        INVOICE_ITEM["<b>INVOICE_ITEM</b>
+        ─────────────────
+        string <b>description</b>
+        int <b>quantity</b>
+        decimal <b>unit_price</b>
+        decimal <b>total</b>"]
+        
+        CONTRACT["<b>CONTRACT</b>
+        ─────────────────
+        uuid <b>id</b> PK
+        uuid <b>sales_order_id</b> FK
+        string <b>contract_number</b>
+        date <b>start_date</b>
+        date <b>end_date</b>
+        string <b>status</b>"]
     end
     
     %% ==========================================
     %% RELATIONSHIPS
     %% ==========================================
     
-    %% Business Domain
     BUSINESS -->|1:N| DEPARTMENT
-    BUSINESS -->|1:N| FACILITY
-    BUSINESS -->|1:N| PACKAGE
-    DEPARTMENT -->|1:N| POSITION
+    BUSINESS -->|1:N| VENUE
+    BUSINESS -->|1:N| SALE_PACKAGE
+    
+    DEPARTMENT -->|1:N| STAFF
     DEPARTMENT -->|1:N| TASK
+    STAFF -->|1:N| STAFF_SHIFT
     
-    %% Facility Domain
-    FACILITY -->|1:N| ROOM_BED
-    ROOM_BED -->|1:N| MAINTENANCE_REQUEST
-    ROOM_BED -->|1:1| RESIDENT
+    VENUE -->|1:N| ROOM
     
-    %% Package Domain
-    PACKAGE -->|1:N| PACKAGE_SERVICE
-    PACKAGE_SERVICE -->|N:1| SERVICE
-    PACKAGE -->|1:N| PACKAGE_TASK
-    PACKAGE_TASK -->|N:1| TASK_TYPE
+    SALE_PACKAGE -->|1:N| SALES_ORDER
     
-    %% Employee Domain
-    POSITION -->|1:N| EMPLOYEE
-    DEPARTMENT -->|1:N| EMPLOYEE
-    EMPLOYEE -->|1:N| SHIFT
-    EMPLOYEE -->|1:N| TASK
-    TASK -->|N:1| TASK_TYPE
-    TASK -->|1:N| TASK_LOG
+    RESIDENT -->|N:1| GUARDIAN
+    RESIDENT -->|1:N| SALES_ORDER
+    ROOM -->|1:N| SALES_ORDER
     
-    %% Resident Domain
-    RESIDENT -->|1:N| RESIDENT_PACKAGE
-    RESIDENT_PACKAGE -->|N:1| PACKAGE
-    RESIDENT -->|1:N| CARE_PLAN
-    RESIDENT -->|1:N| MEDICAL_RECORD
-    RESIDENT -->|1:N| PRESCRIPTION
-    RESIDENT -->|1:N| VITAL_SIGNS
-    RESIDENT -->|1:N| ACTIVITY_LOG
-    RESIDENT -->|1:N| FAMILY_MEMBER
-    CARE_PLAN -->|1:N| CARE_ACTIVITY
-    CARE_PLAN -->|1:N| THERAPY_SESSION
-    FAMILY_MEMBER -->|1:N| MESSAGE
-    FAMILY_MEMBER -->|1:N| VISIT_LOG
+    SALES_ORDER -->|1:1| ADDITIONAL_SERVICES
+    SALES_ORDER -->|1:N| INVOICE
+    SALES_ORDER -->|1:1| CONTRACT
+    SALES_ORDER -->|1:N| OPERATION_TASK
     
-    %% Medication Domain
-    MEDICATION -->|1:N| PRESCRIPTION
-    PRESCRIPTION -->|1:N| ADMINISTRATION_LOG
-    EMPLOYEE -->|1:N| ADMINISTRATION_LOG
-    
-    %% Financial Domain
-    RESIDENT -->|1:N| CONTRACT
-    CONTRACT -->|1:N| BILLING
-    BILLING -->|1:N| PAYMENT
-    BILLING -->|0:1| INVOICE
-    
-    %% Inventory Domain
-    PRODUCT -->|1:1| INVENTORY
-    VENDOR -->|1:N| PURCHASE_ORDER
-    PURCHASE_ORDER -->|1:N| PURCHASE_ORDER_ITEM
-    PURCHASE_ORDER_ITEM -->|N:1| PRODUCT
-    PURCHASE_ORDER -->|0:1| GOODS_RECEIPT
+    INVOICE -->|1:N| INVOICE_ITEM
     
     %% ==========================================
     %% STYLING
     %% ==========================================
     classDef businessStyle fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
-    classDef facilityStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    classDef packageStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    classDef employeeStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef organizationStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef venueStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef serviceStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
     classDef residentStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef medicationStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef financialStyle fill:#fff9c4,stroke:#f9a825,stroke-width:2px
-    classDef inventoryStyle fill:#e0f2f1,stroke:#00897b,stroke-width:2px
+    classDef billingStyle fill:#fff9c4,stroke:#f9a825,stroke-width:2px
     
     class BUSINESS businessStyle
-    class DEPARTMENT,POSITION,TASK businessStyle
-    class FACILITY facilityStyle
-    class ROOM_BED,MAINTENANCE_REQUEST facilityStyle
-    class PACKAGE,SERVICE,PACKAGE_SERVICE,PACKAGE_TASK packageStyle
-    class EMPLOYEE,SHIFT,TASK_TYPE,TASK_LOG employeeStyle
-    class RESIDENT,RESIDENT_PACKAGE,CARE_PLAN,MEDICAL_RECORD,PRESCRIPTION,VITAL_SIGNS,ACTIVITY_LOG,CARE_ACTIVITY,THERAPY_SESSION,ADMINISTRATION_LOG,FAMILY_MEMBER,MESSAGE,VISIT_LOG residentStyle
-    class MEDICATION medicationStyle
-    class CONTRACT,BILLING,PAYMENT,INVOICE financialStyle
-    class PRODUCT,INVENTORY,VENDOR,PURCHASE_ORDER,PURCHASE_ORDER_ITEM,GOODS_RECEIPT inventoryStyle
+    class DEPARTMENT,STAFF,STAFF_SHIFT organizationStyle
+    class VENUE,ROOM venueStyle
+    class SALE_PACKAGE,TASK,OPERATION_TASK serviceStyle
+    class RESIDENT,GUARDIAN residentStyle
+    class SALES_ORDER,ADDITIONAL_SERVICES,INVOICE,INVOICE_ITEM,CONTRACT billingStyle

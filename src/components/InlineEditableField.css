@@ -159,3 +159,24 @@
     color: var(--mantine-color-gray-6);
     cursor: default;
 }
+
+/* Form Styles for standard inputs to match inline style */
+.editable-field--form {
+    border-bottom: 1px solid var(--mantine-color-gray-3);
+    transition: border-color 0.2s ease;
+}
+
+.editable-field--form:focus-within {
+    border-bottom-color: var(--mantine-primary-color-filled);
+}
+
+/* Form Styles for Checkbox/Radio groups */
+.editable-field--form.mantine-CheckboxGroup-root,
+.editable-field--form.mantine-RadioGroup-root {
+    border-bottom: none;
+}
+
+.editable-field--checkbox,
+.editable-field--radio {
+    margin-top: 0.25rem;
+}

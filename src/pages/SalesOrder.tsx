@@ -15,8 +15,6 @@ import {
     Collapse,
     Paper,
     Table,
-    Radio,
-    Checkbox,
     Modal,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -47,7 +45,8 @@ import { useSalesOrder } from '../contexts/SalesOrderContext';
 import type { Package, Room, Guardian, Resident, SalesOrder, Invoice, Contract, AdditionalServices } from '../types';
 import { getBusinessSettings } from '../utils/businessSettings';
 import { buildInvoiceItems, calculateInvoiceTotals } from '../utils/invoiceCalculator';
-import { TextInput, Select, NumberInput, Textarea, DateInput } from '../components/EditableFields';
+import { TextInput, Select, NumberInput, Textarea, DateInput, Checkbox, CheckboxGroup, Radio, RadioGroup } from '../components/EditableFields';
+import { RecurrenceDisplay } from '../components/RecurrenceIcon';
 import './SalesOrder.css';
 
 interface GuardianFormValues {
@@ -890,16 +889,18 @@ export function SalesOrderPage() {
                                 <Stack gap="xs" mb="lg">
                                     {pkg.services.map((service, idx) => (
                                         <Paper key={idx} p="sm" withBorder>
-                                            <Group justify="space-between">
-                                                <div>
+                                            <Stack gap={2}>
+                                                <Group justify="space-between" align="center" wrap="nowrap">
                                                     <Text size="sm" fw={500}>{service.title}</Text>
-                                                    <Text size="xs" c="dimmed">{service.description}</Text>
-                                                </div>
-                                                <Group gap="xs">
-                                                    <Badge size="xs" variant="light">{service.dept}</Badge>
-                                                    <Badge size="xs" variant="outline">{service.interval}</Badge>
+                                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }}>{service.dept}</Badge>
                                                 </Group>
-                                            </Group>
+                                                <Group justify="space-between" wrap="nowrap" align="center">
+                                                    <Text size="xs" c="dimmed" style={{ flex: 1 }}>{service.description}</Text>
+                                                    <div style={{ transform: 'scale(0.9)', transformOrigin: 'right' }}>
+                                                        <RecurrenceDisplay interval={service.interval} />
+                                                    </div>
+                                                </Group>
+                                            </Stack>
                                         </Paper>
                                     ))}
                                 </Stack>
@@ -933,7 +934,6 @@ export function SalesOrderPage() {
                                             onChange={handleSetCheckIn}
                                             minDate={new Date()}
                                             description={endDateLabel ? `End date: ${endDateLabel}` : 'End date: —'}
-                                            leftSection={<IconCalendar size={16} />}
                                             data-er-field="SALES_ORDER.check_in"
                                         />
                                     </Grid.Col>
@@ -1000,10 +1000,10 @@ export function SalesOrderPage() {
 
 	                        <Stack gap="md">
 	                            <Grid>
-                                    <Grid.Col span={4}>
+                                    <Grid.Col span={2}>
                                         <Select
                                             label="Prefix"
-                                            placeholder="Select prefix"
+                                            placeholder="Prefix"
                                             data={[
                                                 { value: 'mr', label: 'Mr.' },
                                                 { value: 'mrs', label: 'Mrs.' },
@@ -1017,19 +1017,19 @@ export function SalesOrderPage() {
                                         />
                                     </Grid.Col>
 
-                                    <Grid.Col span={4}>
+                                    <Grid.Col span={5}>
 	                                    <TextInput
 	                                        label="First Name"
-	                                        placeholder="Enter first name"
+	                                        placeholder="First name"
 	                                        required
 	                                        {...residentForm.getInputProps('firstName')}
 	                                        data-er-field="RESIDENT.first_name"
 	                                    />
 	                                </Grid.Col>
-	                                <Grid.Col span={4}>
+	                                <Grid.Col span={5}>
 	                                    <TextInput
 	                                        label="Last Name"
-	                                        placeholder="Enter last name"
+	                                        placeholder="Last name"
 	                                        required
 	                                        {...residentForm.getInputProps('lastName')}
 	                                        data-er-field="RESIDENT.last_name"
@@ -1038,11 +1038,13 @@ export function SalesOrderPage() {
 	                            </Grid>
 	                            <Grid>
 	                                <Grid.Col span={4}>
-                                    <TextInput
+                                    <DateInput
                                         label="Date of Birth"
-                                        type="date"
+                                        placeholder="Select date"
                                         required
                                         {...residentForm.getInputProps('dateOfBirth')}
+                                        value={residentForm.values.dateOfBirth ? new Date(residentForm.values.dateOfBirth) : null}
+                                        onChange={(val) => residentForm.setFieldValue('dateOfBirth', val ? val.toISOString().split('T')[0] : '')}
                                         data-er-field="RESIDENT.date_of_birth"
                                     />
                                 </Grid.Col>
@@ -1352,7 +1354,7 @@ export function SalesOrderPage() {
 
                         <Stack gap="lg">
                             {guardianForms.map((guardian, index) => (
-                                <Paper key={index} p="md" withBorder className="guardian-form-block">
+                                <div key={index} className="guardian-form-block">
                                     <Group justify="space-between" mb="sm">
                                         <Badge variant="light" size="sm">
                                             Guardian {index + 1} {index === 0 && '(Primary)'}
@@ -1455,7 +1457,8 @@ export function SalesOrderPage() {
                                             data-er-field="GUARDIAN.pays"
                                         />
                                     </Stack>
-                                </Paper>
+                                    {index < guardianForms.length - 1 && <Divider my="xl" />}
+                                </div>
                             ))}
                         </Stack>
                     </Card>
@@ -1543,7 +1546,7 @@ export function SalesOrderPage() {
                             {/* Special Amenities */}
                             <Paper p="md" withBorder>
                                 <Text fw={500} mb="md">Special Amenities</Text>
-                                <Checkbox.Group
+                                <CheckboxGroup
                                     value={checkoutData.additionalServices.specialAmenities}
                                     onChange={(value) => setCheckoutData(prev => ({
                                         ...prev,
@@ -1559,7 +1562,7 @@ export function SalesOrderPage() {
                                         <Checkbox value="oxygen_concentrator" label="Oxygen Concentrator (+฿300/day)" />
                                         <Checkbox value="air_mattress" label="Air Mattress (+฿200/day)" />
                                     </Stack>
-                                </Checkbox.Group>
+                                </CheckboxGroup>
                             </Paper>
 
                             {/* Self-Provided Items */}
@@ -1741,7 +1744,9 @@ export function SalesOrderPage() {
                                                 <Group key={idx} gap="xs">
                                                     <Text size="xs">•</Text>
                                                     <Text size="xs">{service.title}</Text>
-                                                    <Badge size="xs" variant="light">{service.interval}</Badge>
+                                                    <div style={{ transform: 'scale(0.85)', transformOrigin: 'left' }}>
+                                                        <RecurrenceDisplay interval={service.interval} />
+                                                    </div>
                                                 </Group>
                                             ))}
                                             {checkoutData.package.services.length > 5 && (
@@ -1950,7 +1955,7 @@ export function SalesOrderPage() {
                         <Stack gap="md">
                             <Text size="sm" c="dimmed">Select bank and confirm payment:</Text>
 
-                            <Radio.Group value={selectedBank || ''} onChange={setSelectedBank}>
+                            <RadioGroup value={selectedBank || ''} onChange={setSelectedBank}>
                                 <Stack gap="sm">
                                     <Paper p="md" withBorder className={`bank-option ${selectedBank === 'kbank' ? 'selected' : ''}`}>
                                         <Radio value="kbank" label={
@@ -1997,7 +2002,7 @@ export function SalesOrderPage() {
                                         } />
                                     </Paper>
                                 </Stack>
-                            </Radio.Group>
+                            </RadioGroup>
 
                             <Divider />
 

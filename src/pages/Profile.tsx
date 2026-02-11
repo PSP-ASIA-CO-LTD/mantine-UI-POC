@@ -90,22 +90,25 @@ export function Profile() {
                 </Text>
             )}
 
-            <Card padding="lg" radius="md" withBorder>
+            <Card padding="lg" radius="md" withBorder data-er-field="BUSINESS">
                 <Stack gap="md">
                     <TextInput
                         label="First Name"
                         value={profile.adminInfo.firstName}
                         onChange={handleChange('firstName')}
+                        data-er-field="BUSINESS.admin_first_name"
                     />
                     <TextInput
                         label="Last Name"
                         value={profile.adminInfo.lastName}
                         onChange={handleChange('lastName')}
+                        data-er-field="BUSINESS.admin_last_name"
                     />
                     <TextInput
                         label="Email"
                         value={profile.adminInfo.email}
                         onChange={handleChange('email')}
+                        data-er-field="BUSINESS.admin_email"
                     />
                 </Stack>
             </Card>

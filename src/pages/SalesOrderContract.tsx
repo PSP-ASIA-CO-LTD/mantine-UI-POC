@@ -20,6 +20,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import { PageActionBar } from '../components/PageActionBar';
 import { Select, TextInput } from '../components/EditableFields';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
+import { RecurrenceDisplay } from '../components/RecurrenceIcon';
 import type { ContractLanguage, StoredContract, Contract } from '../types';
 import './SalesOrderContract.css';
 
@@ -518,8 +519,11 @@ export function SalesOrderContract() {
                                             )}
                                         </Table.Td>
                                         <Table.Td>{s.dept}</Table.Td>
-                                        <Table.Td>{s.interval}</Table.Td>
-                                    </Table.Tr>
+                                                                                    <Table.Td>
+                                                                                        <div style={{ transform: 'scale(0.9)', transformOrigin: 'left' }}>
+                                                                                            <RecurrenceDisplay interval={s.interval} color="dark" />
+                                                                                        </div>
+                                                                                    </Table.Td>                                    </Table.Tr>
                                 ))}
                             </Table.Tbody>
                         </Table>

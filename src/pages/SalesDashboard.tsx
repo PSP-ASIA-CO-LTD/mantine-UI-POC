@@ -292,11 +292,11 @@ export function SalesDashboard() {
             </Group>
 
             <div className="stats-grid">
-                <Card padding="lg" radius="md" withBorder className="stat-card">
+                <Card padding="lg" radius="md" withBorder className="stat-card" data-er-field="SALES_ORDER">
                     <Group justify="space-between">
                         <div>
                             <Text size="sm" c="dimmed" tt="uppercase" fw={600}>Today's Sales</Text>
-                            <Text size="xl" fw={700}>{stats?.todaySales || 0}</Text>
+                            <Text size="xl" fw={700} data-er-field="SALES_ORDER.status">{stats?.todaySales || 0}</Text>
                         </div>
                         <ActionIcon variant="light" size="xl" color="blue">
                             <IconReceipt size={24} />
@@ -304,11 +304,11 @@ export function SalesDashboard() {
                     </Group>
                 </Card>
 
-                <Card padding="lg" radius="md" withBorder className="stat-card">
+                <Card padding="lg" radius="md" withBorder className="stat-card" data-er-field="SALES_ORDER">
                     <Group justify="space-between">
                         <div>
                             <Text size="sm" c="dimmed" tt="uppercase" fw={600}>Today's Revenue</Text>
-                            <Text size="xl" fw={700}>฿{formatCurrency(stats?.todayRevenue || 0)}</Text>
+                            <Text size="xl" fw={700} data-er-field="SALES_ORDER.adjusted_price">฿{formatCurrency(stats?.todayRevenue || 0)}</Text>
                         </div>
                         <ActionIcon variant="light" size="xl" color="green">
                             <IconCurrencyBaht size={24} />
@@ -316,11 +316,11 @@ export function SalesDashboard() {
                     </Group>
                 </Card>
 
-                <Card padding="lg" radius="md" withBorder className="stat-card">
+                <Card padding="lg" radius="md" withBorder className="stat-card" data-er-field="SALES_ORDER">
                     <Group justify="space-between">
                         <div>
                             <Text size="sm" c="dimmed" tt="uppercase" fw={600}>Pending Payments</Text>
-                            <Text size="xl" fw={700}>{stats?.pendingPayments || 0}</Text>
+                            <Text size="xl" fw={700} data-er-field="SALES_ORDER.status">{stats?.pendingPayments || 0}</Text>
                         </div>
                         <ActionIcon variant="light" size="xl" color="yellow">
                             <IconClock size={24} />
@@ -328,11 +328,11 @@ export function SalesDashboard() {
                     </Group>
                 </Card>
 
-                <Card padding="lg" radius="md" withBorder className="stat-card">
+                <Card padding="lg" radius="md" withBorder className="stat-card" data-er-field="RESIDENT">
                     <Group justify="space-between">
                         <div>
                             <Text size="sm" c="dimmed" tt="uppercase" fw={600}>Active Residents</Text>
-                            <Text size="xl" fw={700}>{stats?.activeResidents || 0}</Text>
+                            <Text size="xl" fw={700} data-er-field="RESIDENT.id">{stats?.activeResidents || 0}</Text>
                         </div>
                         <ActionIcon variant="light" size="xl" color="violet">
                             <IconUsers size={24} />
@@ -366,30 +366,33 @@ export function SalesDashboard() {
                                         key={order.id}
                                         className="sales-dashboard-row"
                                         onClick={() => openSalesOrderSidesheet(order)}
+                                        data-er-field="SALES_ORDER"
                                     >
                                         <StyledTable.Td>
                                             <Stack gap={2}>
-                                                <Text size="sm" fw={600}>{residentName}</Text>
-                                                <Text size="xs" c="dimmed">{order.packageName}</Text>
+                                                <Text size="sm" fw={600} data-er-field="RESIDENT.first_name">{residentName}</Text>
+                                                <Text size="xs" c="dimmed" data-er-field="SALE_PACKAGE.name">{order.packageName}</Text>
                                             </Stack>
                                         </StyledTable.Td>
                                         <StyledTable.Td>
                                             <Stack gap={2}>
-                                                <Text size="sm" fw={500}>{guardianName}</Text>
-                                                <Text size="xs" c="dimmed">{guardian?.phone || '—'}</Text>
+                                                <Text size="sm" fw={500} data-er-field="GUARDIAN.first_name">{guardianName}</Text>
+                                                <Text size="xs" c="dimmed" data-er-field="GUARDIAN.phone">{guardian?.phone || '—'}</Text>
                                             </Stack>
                                         </StyledTable.Td>
                                         <StyledTable.Td>
                                             <Stack gap={2}>
-                                                <Text size="sm">{formatDate(order.checkIn)} - {formatDate(order.checkOut)}</Text>
-                                                <Text size="xs" c="dimmed">{order.adjustedDays} days</Text>
+                                                <Text size="sm">
+                                                    <span data-er-field="SALES_ORDER.check_in">{formatDate(order.checkIn)}</span> - <span data-er-field="SALES_ORDER.check_out">{formatDate(order.checkOut)}</span>
+                                                </Text>
+                                                <Text size="xs" c="dimmed" data-er-field="SALES_ORDER.adjusted_days">{order.adjustedDays} days</Text>
                                             </Stack>
                                         </StyledTable.Td>
                                         <StyledTable.Td>
-                                            <Text size="sm" fw={600}>฿{formatCurrency(order.adjustedPrice)}</Text>
+                                            <Text size="sm" fw={600} data-er-field="SALES_ORDER.adjusted_price">฿{formatCurrency(order.adjustedPrice)}</Text>
                                         </StyledTable.Td>
                                         <StyledTable.Td>
-                                            <Badge color={getStatusColor(order.status)} size="sm">
+                                            <Badge color={getStatusColor(order.status)} size="sm" data-er-field="SALES_ORDER.status">
                                                 {order.status.replace('_', ' ')}
                                             </Badge>
                                         </StyledTable.Td>

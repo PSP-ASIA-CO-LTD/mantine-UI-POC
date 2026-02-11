@@ -8,6 +8,8 @@ import {
     NumberInput as MantineNumberInput,
     PasswordInput as MantinePasswordInput,
     FileInput as MantineFileInput,
+    Checkbox as MantineCheckbox,
+    Radio as MantineRadio,
     type TextInputProps,
     type TextareaProps,
     type SelectProps,
@@ -15,10 +17,14 @@ import {
     type NumberInputProps,
     type PasswordInputProps,
     type FileInputProps,
+    type CheckboxProps,
+    type CheckboxGroupProps,
+    type RadioProps,
+    type RadioGroupProps,
     Loader,
 } from '@mantine/core';
 import { DateInput as MantineDateInput, type DateInputProps } from '@mantine/dates';
-import { IconCheck, IconPencil, IconX } from '@tabler/icons-react';
+import { IconCheck, IconPencil, IconX, IconCalendar } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import './InlineEditableField.css';
 
@@ -117,6 +123,43 @@ export function DateInput(props: DateInputProps) {
         <MantineDateInput
             {...props}
             variant={props.variant ?? 'unstyled'}
+            classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+            rightSection={<IconCalendar size={18} stroke={1.5} />}
+        />
+    );
+}
+
+export function Checkbox(props: CheckboxProps) {
+    return (
+        <MantineCheckbox
+            {...props}
+            classNames={mergeClassNames({ root: 'editable-field--checkbox' }, props.classNames as ClassNames)}
+        />
+    );
+}
+
+export function CheckboxGroup(props: CheckboxGroupProps) {
+    return (
+        <MantineCheckbox.Group
+            {...props}
+            classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+        />
+    );
+}
+
+export function Radio(props: RadioProps) {
+    return (
+        <MantineRadio
+            {...props}
+            classNames={mergeClassNames({ root: 'editable-field--radio' }, props.classNames as ClassNames)}
+        />
+    );
+}
+
+export function RadioGroup(props: RadioGroupProps) {
+    return (
+        <MantineRadio.Group
+            {...props}
             classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
         />
     );
@@ -422,6 +465,7 @@ export function InlineDateInput({ label, value, onSave, ...props }: DateInputPro
                     pointer={!props.disabled}
                     classNames={commonInputClassNames}
                     popoverProps={{ withinPortal: true, zIndex: 3000, ...props.popoverProps }}
+                    rightSection={<IconCalendar size={18} stroke={1.5} />}
                 />
             )}
         </InlineField>
