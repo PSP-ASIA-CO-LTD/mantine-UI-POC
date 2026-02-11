@@ -162,6 +162,7 @@ export function InlineField({
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [draftValue, setDraftValue] = useState<InlineValue>(value);
+    const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
 
     useEffect(() => {
         if (!isEditing) {
@@ -181,6 +182,7 @@ export function InlineField({
 
         if (!actualHasChanges) {
             setIsEditing(false);
+            setIsHoverSuppressed(true);
             return;
         }
 
@@ -188,6 +190,7 @@ export function InlineField({
             setIsSaving(true);
             await onSave(valueToSave);
             setIsEditing(false);
+            setIsHoverSuppressed(true);
         } catch (error) {
             console.error(`Failed to save ${label}:`, error);
         } finally {
@@ -199,26 +202,34 @@ export function InlineField({
         if (isSaving) return;
         setDraftValue(value);
         setIsEditing(false);
+        setIsHoverSuppressed(true);
     };
 
     const rootClasses = [
         'editable-field',
         'editable-field--inline',
         isEditing ? 'is-editing' : '',
+        isSaving ? 'is-saving' : '',
         disabled ? 'is-disabled' : '',
         locked ? 'editable-field--locked' : '',
         hideActionButtons ? 'editable-field--no-actions' : '',
+        isHoverSuppressed ? 'is-hover-suppressed' : '',
         className
     ].filter(Boolean).join(' ');
 
     const handleControlClick = () => {
         if (!isEditing && !disabled && !locked && !disableClickToEdit && hideEditButton) {
             setIsEditing(true);
+            setIsHoverSuppressed(false);
         }
     };
 
     return (
-        <div className={rootClasses}>
+        <div 
+            className={rootClasses}
+            onMouseLeave={() => setIsHoverSuppressed(false)}
+            onMouseEnter={() => !isEditing && setIsHoverSuppressed(false)}
+        >
             <Text size="sm" className="editable-field__label">{label}</Text>
             <div 
                 className="editable-field__control"
@@ -235,7 +246,11 @@ export function InlineField({
                     isSaving,
                 })}
                 <div className="editable-field__actions">
-                    {!isEditing && !locked ? (
+                    {isSaving ? (
+                        <div className="editable-field__loader">
+                            <Loader size={14} />
+                        </div>
+                    ) : !isEditing && !locked ? (
                         !hideEditButton && (
                             <ActionIcon
                                 variant="subtle"
@@ -252,16 +267,14 @@ export function InlineField({
                                 variant="subtle"
                                 color="green"
                                 onClick={(e) => { e.stopPropagation(); handleSave(); }}
-                                disabled={isSaving}
                                 size="sm"
                             >
-                                {isSaving ? <Loader size={14} /> : <IconCheck size={16} />}
+                                <IconCheck size={16} />
                             </ActionIcon>
                             <ActionIcon
                                 variant="subtle"
                                 color="red"
                                 onClick={(e) => { e.stopPropagation(); handleCancel(); }}
-                                disabled={isSaving}
                                 size="sm"
                             >
                                 <IconX size={16} />

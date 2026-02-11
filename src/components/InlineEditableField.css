@@ -3,6 +3,7 @@
     flex-direction: column;
     gap: 0.35rem;
     width: 100%;
+    position: relative;
 }
 
 .editable-field__label {
@@ -17,24 +18,28 @@
 .editable-field__control {
     position: relative;
     display: flex;
-    align-items: stretch;
+    align-items: center;
     width: 100%;
-    border-bottom: 1px solid var(--mantine-color-gray-3);
-    transition: all 0.2s ease;
     min-height: 2.25rem;
 }
 
-.editable-field:hover .editable-field__control {
+.editable-field__mantine-root {
+    flex: 1;
+    width: 100%;
+    border-bottom: 1px solid var(--mantine-color-gray-3);
+    transition: border-color 0.2s ease;
+}
+
+.editable-field:hover .editable-field__mantine-root {
     border-bottom-color: var(--mantine-color-gray-5);
 }
 
-.editable-field:focus-within .editable-field__control,
-.editable-field.is-editing .editable-field__control {
+.editable-field:focus-within .editable-field__mantine-root,
+.editable-field.is-editing .editable-field__mantine-root {
     border-bottom-color: var(--mantine-primary-color-filled) !important;
 }
 
 .editable-field__input {
-    flex: 1;
     width: 100%;
     border: none !important;
     background: transparent !important;
@@ -50,24 +55,66 @@
     outline: none;
 }
 
+/* Action buttons configuration */
 .editable-field__actions {
     position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 0; /* Anchor to right by default to prevent horizontal glitch */
     display: flex;
     gap: 0.25rem;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.15s ease, top 0.15s ease, transform 0.15s ease;
+    z-index: 100;
+    white-space: nowrap;
+}
+
+/* HOVER STATE: Show edit button INSIDE the field */
+.editable-field:hover:not(.is-editing) .editable-field__actions {
+    opacity: 1;
+    pointer-events: auto;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
     background: var(--mantine-color-body);
     padding-left: 0.5rem;
 }
 
-.editable-field:hover .editable-field__actions,
+/* EDITING STATE: Show buttons UNDER the line to the bottom right WITHOUT pushing content */
 .editable-field.is-editing .editable-field__actions {
     opacity: 1;
     pointer-events: auto;
+    top: calc(100% + 4px); /* Step down to keep the line visible */
+    right: 0;
+    transform: none;
+    background: var(--mantine-color-body);
+    padding: 2px 4px;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Suppress buttons after click to prevent "clingy" hover */
+.editable-field.is-hover-suppressed .editable-field__actions {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Standalone loader during saving */
+.editable-field.is-saving .editable-field__actions {
+    opacity: 1 !important;
+    pointer-events: none;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--mantine-color-body);
+    padding-left: 0.5rem;
+}
+
+.editable-field__loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    padding-right: 4px;
 }
 
 .editable-field.is-disabled {
@@ -78,27 +125,37 @@
     display: none;
 }
 
-.editable-field--inline .editable-field__input {
-    padding-right: 3.25rem !important;
+/* Remove horizontal padding constraints when editing since buttons drop down */
+.editable-field.is-editing .editable-field__input {
+    padding-right: 0 !important;
+}
+
+/* Add padding only when hovered to avoid text overlap with internal pencil icon */
+.editable-field--inline:not(.is-editing):hover .editable-field__input {
+    padding-right: 2rem !important;
+}
+
+.editable-field--no-actions .editable-field__actions {
+    display: none;
 }
 
 .editable-field--no-actions .editable-field__input {
-    padding-right: 1.5rem !important;
-}
-
-.editable-field__mantine-root {
-    flex: 1;
-    width: 100%;
+    padding-right: 0 !important;
 }
 
 .editable-field--locked .editable-field__control {
-    border-bottom: 1px dashed var(--mantine-color-gray-3);
+    border-bottom: none;
     background-color: var(--mantine-color-gray-0);
     border-radius: 4px;
     padding-left: 0.5rem;
 }
 
+.editable-field--locked .editable-field__mantine-root {
+    border-bottom: 1px dashed var(--mantine-color-gray-3);
+}
+
 .editable-field--locked .editable-field__input {
+    padding-right: 0.5rem !important;
     color: var(--mantine-color-gray-6);
     cursor: default;
 }

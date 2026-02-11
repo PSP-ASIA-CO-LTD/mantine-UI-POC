@@ -4,14 +4,15 @@
     "firstName": "คุณยาย",
     "lastName": "สุขใจ",
     "dateOfBirth": "1945-03-15",
-    "gender": "female",
+    "gender": "male",
     "idNumber": "1-1001-00001-00-1",
     "medicalConditions": "Diabetes Type 2, Hypertension",
     "allergies": "Penicillin",
     "dietaryRestrictions": "Low sodium, Low sugar",
     "emergencyContact": "081-234-5678",
     "guardianId": "gdn-1",
-    "createdAt": "2025-12-15T10:30:00Z"
+    "createdAt": "2025-12-15T10:30:00Z",
+    "maritalStatus": "married"
   },
   {
     "id": "res-2",
@@ -25,11 +26,10 @@
     "dietaryRestrictions": "None",
     "emergencyContact": "089-999-8888",
     "guardianId": "gdn-2",
-    "createdAt": "2025-12-18T15:00:00Z",
-    "prefix": "mr"
+    "createdAt": "2025-12-18T15:00:00Z"
   },
   {
-    "firstName": "สมศรี",
+    "firstName": "สมทรง",
     "lastName": "ใจดี",
     "dateOfBirth": "1948-05-15",
     "gender": "female",
@@ -41,7 +41,8 @@
     "guardianId": "gdn-1770202911654-o3rqe",
     "id": "res-1770202912457",
     "createdAt": "2026-02-04T11:01:52.457Z",
-    "email": ""
+    "email": "",
+    "prefix": "mr"
   },
   {
     "prefix": "",
