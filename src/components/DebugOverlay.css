@@ -1,0 +1,151 @@
+/* Debug Toggle Button */
+.debug-toggle-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Debug Panel */
+.debug-panel {
+    position: fixed;
+    z-index: 100000;
+    inline-size: 280px;
+    max-block-size: calc(100vh - 40px);
+    overflow-y: auto;
+    background: white;
+    user-select: none;
+}
+
+.debug-panel.dragging {
+    cursor: grabbing;
+    opacity: 0.9;
+}
+
+.debug-panel-header {
+    cursor: grab;
+}
+
+.debug-panel.dragging .debug-panel-header {
+    cursor: grabbing;
+}
+
+/* Field highlight animation */
+.debug-field-highlight {
+    transition: background-color 0.15s ease;
+}
+
+.debug-field-highlight.hovered {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Field label - always visible in debug mode */
+.debug-field-label {
+    opacity: 1;
+}
+
+/* Debug mode body state */
+body.debug-mode [data-er-field] {
+    position: relative;
+}
+
+/* Hide labels by default - they will be shown via React overlay on hover */
+body.debug-mode [data-er-field]::after {
+    display: none;
+}
+
+/* Domain-specific colors using CSS classes */
+body.debug-mode [data-er-field^="PACKAGE"] {
+    --debug-color: #388e3c;
+}
+
+body.debug-mode [data-er-field^="SERVICE"] {
+    --debug-color: #388e3c;
+}
+
+body.debug-mode [data-er-field^="BUSINESS"] {
+    --debug-color: #8e24aa;
+}
+
+body.debug-mode [data-er-field^="DEPARTMENT"] {
+    --debug-color: #8e24aa;
+}
+
+body.debug-mode [data-er-field^="EMPLOYEE"] {
+    --debug-color: #f57c00;
+}
+
+body.debug-mode [data-er-field^="RESIDENT"] {
+    --debug-color: #1976d2;
+}
+
+body.debug-mode [data-er-field^="FACILITY"] {
+    --debug-color: #c2185b;
+}
+
+body.debug-mode [data-er-field^="ROOM"] {
+    --debug-color: #c2185b;
+}
+
+body.debug-mode [data-er-field^="CONTRACT"],
+body.debug-mode [data-er-field^="BILLING"],
+body.debug-mode [data-er-field^="PAYMENT"],
+body.debug-mode [data-er-field^="INVOICE"],
+body.debug-mode [data-er-field^="INVOICE_ITEM"] {
+    --debug-color: #f9a825;
+}
+
+body.debug-mode [data-er-field^="GUARDIAN"],
+body.debug-mode [data-er-field^="RESIDENT"] {
+    --debug-color: #1976d2;
+}
+
+body.debug-mode [data-er-field^="SALES_ORDER"],
+body.debug-mode [data-er-field^="ADDITIONAL_SERVICES"] {
+    --debug-color: #f57c00;
+}
+
+body.debug-mode [data-er-field^="OPERATION_TASK"] {
+    --debug-color: #388e3c;
+}
+
+body.debug-mode [data-er-field^="STAFF_SHIFT"] {
+    --debug-color: #f57c00;
+}
+
+body.debug-mode [data-er-field^="MEDICATION"],
+body.debug-mode [data-er-field^="PRESCRIPTION"] {
+    --debug-color: #7b1fa2;
+}
+
+body.debug-mode [data-er-field^="PRODUCT"],
+body.debug-mode [data-er-field^="INVENTORY"],
+body.debug-mode [data-er-field^="VENDOR"],
+body.debug-mode [data-er-field^="PURCHASE"] {
+    --debug-color: #00897b;
+}
+
+/* Field item hover in panel */
+.debug-field-item:hover {
+    background: #f0f0f0;
+}
+
+/* Scrollbar styling for panel */
+.debug-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.debug-panel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.debug-panel::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.debug-panel::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}

@@ -1,0 +1,163 @@
+{
+  "metadata": {
+    "title": "Bourbon Mall - User Flows",
+    "version": "2.0",
+    "description": "User flows as described: 1) Business setup → dashboard, 2) Create department (basic info, services), 3) Create staff (basic, employment, professional), 4) Create package (basic info, services), 5) Create sales order (package, contact, room, invoice, payment, contract, sign), 6) System creates staff tasks from package and start date; staff view tasks in calendar."
+  },
+  "diagrams": {
+    "overview": {
+      "title": "Overview",
+      "nodes": [
+        {"id": "A", "type": "block", "label": "1. Business Setup", "status": "active"},
+        {"id": "B", "type": "block", "label": "2. Create Department", "status": "active"},
+        {"id": "C", "type": "block", "label": "3. Create (Add) Staff", "status": "active"},
+        {"id": "D", "type": "block", "label": "4. Create Package", "status": "active"},
+        {"id": "E", "type": "block", "label": "5. Create Sales Order", "status": "active"},
+        {"id": "F", "type": "block", "label": "6. System Create Staff Task", "status": "active"}
+      ],
+      "connections": [
+        {"from": "A", "to": "B"},
+        {"from": "B", "to": "C"},
+        {"from": "C", "to": "D"},
+        {"from": "D", "to": "E"},
+        {"from": "E", "to": "F"}
+      ]
+    },
+    "business-setup": {
+      "title": "1. Business Setup",
+      "nodes": [
+        {"id": "A", "type": "block", "label": "Business information", "status": "active"},
+        {"id": "B", "type": "block", "label": "Complete setup", "status": "active"},
+        {"id": "C", "type": "block", "label": "Land on dashboard", "status": "active"}
+      ],
+      "connections": [
+        {"from": "A", "to": "B"},
+        {"from": "B", "to": "C"}
+      ]
+    },
+    "create-department": {
+      "title": "2. Create Department",
+      "nodes": [
+        {"id": "A", "type": "block", "label": "Click create department", "status": "active"},
+        {"id": "B", "type": "block", "label": "Add department basic info", "status": "active"},
+        {"id": "C", "type": "block", "label": "Add service (detail, days/week, CRUD)", "status": "active"},
+        {"id": "D", "type": "block", "label": "Department created", "status": "active"}
+      ],
+      "connections": [
+        {"from": "A", "to": "B"},
+        {"from": "B", "to": "C"},
+        {"from": "C", "to": "D"}
+      ]
+    },
+    "create-staff": {
+      "title": "3. Create (Add) Staff",
+      "nodes": [
+        {"id": "A", "type": "block", "label": "Click add staff", "status": "active"},
+        {"id": "B", "type": "block", "label": "Add staff basic info", "status": "active"},
+        {"id": "C", "type": "block", "label": "Add employment info", "status": "active"},
+        {"id": "D", "type": "block", "label": "Add professional info", "status": "active"},
+        {"id": "E", "type": "block", "label": "Staff created", "status": "active"}
+      ],
+      "connections": [
+        {"from": "A", "to": "B"},
+        {"from": "B", "to": "C"},
+        {"from": "C", "to": "D"},
+        {"from": "D", "to": "E"}
+      ]
+    },
+    "create-package": {
+      "title": "4. Create Package",
+      "nodes": [
+        {"id": "A", "type": "block", "label": "Click add package", "status": "active"},
+        {"id": "B", "type": "block", "label": "Add package basic info", "status": "active"},
+        {"id": "C", "type": "block", "label": "Add service related to this package", "status": "active"},
+        {"id": "D", "type": "block", "label": "Package created", "status": "active"}
+      ],
+      "connections": [
+        {"from": "A", "to": "B"},
+        {"from": "B", "to": "C"},
+        {"from": "C", "to": "D"}
+      ]
+    },
+    "create-sales-order": {
+      "title": "5. Create Sales Order",
+      "nodes": [
+        {"id": "A", "type": "block", "label": "Click create sales order", "status": "active"},
+        {"id": "B", "type": "block", "label": "Select package and add start date", "status": "active"},
+        {"id": "C", "type": "block", "label": "Add contact info (guardian, resident)", "status": "active"},
+        {"id": "D", "type": "block", "label": "Select room and additional service", "status": "active"},
+        {"id": "E", "type": "block", "label": "Invoice created by system", "status": "active"},
+        {"id": "F", "type": "block", "label": "Put payment into payment channel", "status": "active"},
+        {"id": "G", "type": "block", "label": "Contract created by system", "status": "active"},
+        {"id": "H", "type": "block", "label": "Print out for user to sign", "status": "active"},
+        {"id": "I", "type": "block", "label": "Order completed", "status": "active"}
+      ],
+      "connections": [
+        {"from": "A", "to": "B"},
+        {"from": "B", "to": "C"},
+        {"from": "C", "to": "D"},
+        {"from": "D", "to": "E"},
+        {"from": "E", "to": "F"},
+        {"from": "F", "to": "G"},
+        {"from": "G", "to": "H"},
+        {"from": "H", "to": "I"}
+      ]
+    },
+    "system-create-staff-task": {
+      "title": "6. System Create Staff Task",
+      "nodes": [
+        {"id": "A", "type": "block", "label": "System reads package data and start date", "status": "active"},
+        {"id": "B", "type": "block", "label": "System lays down tasks from package into staff task calendar", "status": "active"},
+        {"id": "C", "type": "block", "label": "Staff see their tasks from calendar view", "status": "active"}
+      ],
+      "connections": [
+        {"from": "A", "to": "B"},
+        {"from": "B", "to": "C"}
+      ]
+    }
+  },
+  "relationships": [
+    {
+      "id": "rel-overview-business-setup",
+      "parentDiagram": "overview",
+      "parentNode": "A",
+      "childDiagram": "business-setup",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-create-department",
+      "parentDiagram": "overview",
+      "parentNode": "B",
+      "childDiagram": "create-department",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-create-staff",
+      "parentDiagram": "overview",
+      "parentNode": "C",
+      "childDiagram": "create-staff",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-create-package",
+      "parentDiagram": "overview",
+      "parentNode": "D",
+      "childDiagram": "create-package",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-create-sales-order",
+      "parentDiagram": "overview",
+      "parentNode": "E",
+      "childDiagram": "create-sales-order",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-system-create-staff-task",
+      "parentDiagram": "overview",
+      "parentNode": "F",
+      "childDiagram": "system-create-staff-task",
+      "type": "detail"
+    }
+  ]
+}

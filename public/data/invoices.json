@@ -1,0 +1,132 @@
+[
+  {
+    "id": "inv-1",
+    "salesOrderId": "so-1",
+    "invoiceNumber": "INV-2025-0001",
+    "guardianId": "gdn-1",
+    "guardianName": "สมชาย ใจดี",
+    "residentName": "คุณยาย สุขใจ",
+    "items": [
+      {
+        "description": "20-day Elder Recreation Package",
+        "quantity": 1,
+        "unitPrice": 85000,
+        "total": 85000
+      }
+    ],
+    "subtotal": 85000,
+    "tax": 5950,
+    "total": 90950,
+    "status": "paid",
+    "issuedAt": "2025-12-15T11:30:00Z",
+    "paidAt": "2025-12-15T12:00:00Z",
+    "paymentMethod": "transfer",
+    "notes": ""
+  },
+  {
+    "id": "inv-2",
+    "salesOrderId": "so-2",
+    "invoiceNumber": "INV-2025-0002",
+    "guardianId": "gdn-2",
+    "guardianName": "John Doe",
+    "residentName": "Grandma Smith",
+    "items": [
+      {
+        "description": "Golden Years Premium Package (30 days)",
+        "quantity": 1,
+        "unitPrice": 120000,
+        "total": 120000
+      }
+    ],
+    "subtotal": 120000,
+    "tax": 8400,
+    "total": 128400,
+    "status": "paid",
+    "issuedAt": "2025-12-18T16:30:00Z",
+    "paidAt": "2025-12-19T09:00:00Z",
+    "paymentMethod": "credit_card",
+    "notes": ""
+  },
+  {
+    "salesOrderId": "so-1770202920962",
+    "guardianId": "gdn-1770202911654-o3rqe",
+    "guardianName": "สมชาย ใจดี",
+    "residentName": "สมศรี ใจดี",
+    "items": [
+      {
+        "description": "20-day Elder Recreation (20 days)",
+        "quantity": 1,
+        "unitPrice": 85000,
+        "total": 85000
+      },
+      {
+        "description": "Room 202 (suite)",
+        "quantity": 1,
+        "unitPrice": 24000,
+        "total": 24000
+      },
+      {
+        "description": "Oxygen Concentrator (20 days)",
+        "quantity": 1,
+        "unitPrice": 6000,
+        "total": 6000
+      },
+      {
+        "description": "Deposit (+1 month)",
+        "quantity": 1,
+        "unitPrice": 172500,
+        "total": 172500
+      }
+    ],
+    "subtotal": 287500,
+    "tax": 20125,
+    "total": 307625,
+    "status": "paid",
+    "id": "inv-1770202921463",
+    "invoiceNumber": "INV-2026-0003",
+    "issuedAt": "2026-02-04T11:02:01.463Z",
+    "paidAt": "2026-02-04T11:02:03.148Z",
+    "paymentMethod": "cash"
+  },
+  {
+    "salesOrderId": "so-1770273394194",
+    "guardianId": "gdn-1770273386882-e94co",
+    "guardianName": "สมหญิง ใจดี",
+    "residentName": "สมชาย ใจดี",
+    "items": [
+      {
+        "description": "Golden Years Premium (30 days)",
+        "quantity": 1,
+        "unitPrice": 120000,
+        "total": 120000
+      },
+      {
+        "description": "Room 202 (suite)",
+        "quantity": 1,
+        "unitPrice": 36000,
+        "total": 36000
+      },
+      {
+        "description": "Additional Bed (30 days)",
+        "quantity": 1,
+        "unitPrice": 15000,
+        "total": 15000
+      },
+      {
+        "description": "Deposit (+1 month)",
+        "quantity": 1,
+        "unitPrice": 171000,
+        "total": 171000
+      }
+    ],
+    "subtotal": 342000,
+    "tax": 23940,
+    "total": 365940,
+    "status": "paid",
+    "id": "inv-1770273394696",
+    "invoiceNumber": "INV-2026-0004",
+    "issuedAt": "2026-02-05T06:36:34.696Z",
+    "paidAt": "2026-02-05T06:37:44.933Z",
+    "paymentMethod": "cash"
+  }
+]

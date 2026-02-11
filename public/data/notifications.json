@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ntf-1",
+    "type": "sale",
+    "title": "New Sale Completed",
+    "message": "20-day Elder Recreation package sold to สมชาย ใจดี for resident คุณยาย สุขใจ. Total: ฿90,950",
+    "relatedId": "so-1",
+    "createdAt": "2025-12-15T12:00:00Z",
+    "readAt": "2025-12-15T12:05:00Z"
+  },
+  {
+    "id": "ntf-2",
+    "type": "sale",
+    "title": "New Sale Completed",
+    "message": "Golden Years Premium package sold to John Doe for resident Grandma Smith. Total: ฿128,400",
+    "relatedId": "so-2",
+    "createdAt": "2025-12-19T09:00:00Z",
+    "readAt": null
+  },
+  {
+    "type": "sale",
+    "title": "New Sale Completed",
+    "message": "20-day Elder Recreation sold to สมชาย ใจดี for resident สมศรี ใจดี. Total: ฿307,625",
+    "relatedId": "so-1770202920962",
+    "id": "ntf-1770202924992",
+    "createdAt": "2026-02-04T11:02:04.992Z"
+  },
+  {
+    "type": "sale",
+    "title": "New Sale Completed",
+    "message": "Golden Years Premium sold to สมหญิง ใจดี for resident สมชาย ใจดี. Total: ฿365,940",
+    "relatedId": "so-1770273394194",
+    "id": "ntf-1770273445602",
+    "createdAt": "2026-02-05T06:37:25.602Z"
+  },
+  {
+    "type": "sale",
+    "title": "New Sale Completed",
+    "message": "Golden Years Premium sold to สมหญิง ใจดี for resident สมชาย ใจดี. Total: ฿365,940",
+    "relatedId": "so-1770273394194",
+    "id": "ntf-1770273466765",
+    "createdAt": "2026-02-05T06:37:46.765Z"
+  },
+  {
+    "type": "info",
+    "title": "Contract email logged",
+    "message": "Logged sending to 2 email(s) (no real email delivery yet) — Link: /contract/sctr-1770273455845-zuef0t",
+    "relatedId": "sctr-1770273455845-zuef0t",
+    "id": "ntf-1770273519537",
+    "createdAt": "2026-02-05T06:38:39.537Z"
+  }
+]

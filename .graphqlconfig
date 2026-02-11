@@ -1,0 +1,16 @@
+{
+  "schema": "https://feasible-amoeba-37.hasura.app/v1/graphql",
+  "documents": [
+    "src/**/*.{ts,tsx}"
+  ],
+  "extensions": {
+    "endpoints": {
+      "default": {
+        "url": "https://feasible-amoeba-37.hasura.app/v1/graphql",
+        "headers": {
+          "x-hasura-admin-secret": "${VITE_HASURA_ADMIN_SECRET}"
+        }
+      }
+    }
+  }
+}

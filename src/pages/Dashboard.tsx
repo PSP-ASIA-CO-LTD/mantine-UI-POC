@@ -33,10 +33,6 @@ export function Dashboard() {
         <div>
             <Group justify="space-between" mb="xl">
                 <Title order={2}>Operations Dashboard</Title>
-                <Group gap="xs">
-                    <button className="tertiary active">Today</button>
-                    <button className="tertiary">Forecast</button>
-                </Group>
             </Group>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
@@ -65,6 +61,11 @@ export function Dashboard() {
                     </Stack>
                 </Card>
             </div>
+
+            <Group justify="flex-end" mt="lg" gap="xs">
+                <button className="tertiary active">Today</button>
+                <button className="tertiary">Forecast</button>
+            </Group>
         </div>
     );
 }

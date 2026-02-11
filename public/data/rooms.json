@@ -1,0 +1,50 @@
+[
+  {
+    "id": "room-101",
+    "number": "101",
+    "floor": 1,
+    "type": "standard",
+    "status": "occupied",
+    "pricePerDay": 500
+  },
+  {
+    "id": "room-102",
+    "number": "102",
+    "floor": 1,
+    "type": "standard",
+    "status": "available",
+    "pricePerDay": 500
+  },
+  {
+    "id": "room-103",
+    "number": "103",
+    "floor": 1,
+    "type": "deluxe",
+    "status": "available",
+    "pricePerDay": 800
+  },
+  {
+    "id": "room-201",
+    "number": "201",
+    "floor": 2,
+    "type": "deluxe",
+    "status": "available",
+    "pricePerDay": 800
+  },
+  {
+    "id": "room-202",
+    "number": "202",
+    "floor": 2,
+    "type": "suite",
+    "status": "available",
+    "pricePerDay": 1200
+  },
+  {
+    "id": "room-203",
+    "number": "203",
+    "floor": 2,
+    "type": "suite",
+    "status": "maintenance",
+    "pricePerDay": 1200
+  }
+]

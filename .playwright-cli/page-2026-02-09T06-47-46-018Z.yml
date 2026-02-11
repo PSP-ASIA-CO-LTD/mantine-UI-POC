@@ -1,0 +1,192 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - link "Bourbon Mall" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e8]: Operation Manager
+        - navigation [ref=e9]:
+          - generic [ref=e10]:
+            - generic [ref=e11]: Frontoffice
+            - generic [ref=e12]:
+              - link "Sales Dashboard" [ref=e13] [cursor=pointer]:
+                - /url: /sales
+                - img [ref=e14]
+                - generic [ref=e16]: Sales Dashboard
+              - link "Create Sales Order" [ref=e17] [cursor=pointer]:
+                - /url: /sales/order
+                - img [ref=e18]
+                - generic [ref=e23]: Create Sales Order
+          - generic [ref=e24]:
+            - generic [ref=e25]: Operations
+            - link "Staff Task" [ref=e27] [cursor=pointer]:
+              - /url: /staff/tasks
+              - img [ref=e28]
+              - generic [ref=e31]: Staff Task
+          - generic [ref=e32]:
+            - generic [ref=e33]: Backoffice
+            - generic [ref=e34]:
+              - link "Business Setup" [ref=e35] [cursor=pointer]:
+                - /url: /business-setup
+                - img [ref=e36]
+                - generic [ref=e39]: Business Setup
+              - link "Dashboard" [ref=e40] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e41]
+                - generic [ref=e43]: Dashboard
+              - link "Package" [ref=e44] [cursor=pointer]:
+                - /url: /package
+                - img [ref=e45]
+                - generic [ref=e49]: Package
+              - link "Department" [ref=e50] [cursor=pointer]:
+                - /url: /department
+                - img [ref=e51]
+                - generic [ref=e56]: Department
+              - link "Staff" [ref=e57] [cursor=pointer]:
+                - /url: /staff
+                - img [ref=e58]
+                - generic [ref=e61]: Staff
+              - link "Patient" [ref=e62] [cursor=pointer]:
+                - /url: /patient
+                - img [ref=e63]
+                - generic [ref=e67]: Patient
+        - button "OM Manager Alice Administrator" [ref=e69] [cursor=pointer]:
+          - generic [ref=e70]:
+            - generic [ref=e72]: OM
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Manager Alice
+              - paragraph [ref=e75]: Administrator
+          - img [ref=e76]
+    - main [ref=e78]:
+      - generic [ref=e79]:
+        - generic [ref=e80]:
+          - heading "Sales Dashboard" [level=2] [ref=e81]
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - generic [ref=e84]: "5"
+              - button [ref=e85] [cursor=pointer]:
+                - img [ref=e87]
+            - button "Create Sales Order" [ref=e90] [cursor=pointer]:
+              - generic [ref=e91]:
+                - img [ref=e93]
+                - generic [ref=e94]: Create Sales Order
+        - generic [ref=e95]:
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - paragraph [ref=e99]: Today's Sales
+              - paragraph [ref=e100]: "0"
+            - button [ref=e101] [cursor=pointer]:
+              - img [ref=e103]
+          - generic [ref=e106]:
+            - generic [ref=e107]:
+              - paragraph [ref=e108]: Today's Revenue
+              - paragraph [ref=e109]: ฿0
+            - button [ref=e110] [cursor=pointer]:
+              - img [ref=e112]
+          - generic [ref=e116]:
+            - generic [ref=e117]:
+              - paragraph [ref=e118]: Pending Payments
+              - paragraph [ref=e119]: "0"
+            - button [ref=e120] [cursor=pointer]:
+              - img [ref=e122]
+          - generic [ref=e126]:
+            - generic [ref=e127]:
+              - paragraph [ref=e128]: Active Residents
+              - paragraph [ref=e129]: "1"
+            - button [ref=e130] [cursor=pointer]:
+              - img [ref=e132]
+        - generic [ref=e137]:
+          - paragraph [ref=e138]: Recent Sales
+          - table [ref=e139]:
+            - rowgroup [ref=e140]:
+              - row "Resident / Package Guardian Stay Total Status" [ref=e141]:
+                - columnheader "Resident / Package" [ref=e142]
+                - columnheader "Guardian" [ref=e143]
+                - columnheader "Stay" [ref=e144]
+                - columnheader "Total" [ref=e145]
+                - columnheader "Status" [ref=e146]
+                - columnheader [ref=e147]
+            - rowgroup [ref=e148]:
+              - row "สมชาย ใจดี Golden Years Premium สมหญิง ใจดี 082-345-6789 20 ก.พ. 2569 - 21 มี.ค. 2569 30 days ฿120,000 paid" [ref=e149] [cursor=pointer]:
+                - cell "สมชาย ใจดี Golden Years Premium" [ref=e150]:
+                  - generic [ref=e151]:
+                    - paragraph [ref=e152]: สมชาย ใจดี
+                    - paragraph [ref=e153]: Golden Years Premium
+                - cell "สมหญิง ใจดี 082-345-6789" [ref=e154]:
+                  - generic [ref=e155]:
+                    - paragraph [ref=e156]: สมหญิง ใจดี
+                    - paragraph [ref=e157]: 082-345-6789
+                - cell "20 ก.พ. 2569 - 21 มี.ค. 2569 30 days" [ref=e158]:
+                  - generic [ref=e159]:
+                    - paragraph [ref=e160]: 20 ก.พ. 2569 - 21 มี.ค. 2569
+                    - paragraph [ref=e161]: 30 days
+                - cell "฿120,000" [ref=e162]:
+                  - paragraph [ref=e163]: ฿120,000
+                - cell "paid" [ref=e164]:
+                  - generic [ref=e166]: paid
+                - cell [ref=e167]:
+                  - button "View details" [ref=e168]:
+                    - img [ref=e170]
+              - row "สมศรี ใจดี 20-day Elder Recreation สมชาย ใจดี 081-234-5678 11 ก.พ. 2569 - 2 มี.ค. 2569 20 days ฿85,000 paid" [ref=e173] [cursor=pointer]:
+                - cell "สมศรี ใจดี 20-day Elder Recreation" [ref=e174]:
+                  - generic [ref=e175]:
+                    - paragraph [ref=e176]: สมศรี ใจดี
+                    - paragraph [ref=e177]: 20-day Elder Recreation
+                - cell "สมชาย ใจดี 081-234-5678" [ref=e178]:
+                  - generic [ref=e179]:
+                    - paragraph [ref=e180]: สมชาย ใจดี
+                    - paragraph [ref=e181]: 081-234-5678
+                - cell "11 ก.พ. 2569 - 2 มี.ค. 2569 20 days" [ref=e182]:
+                  - generic [ref=e183]:
+                    - paragraph [ref=e184]: 11 ก.พ. 2569 - 2 มี.ค. 2569
+                    - paragraph [ref=e185]: 20 days
+                - cell "฿85,000" [ref=e186]:
+                  - paragraph [ref=e187]: ฿85,000
+                - cell "paid" [ref=e188]:
+                  - generic [ref=e190]: paid
+                - cell [ref=e191]:
+                  - button "View details" [ref=e192]:
+                    - img [ref=e194]
+              - row "Grandma Smith Golden Years Premium John Doe 089-999-8888 10 ม.ค. 2569 - 9 ก.พ. 2569 30 days ฿120,000 paid" [ref=e197] [cursor=pointer]:
+                - cell "Grandma Smith Golden Years Premium" [ref=e198]:
+                  - generic [ref=e199]:
+                    - paragraph [ref=e200]: Grandma Smith
+                    - paragraph [ref=e201]: Golden Years Premium
+                - cell "John Doe 089-999-8888" [ref=e202]:
+                  - generic [ref=e203]:
+                    - paragraph [ref=e204]: John Doe
+                    - paragraph [ref=e205]: 089-999-8888
+                - cell "10 ม.ค. 2569 - 9 ก.พ. 2569 30 days" [ref=e206]:
+                  - generic [ref=e207]:
+                    - paragraph [ref=e208]: 10 ม.ค. 2569 - 9 ก.พ. 2569
+                    - paragraph [ref=e209]: 30 days
+                - cell "฿120,000" [ref=e210]:
+                  - paragraph [ref=e211]: ฿120,000
+                - cell "paid" [ref=e212]:
+                  - generic [ref=e214]: paid
+                - cell [ref=e215]:
+                  - button "View details" [ref=e216]:
+                    - img [ref=e218]
+              - row "คุณยาย สุขใจ 20-day Elder Recreation สมชาย ใจดี 081-234-5678 20 ธ.ค. 2568 - 8 ม.ค. 2569 20 days ฿85,000 active" [ref=e221] [cursor=pointer]:
+                - cell "คุณยาย สุขใจ 20-day Elder Recreation" [ref=e222]:
+                  - generic [ref=e223]:
+                    - paragraph [ref=e224]: คุณยาย สุขใจ
+                    - paragraph [ref=e225]: 20-day Elder Recreation
+                - cell "สมชาย ใจดี 081-234-5678" [ref=e226]:
+                  - generic [ref=e227]:
+                    - paragraph [ref=e228]: สมชาย ใจดี
+                    - paragraph [ref=e229]: 081-234-5678
+                - cell "20 ธ.ค. 2568 - 8 ม.ค. 2569 20 days" [ref=e230]:
+                  - generic [ref=e231]:
+                    - paragraph [ref=e232]: 20 ธ.ค. 2568 - 8 ม.ค. 2569
+                    - paragraph [ref=e233]: 20 days
+                - cell "฿85,000" [ref=e234]:
+                  - paragraph [ref=e235]: ฿85,000
+                - cell "active" [ref=e236]:
+                  - generic [ref=e238]: active
+                - cell [ref=e239]:
+                  - button "View details" [ref=e240]:
+                    - img [ref=e242]
+  - button "Toggle Debug Mode" [ref=e245] [cursor=pointer]:
+    - img [ref=e247]
