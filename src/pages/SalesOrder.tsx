@@ -42,6 +42,7 @@ import { useCustomerMutations } from '../hooks/useCustomerMutations';
 import { useSalesOrderMutations } from '../hooks/useSalesOrderMutations';
 import { useNotifications } from '../hooks/useNotifications';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
+import { PageHeader } from '../components/PageHeader';
 import type { Package, Room, Guardian, Resident, SalesOrder, Invoice, Contract, AdditionalServices } from '../types';
 import { getBusinessSettings } from '../utils/businessSettings';
 import { buildInvoiceItems, calculateInvoiceTotals } from '../utils/invoiceCalculator';
@@ -807,21 +808,26 @@ export function SalesOrderPage() {
 
     return (
         <div className="sales-order-page" ref={salesOrderRef}>
-            <Group mb="xl">
-                {step !== 5 && <ActionIcon variant="subtle" size="lg" onClick={() => navigate('/sales')}>
-                    <IconArrowLeft size={20} />
-                </ActionIcon>}
-                <Title order={2}>Create Sales Order</Title>
-            </Group>
-
+            {step !== 5 && (
+                <PageHeader 
+                    title="Create Sales Order"
+                    actions={
+                        <ActionIcon variant="subtle" size="lg" onClick={() => navigate('/sales')}>
+                            <IconArrowLeft size={20} />
+                        </ActionIcon>
+                    }
+                />
+            )}
+            
+            <div style={{ padding: '0 var(--mantine-spacing-md)' }}>
             {step !== 5 && <Stepper
-                active={step}
-                onStepClick={setStep}
-                mb="xl"
-                color="blue"
-                size="sm"
-                iconSize={32}
-            >
+                    active={step}
+                    onStepClick={setStep}
+                    mb="xl"
+                    color="blue"
+                    size="sm"
+                    iconSize={32}
+                >
                 <Stepper.Step
                     label="Select Package"
                     description={getStepDescription(0)}
@@ -1044,7 +1050,17 @@ export function SalesOrderPage() {
                                         required
                                         {...residentForm.getInputProps('dateOfBirth')}
                                         value={residentForm.values.dateOfBirth ? new Date(residentForm.values.dateOfBirth) : null}
-                                        onChange={(val) => residentForm.setFieldValue('dateOfBirth', val ? val.toISOString().split('T')[0] : '')}
+                                        onChange={(val) => {
+                                            const normalized = val
+                                                ? new Date(val as string | number | Date)
+                                                : null;
+                                            residentForm.setFieldValue(
+                                                'dateOfBirth',
+                                                normalized && !Number.isNaN(normalized.getTime())
+                                                    ? normalized.toISOString().split('T')[0]
+                                                    : ''
+                                            );
+                                        }}
                                         data-er-field="RESIDENT.date_of_birth"
                                     />
                                 </Grid.Col>
@@ -2238,6 +2254,7 @@ export function SalesOrderPage() {
                     </Paper>
                 </Card>
             )}
+            </div>
         </div>
     );
 }

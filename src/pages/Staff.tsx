@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Title,
     Group,
@@ -10,11 +10,12 @@ import {
     Divider,
     Stack,
 } from '@mantine/core';
-import { IconPlus, IconDotsVertical } from '@tabler/icons-react';
+import { IconPlus, IconDotsVertical, IconSearch } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { StyledTable } from '../components/StyledTable';
+import { PageHeader } from '../components/PageHeader';
 import {
     TextInput,
     Select,
@@ -34,6 +35,7 @@ export function Staff() {
     const [loading, setLoading] = useState(true);
     const [activeStaff, setActiveStaff] = useState<Staff | null>(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [search, setSearch] = useState('');
     const [draftStaff, setDraftStaff] = useState({
         id: '',
         name: '',
@@ -60,6 +62,36 @@ export function Staff() {
         };
         loadStaff();
     }, []);
+
+    const handleUpdateStaff = async (id: string, updates: Partial<Staff>) => {
+        try {
+            const updated = await API.updateStaff(id, updates);
+            if (updated) {
+                setStaff((prev) => prev.map((s) => (s.id === id ? updated : s)));
+                setActiveStaff(updated);
+            }
+        } catch (error) {
+            console.error('Failed to update staff:', error);
+        }
+    };
+
+    const filteredStaff = useMemo(() => {
+        const query = search.trim().toLowerCase();
+        if (!query) return staff;
+
+        return staff.filter((member) => {
+            const haystack = [
+                member.id,
+                member.name,
+                member.role,
+                member.dept,
+            ]
+                .join(' ')
+                .toLowerCase();
+
+            return haystack.includes(query);
+        });
+    }, [search, staff]);
 
     const openStaffSidesheet = (member: Staff) => {
         const leftPane = (
@@ -300,11 +332,25 @@ export function Staff() {
 
     return (
         <div>
-            <Group justify="space-between" mb="xl">
-                <Title order={2}>Staff Management</Title>
-                <Button leftSection={<IconPlus size={16} />} onClick={openAddStaffSidesheet}>
-                    Add Staff
-                </Button>
+            <PageHeader
+                title="Staff Management"
+                subtitle="Manage your facility staff and departments."
+                actions={
+                    <Button leftSection={<IconPlus size={16} />} onClick={openAddStaffSidesheet}>
+                        Add Staff
+                    </Button>
+                }
+            />
+
+            <Group justify="space-between" mb="md" mt="xl">
+                <Text fw={600} size="lg">Staff ({filteredStaff.length})</Text>
+                <TextInput
+                    placeholder="Search staff, role, or ID"
+                    value={search}
+                    onChange={(event) => setSearch(event.currentTarget.value)}
+                    leftSection={<IconSearch size={16} />}
+                    style={{ width: 280 }}
+                />
             </Group>
 
 
@@ -320,7 +366,7 @@ export function Staff() {
                 </StyledTable.Thead>
 
                 <StyledTable.Tbody>
-                    {staff.map((member) => (
+                    {filteredStaff.map((member) => (
                         <StyledTable.Tr
                             key={member.id}
                             data-er-field="STAFF"

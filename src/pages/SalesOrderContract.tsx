@@ -78,32 +78,15 @@ export function SalesOrderContract() {
     }, [locationState?.draftId, currentDraft?.id, loadDraft]);
 
     const order = currentDraft;
-
-    if (!order || !order.package || !order.contract) {
-        return (
-            <div className="contract-page">
-                <Paper p="lg" withBorder>
-                    <Stack gap="md">
-                        <Title order={2}>Contract</Title>
-                        <Text c="dimmed">No contract data available. Please complete a sales order first.</Text>
-                        <Group justify="flex-start" gap="sm">
-                            <Button onClick={() => navigate('/sales/order')}>Go to Sales Order</Button>
-                        </Group>
-                    </Stack>
-                </Paper>
-            </div>
-        );
-    }
-
-    const contract = order.contract;
-    const pkg = order.package;
+    const contract = order?.contract;
+    const pkg = order?.package;
 
     const days = useMemo(() => {
-        return order.adjustedDays || pkg.duration;
-    }, [order.adjustedDays, pkg.duration]);
+        return order?.adjustedDays || pkg?.duration || 0;
+    }, [order?.adjustedDays, pkg?.duration]);
 
     const pricing = useMemo(() => {
-        return calculateTotalPrice(order);
+        return order ? calculateTotalPrice(order) : { subtotal: 0, tax: 0, total: 0 };
     }, [order, calculateTotalPrice]);
 
     const sharePath = useMemo(() => {
@@ -120,10 +103,11 @@ export function SalesOrderContract() {
         }
     }, [sharePath]);
 
-    const primaryGuardian = useMemo(() => getPrimaryGuardian(order), [order, getPrimaryGuardian]);
+    const primaryGuardian = useMemo(() => (order ? getPrimaryGuardian(order) : null), [order, getPrimaryGuardian]);
 
     // Ensure stored contract exists (localStorage-backed) and aligns with the current draft
     useEffect(() => {
+        if (!order || !contract) return;
         const run = async () => {
             const salesOrderId = order.salesOrder?.id || contract.salesOrderId;
             const existing = salesOrderId ? await getStoredContractBySalesOrderId(salesOrderId) : undefined;
@@ -174,10 +158,11 @@ export function SalesOrderContract() {
 
         run();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [order.id]);
+    }, [order?.id]);
 
     // Keep the stored contract up to date with the current render (compiled paper + source snapshot)
     useEffect(() => {
+        if (!contract) return;
         const run = async () => {
             const current = storedRef.current;
             if (!current) return;
@@ -211,10 +196,26 @@ export function SalesOrderContract() {
         pricing.subtotal,
         pricing.tax,
         pricing.total,
-        order.updatedAt,
-        contract.status,
-        contract.contractNumber,
+        order?.updatedAt,
+        contract?.status,
+        contract?.contractNumber,
     ]);
+
+    if (!order || !order.package || !order.contract) {
+        return (
+            <div className="contract-page">
+                <Paper p="lg" withBorder>
+                    <Stack gap="md">
+                        <Title order={2}>Contract</Title>
+                        <Text c="dimmed">No contract data available. Please complete a sales order first.</Text>
+                        <Group justify="flex-start" gap="sm">
+                            <Button onClick={() => navigate('/sales/order')}>Go to Sales Order</Button>
+                        </Group>
+                    </Stack>
+                </Paper>
+            </div>
+        );
+    }
 
     const contractTitle = language === 'th' ? 'สัญญาให้บริการดูแลผู้สูงอายุ/ผู้มีภาวะพึ่งพิง' : 'Care Service Agreement';
     const policyTitle = language === 'th' ? 'ระเบียบการใช้บริการ (รวมในสัญญา)' : 'Service Rules & Policy (Included)';
@@ -270,7 +271,7 @@ export function SalesOrderContract() {
     };
 
     const handleSign = async () => {
-        if (!stored) return;
+        if (!stored || !contract) return;
 
         const email = signerEmail.trim().toLowerCase();
         const allowed = new Set(order.guardians.map(g => (g.email || '').trim().toLowerCase()).filter(Boolean));
@@ -290,13 +291,14 @@ export function SalesOrderContract() {
         if (updatedStored) setStored(updatedStored);
 
         const signedAt = new Date().toISOString();
+        const nextContract: Contract = {
+            ...contract,
+            status: 'signed',
+            signedAt,
+            signedBy: email,
+        };
         updateDraft({
-            contract: {
-                ...contract,
-                status: 'signed',
-                signedAt,
-                signedBy: email,
-            },
+            contract: nextContract,
         });
         saveDraft();
 
@@ -310,7 +312,7 @@ export function SalesOrderContract() {
     };
 
     const handleUnsign = async () => {
-        if (!stored) return;
+        if (!stored || !contract) return;
 
         const updatedContract = {
             ...stored,
@@ -322,13 +324,14 @@ export function SalesOrderContract() {
         const updatedStored = await upsertStoredContract(updatedContract);
         if (updatedStored) setStored(updatedStored);
 
+        const nextContract: Contract = {
+            ...contract,
+            status: 'pending',
+            signedAt: undefined,
+            signedBy: undefined,
+        };
         updateDraft({
-            contract: {
-                ...(order.contract as Contract),
-                status: 'pending',
-                signedAt: undefined,
-                signedBy: undefined,
-            },
+            contract: nextContract,
         });
         saveDraft();
 

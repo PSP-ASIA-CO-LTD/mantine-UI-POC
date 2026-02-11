@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 import {
-    Title,
     Group,
     Button,
-    Grid,
     Text,
     ActionIcon,
     Divider,
     Card,
     Badge,
     Stack,
+    Grid,
 } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 import { CardList } from '../components/CardList';
+import { PageHeader } from '../components/PageHeader';
 import { buildLeftSection } from '../utils/sidesheetHelper';
 import { RecurrenceDisplay } from '../components/RecurrenceIcon';
 import type { Package, Service } from '../types';
@@ -206,12 +206,16 @@ export function Packages() {
 
     return (
         <div>
-            <Group justify="space-between" mb="xl">
-                <Title order={2}>Package Management</Title>
-                <Button leftSection={<IconPlus size={16} />}>
-                    Create Package
-                </Button>
-            </Group>
+            <PageHeader
+                title="Package Management"
+                subtitle="Define and manage your service bundles."
+                actions={
+                    <Button leftSection={<IconPlus size={16} />}>
+                        Create Package
+                    </Button>
+                }
+                transparent
+            />
 
             <Grid>
                 {packages.map((pkg) => (

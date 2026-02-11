@@ -213,20 +213,18 @@ export function BusinessSetupFlow({ onComplete }: BusinessSetupFlowProps) {
                 <Stack gap="md" data-er-field="BUSINESS">
                   <Title order={3} mb="sm">Business Information</Title>
 
-                  <div data-er-field="BUSINESS">
-                    <TextInput
-                      label="Business Name"
-                      placeholder="Enter your nursing home name"
-                      value={businessInfo.businessName}
-                      onChange={(e) => {
-                        setBusinessInfo({ ...businessInfo, businessName: e.target.value });
-                        clearError('businessName');
-                      }}
-                      required
-                      error={errors.businessName}
-                      data-er-field="BUSINESS.business_name"
-                    />
-                  </div>
+                  <TextInput
+                    label="Business Name"
+                    placeholder="Enter your nursing home name"
+                    value={businessInfo.businessName}
+                    onChange={(e) => {
+                      setBusinessInfo({ ...businessInfo, businessName: e.target.value });
+                      clearError('businessName');
+                    }}
+                    required
+                    error={errors.businessName}
+                    data-er-field="BUSINESS.business_name"
+                  />
 
                   <Select
                     label="Business Type"
@@ -252,7 +250,8 @@ export function BusinessSetupFlow({ onComplete }: BusinessSetupFlowProps) {
                       clearError('address');
                     }}
                     required
-                    rows={3}
+                    autosize
+                    minRows={1}
                     error={errors.address}
                     data-er-field="BUSINESS.address"
                   />

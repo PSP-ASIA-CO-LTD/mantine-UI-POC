@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Title,
     Group,
     Button,
     Card,
@@ -27,6 +26,7 @@ import { API } from '../api';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { StyledTable } from '../components/StyledTable';
+import { PageHeader } from '../components/PageHeader';
 import { buildLeftSection } from '../utils/sidesheetHelper';
 import type { SalesDashboardStats, Notification, SalesOrder, Resident, Guardian, Room } from '../types';
 import './SalesDashboard.css';
@@ -232,64 +232,66 @@ export function SalesDashboard() {
 
     return (
         <div className="sales-dashboard">
-            <Group justify="space-between" mb="xl">
-                <Title order={2}>Sales Dashboard</Title>
-                <Group gap="sm">
-                    <Popover width={360} position="bottom-end" withArrow shadow="md">
-                        <Popover.Target>
-                            <Indicator
-                                color="red"
-                                size={18}
-                                label={unreadCount}
-                                disabled={unreadCount === 0}
-                            >
-                                <ActionIcon variant="light" size="lg">
-                                    <IconBell size={20} />
-                                </ActionIcon>
-                            </Indicator>
-                        </Popover.Target>
-                        <Popover.Dropdown>
-                            <Text fw={600} mb="sm">Notifications</Text>
-                            <ScrollArea h={300}>
-                                <Stack gap="xs">
-                                    {dashboardNotifications.slice(0, 10).map(notif => (
-                                        <Card
-                                            key={notif.id}
-                                            padding="sm"
-                                            withBorder
-                                            className={!notif.readAt ? 'unread' : ''}
-                                            onClick={() => !notif.readAt && handleMarkRead(notif.id)}
-                                            style={{ cursor: !notif.readAt ? 'pointer' : 'default' }}
-                                        >
-                                            <Group justify="space-between" mb={4}>
-                                                <Badge size="xs" color={notif.type === 'sale' ? 'green' : 'blue'}>
-                                                    {notif.type}
-                                                </Badge>
-                                                <Text size="xs" c="dimmed">
-                                                    {formatDate(notif.createdAt)}
+            <PageHeader
+                title="Sales Dashboard"
+                actions={
+                    <Group gap="sm">
+                        <Popover width={360} position="bottom-end" withArrow shadow="md">
+                            <Popover.Target>
+                                <Indicator
+                                    color="red"
+                                    size={18}
+                                    label={unreadCount}
+                                    disabled={unreadCount === 0}
+                                >
+                                    <ActionIcon variant="light" size="lg">
+                                        <IconBell size={20} />
+                                    </ActionIcon>
+                                </Indicator>
+                            </Popover.Target>
+                            <Popover.Dropdown>
+                                <Text fw={600} mb="sm">Notifications</Text>
+                                <ScrollArea h={300}>
+                                    <Stack gap="xs">
+                                        {dashboardNotifications.slice(0, 10).map(notif => (
+                                            <Card
+                                                key={notif.id}
+                                                padding="sm"
+                                                withBorder
+                                                className={!notif.readAt ? 'unread' : ''}
+                                                onClick={() => !notif.readAt && handleMarkRead(notif.id)}
+                                                style={{ cursor: !notif.readAt ? 'pointer' : 'default' }}
+                                            >
+                                                <Group justify="space-between" mb={4}>
+                                                    <Badge size="xs" color={notif.type === 'sale' ? 'green' : 'blue'}>
+                                                        {notif.type}
+                                                    </Badge>
+                                                    <Text size="xs" c="dimmed">
+                                                        {formatDate(notif.createdAt)}
+                                                    </Text>
+                                                </Group>
+                                                <Text size="sm" fw={500}>{notif.title}</Text>
+                                                <Text size="xs" c="dimmed" lineClamp={2}>
+                                                    {notif.message}
                                                 </Text>
-                                            </Group>
-                                            <Text size="sm" fw={500}>{notif.title}</Text>
-                                            <Text size="xs" c="dimmed" lineClamp={2}>
-                                                {notif.message}
-                                            </Text>
-                                        </Card>
-                                    ))}
-                                </Stack>
-                            </ScrollArea>
-                        </Popover.Dropdown>
-                    </Popover>
-                    <Button
-                        leftSection={<IconPlus size={16} />}
-                        onClick={() => {
-                            initNewDraft();
-                            navigate('/sales/order');
-                        }}
-                    >
-                        Create Sales Order
-                    </Button>
-                </Group>
-            </Group>
+                                            </Card>
+                                        ))}
+                                    </Stack>
+                                </ScrollArea>
+                            </Popover.Dropdown>
+                        </Popover>
+                        <Button
+                            leftSection={<IconPlus size={16} />}
+                            onClick={() => {
+                                initNewDraft();
+                                navigate('/sales/order');
+                            }}
+                        >
+                            Create Sales Order
+                        </Button>
+                    </Group>
+                }
+            />
 
             <div className="stats-grid">
                 <Card padding="lg" radius="md" withBorder className="stat-card" data-er-field="SALES_ORDER">

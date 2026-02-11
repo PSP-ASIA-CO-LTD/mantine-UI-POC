@@ -24,7 +24,7 @@ import {
     Loader,
 } from '@mantine/core';
 import { DateInput as MantineDateInput, type DateInputProps } from '@mantine/dates';
-import { IconCheck, IconPencil, IconX, IconCalendar } from '@tabler/icons-react';
+import { IconCheck, IconPencil, IconX, IconCalendar, IconSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import './InlineEditableField.css';
 
@@ -34,6 +34,7 @@ const baseFormClassNames: ClassNames = {
     root: 'editable-field editable-field--form',
     label: 'editable-field__label',
     input: 'editable-field__input',
+    description: 'editable-field__description',
 };
 
 const mergeClassNames = (base: ClassNames, incoming?: ClassNames) => {
@@ -54,6 +55,17 @@ export function TextInput(props: TextInputProps) {
             {...props}
             variant={props.variant ?? 'unstyled'}
             classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+        />
+    );
+}
+
+export function SearchInput(props: TextInputProps) {
+    return (
+        <MantineTextInput
+            leftSection={<IconSearch size={16} />}
+            {...props}
+            variant={props.variant ?? 'default'}
+            radius={props.radius ?? 'md'}
         />
     );
 }
@@ -108,9 +120,9 @@ export function PasswordInput(props: PasswordInputProps) {
     );
 }
 
-export function FileInput(props: FileInputProps) {
+export function FileInput<Multiple extends boolean = false>(props: FileInputProps<Multiple>) {
     return (
-        <MantineFileInput
+        <MantineFileInput<Multiple>
             {...props}
             variant={props.variant ?? 'unstyled'}
             classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
@@ -358,6 +370,28 @@ export function InlineTextInput({ label, value, onSave, ...props }: TextInputPro
     );
 }
 
+export function InlineSearchInput({ label, value, onSave, ...props }: TextInputProps & { onSave: (val: string) => Promise<void> | void }) {
+    return (
+        <InlineField label={label as string} value={value as string} onSave={(val) => onSave(val as string)} disabled={props.disabled}>
+            {({ draftValue, setDraftValue, handleSave, handleCancel, isEditing }) => (
+                <MantineTextInput
+                    {...props}
+                    variant="unstyled"
+                    leftSection={<IconSearch size={16} />}
+                    value={(draftValue as string) || ''}
+                    onChange={(e) => setDraftValue(e.currentTarget.value)}
+                    readOnly={!isEditing}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSave();
+                        if (e.key === 'Escape') handleCancel();
+                    }}
+                    classNames={commonInputClassNames}
+                />
+            )}
+        </InlineField>
+    );
+}
+
 export function InlineNumberInput({ label, value, onSave, ...props }: NumberInputProps & { onSave: (val: string | number) => Promise<void> | void }) {
     return (
         <InlineField label={label as string} value={value as number} onSave={(val) => onSave(val as string | number)} disabled={props.disabled}>
@@ -444,24 +478,25 @@ export function InlineDateInput({ label, value, onSave, ...props }: DateInputPro
     return (
         <InlineField 
             label={label as string} 
-            value={value as Date} 
+            value={value as Date | null} 
             onSave={(val) => onSave(val as Date | null)} 
             disabled={props.disabled} 
             hideEditButton 
             hideActionButtons
             disableClickToEdit
         >
-            {({ draftValue, setDraftValue, handleSave, setIsEditing }) => (
+            {({ draftValue, setDraftValue, handleSave }) => (
                 <MantineDateInput
                     {...props}
                     variant="unstyled"
                     value={draftValue ? new Date(draftValue as string | number | Date) : null}
                     onChange={(val) => {
-                        setDraftValue(val);
-                        handleSave(val);
+                        const normalized = val
+                            ? new Date(val as string | number | Date)
+                            : null;
+                        setDraftValue(normalized);
+                        handleSave(normalized);
                     }}
-                    onDropdownOpen={() => setIsEditing(true)}
-                    onDropdownClose={() => setIsEditing(false)}
                     pointer={!props.disabled}
                     classNames={commonInputClassNames}
                     popoverProps={{ withinPortal: true, zIndex: 3000, ...props.popoverProps }}

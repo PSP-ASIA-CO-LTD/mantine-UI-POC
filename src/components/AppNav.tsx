@@ -193,10 +193,6 @@ export function AppNav() {
                             <IconReceipt size={20} />
                             <span>Dashboard</span>
                         </NavLink>
-                        <NavLink to="/package" className="nav-link">
-                            <IconBox size={20} />
-                            <span>Package</span>
-                        </NavLink>
                         <NavLink to="/department" className="nav-link">
                             <IconUsers size={20} />
                             <span>Department</span>
@@ -204,6 +200,10 @@ export function AppNav() {
                         <NavLink to="/staff" end className="nav-link">
                             <IconUser size={20} />
                             <span>Staff</span>
+                        </NavLink>
+                        <NavLink to="/package" className="nav-link">
+                            <IconBox size={20} />
+                            <span>Package</span>
                         </NavLink>
                         <NavLink to="/patient" end className="nav-link">
                             <IconUserHeart size={20} />

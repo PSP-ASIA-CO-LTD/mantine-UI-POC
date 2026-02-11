@@ -6,11 +6,13 @@ import {
     InlineLockedInput,
     InlineSelect,
     InlineDateInput,
-    InlineTextarea
+    InlineTextarea,
+    SearchInput
 } from '../components/EditableFields';
 
 export function UiFields() {
     const [text, setText] = useState('John Doe');
+    const [searchText, setSearchText] = useState('');
     const [number, setNumber] = useState(42);
     const [select, setSelect] = useState('active');
     const [date, setDate] = useState<Date | null>(new Date());
@@ -60,7 +62,19 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">2. Locked Input Fields</Title>
+                            <Title order={4} mb="xs">2. Search Fields</Title>
+                            <Text size="xs" c="dimmed" mb="md">Standard search input with icon and placeholder padding fix.</Text>
+                            <SearchInput 
+                                placeholder="Search everything..." 
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.currentTarget.value)}
+                            />
+                        </div>
+
+                        <Divider />
+
+                        <div>
+                            <Title order={4} mb="xs">3. Locked Input Fields</Title>
                             <Text size="xs" c="dimmed" mb="md">Read-only fields with dashed border and "Locked" visual state.</Text>
                             <InlineLockedInput
                                 label="System ID (Immutable)"
@@ -71,7 +85,7 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">3. Selection Fields</Title>
+                            <Title order={4} mb="xs">4. Selection Fields</Title>
                             <Text size="xs" c="dimmed" mb="md">No edit button. Click the field directly to trigger selection.</Text>
                             <Stack gap="md">
                                 <InlineSelect
@@ -92,7 +106,7 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">4. Date Picker Fields</Title>
+                            <Title order={4} mb="xs">5. Date Picker Fields</Title>
                             <Text size="xs" c="dimmed" mb="md">No edit button. Click to open date picker.</Text>
                             <InlineDateInput
                                 label="Joining Date"
@@ -104,7 +118,7 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">5. Text Area Fields</Title>
+                            <Title order={4} mb="xs">6. Text Area Fields</Title>
                             <Text size="xs" c="dimmed" mb="md">Multi-line text support with auto-resize.</Text>
                             <InlineTextarea
                                 label="Biography"

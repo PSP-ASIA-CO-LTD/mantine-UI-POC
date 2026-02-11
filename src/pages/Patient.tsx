@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-    Title,
     Group,
-    Card,
     Text,
     Stack,
     Badge,
@@ -11,19 +9,20 @@ import {
     Divider,
     Grid,
 } from '@mantine/core';
-import { IconSearch, IconEye, IconPhone, IconMail, IconCalendar } from '@tabler/icons-react';
+import { IconEye, IconPhone, IconMail, IconCalendar } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { CardList } from '../components/CardList';
 import { SidesheetSection } from '../components/SidesheetSection';
 import { StyledTable } from '../components/StyledTable';
+import { PageHeader } from '../components/PageHeader';
 import {
-    TextInput,
     InlineTextInput,
     InlineLockedInput,
     InlineSelect,
     InlineDateInput,
-    InlineTextarea
+    InlineTextarea,
+    SearchInput
 } from '../components/EditableFields';
 import type { Guardian, Resident, SalesOrder, Room } from '../types';
 import './Patient.css';
@@ -83,6 +82,21 @@ const maritalStatusOptions = [
     { value: 'widowed', label: 'Widowed' },
 ];
 
+const getGuardiansForResidentFromSource = (resident: Resident, sourceGuardians: Guardian[]) => {
+    const linked = sourceGuardians.filter((guardian) => guardian.residentId === resident.id);
+    const primary = sourceGuardians.find((guardian) => guardian.id === resident.guardianId);
+    if (primary && !linked.some((guardian) => guardian.id === primary.id)) {
+        return [primary, ...linked];
+    }
+    return linked;
+};
+
+const getAdmissionsForResidentFromSource = (residentId: string, sourceSalesOrders: SalesOrder[]) => {
+    return sourceSalesOrders
+        .filter((order) => order.residentId === residentId)
+        .sort((a, b) => new Date(b.checkIn).getTime() - new Date(a.checkIn).getTime());
+};
+
 export function Patient() {
     const [residents, setResidents] = useState<Resident[]>([]);
     const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -92,27 +106,28 @@ export function Patient() {
     const [search, setSearch] = useState('');
     const { open } = useSidesheet();
 
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                const [residentData, guardianData, salesOrderData, roomData] = await Promise.all([
-                    API.getResidents(),
-                    API.getGuardians(),
-                    API.getSalesOrders(),
-                    API.getRooms(),
-                ]);
-                setResidents(residentData);
-                setGuardians(guardianData);
-                setSalesOrders(salesOrderData);
-                setRooms(roomData);
-            } catch (error) {
-                console.error('Failed to load patient data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadData();
+    const loadPatientData = useCallback(async () => {
+        try {
+            const [residentData, guardianData, salesOrderData, roomData] = await Promise.all([
+                API.getResidents(),
+                API.getGuardians(),
+                API.getSalesOrders(),
+                API.getRooms(),
+            ]);
+            setResidents(residentData);
+            setGuardians(guardianData);
+            setSalesOrders(salesOrderData);
+            setRooms(roomData);
+        } catch (error) {
+            console.error('Failed to load patient data:', error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        loadPatientData();
+    }, [loadPatientData]);
 
     const handleUpdateResident = async (id: string, updates: Partial<Resident>) => {
         try {
@@ -120,16 +135,12 @@ export function Patient() {
             if (updated) {
                 setResidents(prev => prev.map(r => r.id === id ? updated : r));
                 // Refresh the sidesheet with updated data
-                openResidentSidesheet(updated);
+                void openResidentSidesheet(updated);
             }
         } catch (error) {
             console.error('Failed to update resident:', error);
         }
     };
-
-    const roomsById = useMemo(() => {
-        return new Map(rooms.map((room) => [room.id, room]));
-    }, [rooms]);
 
     const guardiansByResident = useMemo(() => {
         const map = new Map<string, Guardian[]>();
@@ -168,112 +179,144 @@ export function Patient() {
         return admissionsByResident.get(residentId) || [];
     };
 
-	const openResidentSidesheet = (resident: Resident) => {
-		const residentGuardians = getGuardiansForResident(resident);
-		const admissions = getAdmissionsForResident(resident.id);
+	const openResidentSidesheet = async (resident: Resident) => {
+        let latestResident = resident;
+        let latestGuardians = guardians;
+        let latestSalesOrders = salesOrders;
+        let latestRooms = rooms;
 
-		const leftPane = (
-			<div className="patient-left-details">
+        try {
+            const [residentFromStore, guardianData, salesOrderData, roomData] = await Promise.all([
+                API.getResidentById(resident.id),
+                API.getGuardians(),
+                API.getSalesOrders(),
+                API.getRooms(),
+            ]);
+
+            latestResident = residentFromStore || resident;
+            latestGuardians = guardianData;
+            latestSalesOrders = salesOrderData;
+            latestRooms = roomData;
+
+            setResidents((prev) => {
+                if (prev.some((item) => item.id === latestResident.id)) {
+                    return prev.map((item) => (item.id === latestResident.id ? latestResident : item));
+                }
+                return [latestResident, ...prev];
+            });
+            setGuardians(guardianData);
+            setSalesOrders(salesOrderData);
+            setRooms(roomData);
+        } catch (error) {
+            console.error('Failed to refresh patient sidesheet data:', error);
+        }
+
+		const residentGuardians = getGuardiansForResidentFromSource(latestResident, latestGuardians);
+		const admissions = getAdmissionsForResidentFromSource(latestResident.id, latestSalesOrders);
+        const latestRoomsById = new Map(latestRooms.map((room) => [room.id, room]));
+
+			const leftPane = (
+				<div className="patient-left-details">
                 <Stack gap="md">
                     <Grid gutter="md">
                         <Grid.Col span={12}>
                             <InlineLockedInput
                                 label="Resident ID"
-                                value={resident.id}
+                                value={latestResident.id}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineSelect
                                 label="Prefix"
-                                value={resident.prefix || null}
+                                value={latestResident.prefix || null}
                                 data={prefixOptions}
-                                onSave={(val) => handleUpdateResident(resident.id, { prefix: (val as Resident['prefix']) || undefined })}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { prefix: (val as Resident['prefix']) || undefined })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="First Name"
-                                value={resident.firstName}
-                                onSave={(val) => handleUpdateResident(resident.id, { firstName: val })}
+                                value={latestResident.firstName}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { firstName: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Last Name"
-                                value={resident.lastName}
-                                onSave={(val) => handleUpdateResident(resident.id, { lastName: val })}
+                                value={latestResident.lastName}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { lastName: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineDateInput
                                 label="Date of Birth"
-                                value={resident.dateOfBirth ? new Date(resident.dateOfBirth) : null}
-                                onSave={(val) => handleUpdateResident(resident.id, { dateOfBirth: val?.toISOString() || '' })}
+                                value={latestResident.dateOfBirth ? new Date(latestResident.dateOfBirth) : null}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { dateOfBirth: val?.toISOString() || '' })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineSelect
                                 label="Gender"
-                                value={resident.gender || null}
+                                value={latestResident.gender || null}
                                 data={genderOptions}
-                                onSave={(val) => handleUpdateResident(resident.id, { gender: (val as Resident['gender']) || undefined })}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { gender: (val as Resident['gender']) || undefined })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="ID Number"
-                                value={resident.idNumber}
-                                onSave={(val) => handleUpdateResident(resident.id, { idNumber: val })}
+                                value={latestResident.idNumber}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { idNumber: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Hospital No. (HN)"
-                                value={resident.hospitalNumber}
-                                onSave={(val) => handleUpdateResident(resident.id, { hospitalNumber: val })}
+                                value={latestResident.hospitalNumber}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { hospitalNumber: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Race"
-                                value={resident.race}
-                                onSave={(val) => handleUpdateResident(resident.id, { race: val })}
+                                value={latestResident.race}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { race: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Nationality"
-                                value={resident.nationality}
-                                onSave={(val) => handleUpdateResident(resident.id, { nationality: val })}
+                                value={latestResident.nationality}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { nationality: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Religion"
-                                value={resident.religion}
-                                onSave={(val) => handleUpdateResident(resident.id, { religion: val })}
+                                value={latestResident.religion}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { religion: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineSelect
                                 label="Marital Status"
-                                value={resident.maritalStatus || null}
+                                value={latestResident.maritalStatus || null}
                                 data={maritalStatusOptions}
-                                onSave={(val) => handleUpdateResident(resident.id, { maritalStatus: val || undefined })}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { maritalStatus: val || undefined })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Occupation"
-                                value={resident.occupation}
-                                onSave={(val) => handleUpdateResident(resident.id, { occupation: val })}
+                                value={latestResident.occupation}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { occupation: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Blood Group"
-                                value={resident.bloodGroup}
-                                onSave={(val) => handleUpdateResident(resident.id, { bloodGroup: val })}
+                                value={latestResident.bloodGroup}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { bloodGroup: val })}
                             />
                         </Grid.Col>
                     </Grid>
@@ -284,22 +327,22 @@ export function Patient() {
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Mobile Phone"
-                                value={resident.phoneMobile}
-                                onSave={(val) => handleUpdateResident(resident.id, { phoneMobile: val })}
+                                value={latestResident.phoneMobile}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { phoneMobile: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Home Phone"
-                                value={resident.phoneHome}
-                                onSave={(val) => handleUpdateResident(resident.id, { phoneHome: val })}
+                                value={latestResident.phoneHome}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { phoneHome: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={12}>
                             <InlineTextInput
                                 label="Email"
-                                value={resident.email}
-                                onSave={(val) => handleUpdateResident(resident.id, { email: val })}
+                                value={latestResident.email}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { email: val })}
                             />
                         </Grid.Col>
                     </Grid>
@@ -310,64 +353,64 @@ export function Patient() {
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Address No."
-                                value={resident.addressNumber}
-                                onSave={(val) => handleUpdateResident(resident.id, { addressNumber: val })}
+                                value={latestResident.addressNumber}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressNumber: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Moo"
-                                value={resident.addressMoo}
-                                onSave={(val) => handleUpdateResident(resident.id, { addressMoo: val })}
+                                value={latestResident.addressMoo}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressMoo: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Village/Building"
-                                value={resident.residenceName || resident.addressVillage}
-                                onSave={(val) => handleUpdateResident(resident.id, { residenceName: val })}
+                                value={latestResident.residenceName || latestResident.addressVillage}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { residenceName: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Street"
-                                value={resident.addressStreet}
-                                onSave={(val) => handleUpdateResident(resident.id, { addressStreet: val })}
+                                value={latestResident.addressStreet}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressStreet: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Soi"
-                                value={resident.addressSoi}
-                                onSave={(val) => handleUpdateResident(resident.id, { addressSoi: val })}
+                                value={latestResident.addressSoi}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressSoi: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Sub-district"
-                                value={resident.addressSubDistrict}
-                                onSave={(val) => handleUpdateResident(resident.id, { addressSubDistrict: val })}
+                                value={latestResident.addressSubDistrict}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressSubDistrict: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="District"
-                                value={resident.addressDistrict}
-                                onSave={(val) => handleUpdateResident(resident.id, { addressDistrict: val })}
+                                value={latestResident.addressDistrict}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressDistrict: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Province"
-                                value={resident.addressProvince}
-                                onSave={(val) => handleUpdateResident(resident.id, { addressProvince: val })}
+                                value={latestResident.addressProvince}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressProvince: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineTextInput
                                 label="Postal Code"
-                                value={resident.addressPostalCode}
-                                onSave={(val) => handleUpdateResident(resident.id, { addressPostalCode: val })}
+                                value={latestResident.addressPostalCode}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressPostalCode: val })}
                             />
                         </Grid.Col>
                     </Grid>
@@ -378,22 +421,22 @@ export function Patient() {
                         <Grid.Col span={12}>
                             <InlineTextarea
                                 label="Medical Conditions"
-                                value={resident.medicalConditions}
-                                onSave={(val) => handleUpdateResident(resident.id, { medicalConditions: val })}
+                                value={latestResident.medicalConditions}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { medicalConditions: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextarea
                                 label="Allergies"
-                                value={resident.allergies}
-                                onSave={(val) => handleUpdateResident(resident.id, { allergies: val })}
+                                value={latestResident.allergies}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { allergies: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextarea
                                 label="Dietary Restrictions"
-                                value={resident.dietaryRestrictions}
-                                onSave={(val) => handleUpdateResident(resident.id, { dietaryRestrictions: val })}
+                                value={latestResident.dietaryRestrictions}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { dietaryRestrictions: val })}
                             />
                         </Grid.Col>
                     </Grid>
@@ -404,40 +447,40 @@ export function Patient() {
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Emergency Contact Name"
-                                value={resident.emergencyContactName}
-                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContactName: val })}
+                                value={latestResident.emergencyContactName}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { emergencyContactName: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={6}>
                             <InlineTextInput
                                 label="Relationship to Resident"
-                                value={resident.emergencyContactRelationship}
-                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContactRelationship: val })}
+                                value={latestResident.emergencyContactRelationship}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { emergencyContactRelationship: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={12}>
                             <InlineTextInput
                                 label="Emergency Contact Phone"
-                                value={resident.emergencyContact}
-                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContact: val })}
+                                value={latestResident.emergencyContact}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { emergencyContact: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={12}>
                             <InlineSelect
                                 label="Emergency Contact Address Same as Resident"
-                                value={resident.emergencyContactAddressSameAsResident ? 'yes' : 'no'}
+                                value={latestResident.emergencyContactAddressSameAsResident ? 'yes' : 'no'}
                                 data={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]}
-                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContactAddressSameAsResident: val === 'yes' })}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { emergencyContactAddressSameAsResident: val === 'yes' })}
                             />
                         </Grid.Col>
                         <Grid.Col span={12}>
                             <InlineTextarea
                                 label="Emergency Contact Address"
-                                value={resident.emergencyContactAddressSameAsResident
+                                value={latestResident.emergencyContactAddressSameAsResident
                                     ? 'Same as resident address'
-                                    : resident.emergencyContactAddress || ''}
-                                onSave={(val) => handleUpdateResident(resident.id, { emergencyContactAddress: val })}
-                                disabled={resident.emergencyContactAddressSameAsResident}
+                                    : latestResident.emergencyContactAddress || ''}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { emergencyContactAddress: val })}
+                                disabled={latestResident.emergencyContactAddressSameAsResident}
                             />
                         </Grid.Col>
                     </Grid>
@@ -461,7 +504,7 @@ export function Patient() {
                                     )}
                                     badge={(
                                         <Group gap="xs">
-                                            {guardian.id === resident.guardianId && (
+                                            {guardian.id === latestResident.guardianId && (
                                                 <Badge size="xs" color="blue" variant="light">Primary</Badge>
                                             )}
                                             {guardian.pays && (
@@ -500,7 +543,7 @@ export function Patient() {
                     {admissions.length > 0 ? (
                         <Stack gap="md">
                             {admissions.map((order) => {
-                                const room = roomsById.get(order.roomId);
+                                const room = latestRoomsById.get(order.roomId);
                                 return (
                                     <CardList
                                         key={order.id}
@@ -542,7 +585,7 @@ export function Patient() {
         );
 
         open({
-            title: `${resident.firstName} ${resident.lastName}`,
+            title: `${latestResident.firstName} ${latestResident.lastName}`,
             subtitle: 'Resident Profile',
             leftPane,
             rightPane,
@@ -577,120 +620,116 @@ export function Patient() {
 
     return (
         <div className="patient-page">
-            <Group justify="space-between" align="flex-end">
-                <div>
-                    <Title order={2}>Patient</Title>
-                    <Text size="sm" c="dimmed">Search residents and review guardian details.</Text>
-                </div>
-                <TextInput
+            <PageHeader
+                title="Patient"
+                subtitle="Search residents and review guardian details."
+            />
+
+            <Group justify="space-between" mb="md" mt="xl">
+                <Text fw={600} size="lg">Residents ({filteredResidents.length})</Text>
+                <SearchInput
                     className="patient-search"
                     placeholder="Search resident, guardian, or ID"
                     value={search}
                     onChange={(event) => setSearch(event.currentTarget.value)}
-                    leftSection={<IconSearch size={16} />}
+                    style={{ width: 280 }}
                 />
             </Group>
 
-            <Card padding="lg" radius="md" withBorder>
-                <Group justify="space-between" mb="md">
-                    <Text fw={600}>Residents ({filteredResidents.length})</Text>
-                </Group>
+            {filteredResidents.length > 0 ? (
+                <StyledTable>
+                    <StyledTable.Thead>
+                        <StyledTable.Tr>
+                            <StyledTable.Th>Resident</StyledTable.Th>
+                            <StyledTable.Th>Guardians</StyledTable.Th>
+                            <StyledTable.Th>Latest Admission</StyledTable.Th>
+                            <StyledTable.Th>Status</StyledTable.Th>
+                            <StyledTable.Th></StyledTable.Th>
+                        </StyledTable.Tr>
+                    </StyledTable.Thead>
+                    <StyledTable.Tbody>
+                        {filteredResidents.map((resident) => {
+                            const residentGuardians = getGuardiansForResident(resident);
+                            const primaryGuardian =
+                                residentGuardians.find((guardian) => guardian.id === resident.guardianId) ||
+                                residentGuardians[0];
+                            const admissions = getAdmissionsForResident(resident.id);
+                            const latestAdmission = admissions[0];
+                            const latestStatus = latestAdmission?.status;
 
-                {filteredResidents.length > 0 ? (
-                    <StyledTable>
-                        <StyledTable.Thead>
-                            <StyledTable.Tr>
-                                <StyledTable.Th>Resident</StyledTable.Th>
-                                <StyledTable.Th>Guardians</StyledTable.Th>
-                                <StyledTable.Th>Latest Admission</StyledTable.Th>
-                                <StyledTable.Th>Status</StyledTable.Th>
-                                <StyledTable.Th></StyledTable.Th>
-                            </StyledTable.Tr>
-                        </StyledTable.Thead>
-                        <StyledTable.Tbody>
-                            {filteredResidents.map((resident) => {
-                                const residentGuardians = getGuardiansForResident(resident);
-                                const primaryGuardian =
-                                    residentGuardians.find((guardian) => guardian.id === resident.guardianId) ||
-                                    residentGuardians[0];
-                                const admissions = getAdmissionsForResident(resident.id);
-                                const latestAdmission = admissions[0];
-                                const latestStatus = latestAdmission?.status;
-
-                                return (
-                                    <StyledTable.Tr
-                                        key={resident.id}
-                                        className="patient-table-row"
-                                        onClick={() => openResidentSidesheet(resident)}
-                                    >
-                                        <StyledTable.Td>
-                                            <Group gap="sm">
-                                                <Avatar color="blue" radius="xl">
-                                                    {resident.firstName?.[0] || 'R'}
-                                                </Avatar>
-                                                <div>
-                                                    <Text fw={600}>{resident.firstName} {resident.lastName}</Text>
-                                                    <Text size="xs" c="dimmed">ID: {resident.id}</Text>
-                                                </div>
-                                            </Group>
-                                        </StyledTable.Td>
-                                        <StyledTable.Td>
-                                            {primaryGuardian ? (
-                                                <Stack gap={2}>
-                                                    <Text size="sm" fw={500}>
-                                                        {primaryGuardian.firstName} {primaryGuardian.lastName}
-                                                    </Text>
-                                                    <Text size="xs" c="dimmed">
-                                                        {residentGuardians.length} guardian{residentGuardians.length === 1 ? '' : 's'}
-                                                    </Text>
-                                                </Stack>
-                                            ) : (
-                                                <Text size="sm" c="dimmed">No guardian</Text>
-                                            )}
-                                        </StyledTable.Td>
-                                        <StyledTable.Td>
-                                            {latestAdmission ? (
-                                                <Stack gap={2}>
-                                                    <Text size="sm">{latestAdmission.packageName}</Text>
-                                                    <Text size="xs" c="dimmed">
-                                                        {formatDate(latestAdmission.checkIn)} - {formatDate(latestAdmission.checkOut)}
-                                                    </Text>
-                                                </Stack>
-                                            ) : (
-                                                <Text size="sm" c="dimmed">No admissions</Text>
-                                            )}
-                                        </StyledTable.Td>
-                                        <StyledTable.Td>
-                                            {latestStatus ? (
-                                                <Badge size="sm" color={getStatusColor(latestStatus)}>
-                                                    {latestStatus.replace('_', ' ')}
-                                                </Badge>
-                                            ) : (
-                                                <Badge size="sm" color="gray">—</Badge>
-                                            )}
-                                        </StyledTable.Td>
-                                        <StyledTable.Td>
-                                            <ActionIcon
-                                                variant="subtle"
-                                                size="sm"
-                                                onClick={(event) => {
-                                                    event.stopPropagation();
-                                                    openResidentSidesheet(resident);
-                                                }}
-                                                title="View profile"
-                                            >
-                                                <IconEye size={16} />
-                                            </ActionIcon>
-                                        </StyledTable.Td>
-                                    </StyledTable.Tr>
-                                );
-                            })}
-                        </StyledTable.Tbody>
-                    </StyledTable>
-                ) : (
-                    <Text c="dimmed" ta="center" py="xl">No residents found</Text>
-                )}
-            </Card>
+                            return (
+                                <StyledTable.Tr
+                                    key={resident.id}
+                                    className="patient-table-row"
+                                    onClick={() => openResidentSidesheet(resident)}
+                                >
+                                    <StyledTable.Td>
+                                        <Group gap="sm">
+                                            <Avatar color="blue" radius="xl">
+                                                {resident.firstName?.[0] || 'R'}
+                                            </Avatar>
+                                            <div>
+                                                <Text fw={600}>{resident.firstName} {resident.lastName}</Text>
+                                                <Text size="xs" c="dimmed">ID: {resident.id}</Text>
+                                            </div>
+                                        </Group>
+                                    </StyledTable.Td>
+                                    <StyledTable.Td>
+                                        {primaryGuardian ? (
+                                            <Stack gap={2}>
+                                                <Text size="sm" fw={500}>
+                                                    {primaryGuardian.firstName} {primaryGuardian.lastName}
+                                                </Text>
+                                                <Text size="xs" c="dimmed">
+                                                    {residentGuardians.length} guardian{residentGuardians.length === 1 ? '' : 's'}
+                                                </Text>
+                                            </Stack>
+                                        ) : (
+                                            <Text size="sm" c="dimmed">No guardian</Text>
+                                        )}
+                                    </StyledTable.Td>
+                                    <StyledTable.Td>
+                                        {latestAdmission ? (
+                                            <Stack gap={2}>
+                                                <Text size="sm">{latestAdmission.packageName}</Text>
+                                                <Text size="xs" c="dimmed">
+                                                    {formatDate(latestAdmission.checkIn)} - {formatDate(latestAdmission.checkOut)}
+                                                </Text>
+                                            </Stack>
+                                        ) : (
+                                            <Text size="sm" c="dimmed">No admissions</Text>
+                                        )}
+                                    </StyledTable.Td>
+                                    <StyledTable.Td>
+                                        {latestStatus ? (
+                                            <Badge size="sm" color={getStatusColor(latestStatus)}>
+                                                {latestStatus.replace('_', ' ')}
+                                            </Badge>
+                                        ) : (
+                                            <Badge size="sm" color="gray">—</Badge>
+                                        )}
+                                    </StyledTable.Td>
+                                    <StyledTable.Td>
+                                        <ActionIcon
+                                            variant="subtle"
+                                            size="sm"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                openResidentSidesheet(resident);
+                                            }}
+                                            title="View profile"
+                                        >
+                                            <IconEye size={16} />
+                                        </ActionIcon>
+                                    </StyledTable.Td>
+                                </StyledTable.Tr>
+                            );
+                        })}
+                    </StyledTable.Tbody>
+                </StyledTable>
+            ) : (
+                <Text c="dimmed" ta="center" py="xl">No residents found</Text>
+            )}
         </div>
     );
 }

@@ -16,6 +16,7 @@ import { Patient } from './pages/Patient';
 import { Profile } from './pages/Profile';
 import { UiButtons } from './pages/UiButtons';
 import { UiFields } from './pages/UiFields';
+import { UiLayout } from './pages/UiLayout';
 import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
 import { SalesOrderProvider } from './contexts/SalesOrderContext';
@@ -59,15 +60,16 @@ function AppLayout() {
                     <Route path="/contract/:id" element={<PublicContractView />} />
                     <Route path="/business-setup" element={<BusinessSetup />} />
                     <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/package" element={<Packages />} />
-                    <Route path="/packages" element={<Packages />} />
                     <Route path="/department" element={<Departments />} />
                     <Route path="/departments" element={<Departments />} />
+                    <Route path="/package" element={<Packages />} />
+                    <Route path="/packages" element={<Packages />} />
                     <Route path="/staff" element={<Staff />} />
                     <Route path="/patient" element={<Patient />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/ui/buttons" element={<UiButtons />} />
                     <Route path="/ui/fields" element={<UiFields />} />
+                    <Route path="/ui/layout" element={<UiLayout />} />
                 </Routes>
             </AppShell.Main>
         </AppShell>

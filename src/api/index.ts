@@ -421,6 +421,22 @@ export const API = {
         return newStaff;
     },
 
+    updateStaff: async (id: string, updates: Partial<Staff>): Promise<Staff | null> => {
+        await loadAllJSON();
+        await delay(300);
+        const index = staffMembers.findIndex((s) => s.id === id);
+        if (index === -1) return null;
+
+        staffMembers[index] = {
+            ...staffMembers[index],
+            ...updates,
+            id: staffMembers[index].id,
+        };
+
+        persist(STORAGE_KEYS.staff, staffMembers);
+        return staffMembers[index];
+    },
+
     deleteStaff: async (id: string): Promise<boolean> => {
         await loadAllJSON();
         await delay(400);
@@ -873,7 +889,7 @@ export const API = {
         const checkOut = new Date(salesOrder.checkOut);
 
         for (const service of pkg.services) {
-            let currentDate = new Date(checkIn);
+            const currentDate = new Date(checkIn);
 
             while (currentDate <= checkOut) {
                 const shouldAdd = (() => {
