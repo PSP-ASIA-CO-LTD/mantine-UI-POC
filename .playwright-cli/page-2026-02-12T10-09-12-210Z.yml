@@ -1,0 +1,157 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - link "Bourbon Mall" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e8]: Operation Manager
+        - navigation [ref=e9]:
+          - generic [ref=e10]:
+            - generic [ref=e11]: Frontoffice
+            - generic [ref=e12]:
+              - link "Sales Dashboard" [ref=e13] [cursor=pointer]:
+                - /url: /sales
+                - img [ref=e14]
+                - generic [ref=e16]: Sales Dashboard
+              - link "Create Sales Order" [ref=e17] [cursor=pointer]:
+                - /url: /sales/order
+                - img [ref=e18]
+                - generic [ref=e23]: Create Sales Order
+          - generic [ref=e24]:
+            - generic [ref=e25]: Operations
+            - link "Staff Task" [ref=e27] [cursor=pointer]:
+              - /url: /staff/tasks
+              - img [ref=e28]
+              - generic [ref=e31]: Staff Task
+          - generic [ref=e32]:
+            - generic [ref=e33]: Backoffice
+            - generic [ref=e34]:
+              - link "Business Setup" [ref=e35] [cursor=pointer]:
+                - /url: /business-setup
+                - img [ref=e36]
+                - generic [ref=e39]: Business Setup
+              - link "Dashboard" [ref=e40] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e41]
+                - generic [ref=e43]: Dashboard
+              - link "Department" [ref=e44] [cursor=pointer]:
+                - /url: /department
+                - img [ref=e45]
+                - generic [ref=e50]: Department
+              - link "Staff" [ref=e51] [cursor=pointer]:
+                - /url: /staff
+                - img [ref=e52]
+                - generic [ref=e55]: Staff
+              - link "Package" [ref=e56] [cursor=pointer]:
+                - /url: /package
+                - img [ref=e57]
+                - generic [ref=e61]: Package
+              - link "Patient" [ref=e62] [cursor=pointer]:
+                - /url: /patient
+                - img [ref=e63]
+                - generic [ref=e67]: Patient
+        - button "OM Manager Alice Administrator" [ref=e69] [cursor=pointer]:
+          - generic [ref=e70]:
+            - generic [ref=e72]: OM
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Manager Alice
+              - paragraph [ref=e75]: Administrator
+          - img [ref=e76]
+    - main [ref=e78]:
+      - generic [ref=e79]:
+        - generic [ref=e90]:
+          - generic [ref=e92]:
+            - heading "Staff Management" [level=2] [ref=e93]
+            - paragraph [ref=e94]: Manage your facility staff and departments.
+          - button "Add Staff" [ref=e96] [cursor=pointer]:
+            - generic [ref=e97]:
+              - img [ref=e99]
+              - generic [ref=e100]: Add Staff
+        - generic [ref=e101]:
+          - paragraph [ref=e102]: Staff (5)
+          - generic [ref=e104]:
+            - generic:
+              - img
+            - textbox "Search staff, role, or ID" [ref=e105]
+        - table [ref=e106]:
+          - rowgroup [ref=e107]:
+            - row "Name Department Role Status Actions" [ref=e108]:
+              - columnheader "Name" [ref=e109]
+              - columnheader "Department" [ref=e110]
+              - columnheader "Role" [ref=e111]
+              - columnheader "Status" [ref=e112]
+              - columnheader "Actions" [ref=e113]
+          - rowgroup [ref=e114]:
+            - 'row "M Miss Alice Flexbox ID: st-1 Frontend Senior Operator Active" [ref=e115] [cursor=pointer]':
+              - 'cell "M Miss Alice Flexbox ID: st-1" [ref=e116]':
+                - generic [ref=e117]:
+                  - generic [ref=e119]: M
+                  - generic [ref=e120]:
+                    - paragraph [ref=e121]: Miss Alice Flexbox
+                    - paragraph [ref=e122]: "ID: st-1"
+              - cell "Frontend" [ref=e123]
+              - cell "Senior Operator" [ref=e124]
+              - cell "Active" [ref=e125]:
+                - generic [ref=e127]: Active
+              - cell [ref=e128]:
+                - button [ref=e130]:
+                  - img [ref=e132]
+            - 'row "M Mr. Max Overflow ID: st-2 Frontend Junior Operator Active" [ref=e136] [cursor=pointer]':
+              - 'cell "M Mr. Max Overflow ID: st-2" [ref=e137]':
+                - generic [ref=e138]:
+                  - generic [ref=e140]: M
+                  - generic [ref=e141]:
+                    - paragraph [ref=e142]: Mr. Max Overflow
+                    - paragraph [ref=e143]: "ID: st-2"
+              - cell "Frontend" [ref=e144]
+              - cell "Junior Operator" [ref=e145]
+              - cell "Active" [ref=e146]:
+                - generic [ref=e148]: Active
+              - cell [ref=e149]:
+                - button [ref=e151]:
+                  - img [ref=e153]
+            - 'row "M Mr.Chef Fryday ID: st-3 Kitchen Cook Active" [ref=e157] [cursor=pointer]':
+              - 'cell "M Mr.Chef Fryday ID: st-3" [ref=e158]':
+                - generic [ref=e159]:
+                  - generic [ref=e161]: M
+                  - generic [ref=e162]:
+                    - paragraph [ref=e163]: Mr.Chef Fryday
+                    - paragraph [ref=e164]: "ID: st-3"
+              - cell "Kitchen" [ref=e165]
+              - cell "Cook" [ref=e166]
+              - cell "Active" [ref=e167]:
+                - generic [ref=e169]: Active
+              - cell [ref=e170]:
+                - button [ref=e172]:
+                  - img [ref=e174]
+            - 'row "M Miss Moppa Cleaner ID: st-4 Housekeeping Housekeeper Active" [ref=e178] [cursor=pointer]':
+              - 'cell "M Miss Moppa Cleaner ID: st-4" [ref=e179]':
+                - generic [ref=e180]:
+                  - generic [ref=e182]: M
+                  - generic [ref=e183]:
+                    - paragraph [ref=e184]: Miss Moppa Cleaner
+                    - paragraph [ref=e185]: "ID: st-4"
+              - cell "Housekeeping" [ref=e186]
+              - cell "Housekeeper" [ref=e187]
+              - cell "Active" [ref=e188]:
+                - generic [ref=e190]: Active
+              - cell [ref=e191]:
+                - button [ref=e193]:
+                  - img [ref=e195]
+            - 'row "D Dr. Prasert ID: st-5 Medical Doctor Active" [ref=e199] [cursor=pointer]':
+              - 'cell "D Dr. Prasert ID: st-5" [ref=e200]':
+                - generic [ref=e201]:
+                  - generic [ref=e203]: D
+                  - generic [ref=e204]:
+                    - paragraph [ref=e205]: Dr. Prasert
+                    - paragraph [ref=e206]: "ID: st-5"
+              - cell "Medical" [ref=e207]
+              - cell "Doctor" [ref=e208]
+              - cell "Active" [ref=e209]:
+                - generic [ref=e211]: Active
+              - cell [ref=e212]:
+                - button [ref=e214]:
+                  - img [ref=e216]
+  - button "Toggle Debug Mode" [ref=e80] [cursor=pointer]:
+    - img [ref=e82]

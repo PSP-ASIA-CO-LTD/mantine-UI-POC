@@ -4,6 +4,7 @@ import {
     Group,
     Button,
     Grid,
+    SimpleGrid,
     Text,
     ActionIcon,
     Divider,
@@ -62,6 +63,7 @@ const DEPARTMENT_COLOR_LABEL_BY_VALUE = new Map(
 const DEFAULT_DEPARTMENT_COLOR = DEPARTMENT_COLOR_PRESETS[0];
 const WEEKDAY_OPTIONS = getWeekdayLabels().map((label, day) => ({ label, day }));
 const WEEKDAY_SHORT_OPTIONS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const RECURRENCE_CONTROL_HEIGHT = '2.5rem';
 
 type ServiceCreateDraft = {
     title: string;
@@ -104,6 +106,28 @@ const createNameBridge = (initial = ''): NameBridge => {
 };
 
 const normalizeText = (value: string) => value.trim().toLowerCase();
+
+const getDepartmentTitleInputStyle = (rawValue: string, placeholder: string): CSSProperties => {
+    const contentLength = rawValue.trim().length;
+    const placeholderLength = placeholder.trim().length;
+    const lengthForScale = Math.min(Math.max(contentLength, placeholderLength, 4), 36);
+    const scaledSizeRem = Math.max(1.55, 2.6 - (lengthForScale - 4) * 0.038);
+
+    return {
+        '--dept-title-size': `${scaledSizeRem.toFixed(3)}rem`,
+        '--dept-title-min-ch': String(Math.max(placeholderLength, 1)),
+        fontSize: 'var(--dept-title-size)',
+        fontWeight: 700,
+        lineHeight: 1.12,
+        letterSpacing: lengthForScale > 24 ? '-0.01em' : 'normal',
+        color: 'hsl(0, 0%, 20%)',
+        paddingBlock: '0.16em',
+        paddingInline: '0.26em',
+        minHeight: 'calc(var(--dept-title-size) * 1.34)',
+        minInlineSize: 'calc((var(--dept-title-min-ch) * 1ch) + 0.52em)',
+        transition: 'font-size 160ms ease, min-height 160ms ease, padding 160ms ease',
+    } as CSSProperties;
+};
 
 const hexToRgba = (hex: string, alpha: number) => {
     const raw = hex.replace('#', '');
@@ -213,14 +237,7 @@ function DepartmentTitleInput({
             onChange={(event) => bridge.set(event.currentTarget.value)}
             variant="unstyled"
             styles={{
-                input: {
-                    fontSize: '2rem',
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    color: 'hsl(0, 0%, 20%)',
-                    padding: 0,
-                    minHeight: 0,
-                },
+                input: getDepartmentTitleInputStyle(name, placeholder),
             }}
         />
     );
@@ -270,14 +287,7 @@ function DepartmentEditableTitleInput({
             }}
             variant="unstyled"
             styles={{
-                input: {
-                    fontSize: '2rem',
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    color: 'hsl(0, 0%, 20%)',
-                    padding: 0,
-                    minHeight: 0,
-                },
+                input: getDepartmentTitleInputStyle(value, 'Type department name'),
             }}
         />
     );
@@ -423,6 +433,37 @@ function DepartmentServicesPane({
                 </ActionIcon>
             </Group>
 
+            {services.length > 0 ? (
+                services.map((service) => (
+                    <CardList
+                        key={service.id}
+                        title={(
+                            <Group justify="space-between" align="center" wrap="nowrap" w="100%">
+                                <Text fw={500}>{service.title}</Text>
+                                <Group gap={6} wrap="nowrap">
+                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }}>
+                                        {serviceRepeatBadgeLabel(service.interval)}
+                                    </Badge>
+                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }} data-er-field="TASK.price">
+                                        ฿{service.price.toLocaleString()}
+                                    </Badge>
+                                </Group>
+                            </Group>
+                        )}
+                        cardDataErField="TASK"
+                        titleDataErField="TASK.title"
+                        description={(
+                            <Text size="xs" c="dimmed" style={{ flex: 1 }}>{service.description}</Text>
+                        )}
+                        descriptionDataErField="TASK.description"
+                        meta={<div data-er-field="TASK.interval"><RecurrenceDisplay interval={service.interval} /></div>}
+                        mb="sm"
+                    />
+                ))
+            ) : (
+                !isCreating && <Text size="sm" c="dimmed">No services yet. Click + to create the first card.</Text>
+            )}
+
             {isCreating && (
                 <CardList
                     title={<Text fw={500}>New Service</Text>}
@@ -441,7 +482,7 @@ function DepartmentServicesPane({
                                 value={draft.description}
                                 onChange={(event) => setDraft((current) => ({ ...current, description: event.currentTarget?.value || '' }))}
                             />
-                            <Group align="flex-end" gap="sm" wrap="nowrap">
+                            <Group align="flex-start" gap="sm" wrap="nowrap">
                                 <Select
                                     label="Repeat"
                                     value={draft.repeatMode}
@@ -460,13 +501,14 @@ function DepartmentServicesPane({
 
                                 {draft.repeatMode === 'day' && (
                                     <Box style={{ flex: 1, minWidth: 0 }}>
-                                        <Text size="xs" c="dimmed" mb={6}>Days of week</Text>
+                                        <Text className="editable-field__label" mb={2}>Days of week</Text>
                                         <Group
                                             gap={0}
                                             wrap="nowrap"
                                             style={{
-                                                border: '1px solid var(--mantine-color-blue-8)',
-                                                borderRadius: '10px',
+                                                height: RECURRENCE_CONTROL_HEIGHT,
+                                                backgroundColor: 'var(--mantine-color-gray-1)',
+                                                borderRadius: 0,
                                                 overflow: 'hidden',
                                             }}
                                         >
@@ -483,18 +525,31 @@ function DepartmentServicesPane({
                                                                 weeklyDays: toggleWeekday(current.weeklyDays, day),
                                                             }))
                                                         }
-                                                        style={{ flex: 1, borderRadius: 0, minWidth: 0 }}
+                                                        style={{
+                                                            flex: 1,
+                                                            borderRadius: 0,
+                                                            minWidth: 0,
+                                                            height: RECURRENCE_CONTROL_HEIGHT,
+                                                            minHeight: RECURRENCE_CONTROL_HEIGHT,
+                                                        }}
                                                     >
                                                         {label}
                                                     </Button>
                                                 );
                                             })}
                                         </Group>
-                                        <Group justify="space-between" mt={4}>
-                                            <Text size="xs" c="dimmed">Select weekly active days</Text>
+                                        <Group justify="space-between" mt={4} wrap="nowrap">
+                                            <Text
+                                                size="xs"
+                                                c="dimmed"
+                                                style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                            >
+                                                Select weekly active days
+                                            </Text>
                                             <Button
                                                 variant="subtle"
                                                 size="compact-xs"
+                                                style={{ flexShrink: 0 }}
                                                 onClick={() =>
                                                     setDraft((current) => ({
                                                         ...current,
@@ -571,37 +626,6 @@ function DepartmentServicesPane({
                     )}
                     mb="sm"
                 />
-            )}
-
-            {services.length > 0 ? (
-                services.map((service) => (
-                    <CardList
-                        key={service.id}
-                        title={(
-                            <Group justify="space-between" align="center" wrap="nowrap" w="100%">
-                                <Text fw={500}>{service.title}</Text>
-                                <Group gap={6} wrap="nowrap">
-                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }}>
-                                        {serviceRepeatBadgeLabel(service.interval)}
-                                    </Badge>
-                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }} data-er-field="TASK.price">
-                                        ฿{service.price.toLocaleString()}
-                                    </Badge>
-                                </Group>
-                            </Group>
-                        )}
-                        cardDataErField="TASK"
-                        titleDataErField="TASK.title"
-                        description={(
-                            <Text size="xs" c="dimmed" style={{ flex: 1 }}>{service.description}</Text>
-                        )}
-                        descriptionDataErField="TASK.description"
-                        meta={<div data-er-field="TASK.interval"><RecurrenceDisplay interval={service.interval} /></div>}
-                        mb="sm"
-                    />
-                ))
-            ) : (
-                !isCreating && <Text size="sm" c="dimmed">No services yet. Click + to create the first card.</Text>
             )}
         </div>
     );
@@ -699,37 +723,39 @@ function CreateDepartmentLeftPane({
                 onChange={(event) => setDescription(event.currentTarget.value)}
             />
 
-            <Select
-                label="Parent Department"
-                placeholder="None"
-                data={departments.map((department) => ({ value: department.id, label: department.name }))}
-                value={parentDepartmentId}
-                searchable
-                clearable
-                onChange={setParentDepartmentId}
-            />
-
-            {!parentDepartment && (
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Select
-                    label="Department Color"
-                    placeholder="Pick color"
-                    data={DEPARTMENT_COLOR_OPTIONS}
-                    value={color}
-                    leftSection={renderColorDot(color)}
-                    leftSectionWidth={32}
-                    classNames={{ root: 'ds-color-dot-select' }}
-                    renderOption={({ option }) => renderColorLabel(option.value, option.label)}
+                    label="Parent Department"
+                    placeholder="None"
+                    data={departments.map((department) => ({ value: department.id, label: department.name }))}
+                    value={parentDepartmentId}
                     searchable
-                    onChange={(value) => value && setColor(value)}
+                    clearable
+                    onChange={setParentDepartmentId}
                 />
-            )}
 
-            {parentDepartment && (
-                <InlineLockedInput
-                    label="Department Color"
-                    value={`${colorLabelFor(parentDepartment.color || DEFAULT_DEPARTMENT_COLOR)} (${parentDepartment.color || DEFAULT_DEPARTMENT_COLOR}) inherited from ${parentDepartment.name}`}
-                />
-            )}
+                {!parentDepartment ? (
+                    <Select
+                        label="Department Color"
+                        placeholder="Pick color"
+                        data={DEPARTMENT_COLOR_OPTIONS}
+                        value={color}
+                        leftSection={renderColorDot(color)}
+                        leftSectionWidth={32}
+                        classNames={{ root: 'ds-color-dot-select' }}
+                        renderOption={({ option }) => renderColorLabel(option.value, option.label)}
+                        searchable
+                        onChange={(value) => value && setColor(value)}
+                    />
+                ) : (
+                    <InlineLockedInput
+                        label="Department Color"
+                        leftSection={renderColorDot(parentDepartment.color || DEFAULT_DEPARTMENT_COLOR)}
+                        leftSectionWidth={32}
+                        value={`${colorLabelFor(parentDepartment.color || DEFAULT_DEPARTMENT_COLOR)} inherited from ${parentDepartment.name}`}
+                    />
+                )}
+            </SimpleGrid>
 
             <Divider my="sm" />
 
@@ -945,43 +971,47 @@ export function Departments() {
                     minRows={2}
                 />
 
-                <InlineSelect
-                    label="Parent Department"
-                    value={department.parentDepartmentId || null}
-                    data={parentOptions}
-                    placeholder="None"
-                    searchable
-                    clearable
-                    onSave={async (value) => {
-                        const parent = value ? departmentById.get(value) : null;
-                        await updateDepartment({
-                            parentDepartmentId: value || undefined,
-                            color: parent?.color || department.color,
-                        });
-                    }}
-                />
-
-                {!parentDepartment ? (
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <InlineSelect
-                        label="Department Color"
-                        value={department.color || DEFAULT_DEPARTMENT_COLOR}
-                        data={DEPARTMENT_COLOR_OPTIONS}
-                        leftSection={renderColorDot(department.color || DEFAULT_DEPARTMENT_COLOR)}
-                        leftSectionWidth={32}
-                        classNames={{ root: 'ds-color-dot-select' }}
-                        renderOption={({ option }) => renderColorLabel(option.value, option.label)}
+                        label="Parent Department"
+                        value={department.parentDepartmentId || null}
+                        data={parentOptions}
+                        placeholder="None"
                         searchable
+                        clearable
                         onSave={async (value) => {
-                            if (!value) return;
-                            await updateDepartment({ color: value });
+                            const parent = value ? departmentById.get(value) : null;
+                            await updateDepartment({
+                                parentDepartmentId: value || undefined,
+                                color: parent?.color || department.color,
+                            });
                         }}
                     />
-                ) : (
-                    <InlineLockedInput
-                        label="Department Color"
-                        value={`${colorLabelFor(parentDepartment.color || DEFAULT_DEPARTMENT_COLOR)} (${parentDepartment.color || DEFAULT_DEPARTMENT_COLOR}) inherited from ${parentDepartment.name}`}
-                    />
-                )}
+
+                    {!parentDepartment ? (
+                        <InlineSelect
+                            label="Department Color"
+                            value={department.color || DEFAULT_DEPARTMENT_COLOR}
+                            data={DEPARTMENT_COLOR_OPTIONS}
+                            leftSection={renderColorDot(department.color || DEFAULT_DEPARTMENT_COLOR)}
+                            leftSectionWidth={32}
+                            classNames={{ root: 'ds-color-dot-select' }}
+                            renderOption={({ option }) => renderColorLabel(option.value, option.label)}
+                            searchable
+                            onSave={async (value) => {
+                                if (!value) return;
+                                await updateDepartment({ color: value });
+                            }}
+                        />
+                    ) : (
+                        <InlineLockedInput
+                            label="Department Color"
+                            leftSection={renderColorDot(parentDepartment.color || DEFAULT_DEPARTMENT_COLOR)}
+                            leftSectionWidth={32}
+                            value={`${colorLabelFor(parentDepartment.color || DEFAULT_DEPARTMENT_COLOR)} inherited from ${parentDepartment.name}`}
+                        />
+                    )}
+                </SimpleGrid>
 
                 <Divider my="sm" />
 

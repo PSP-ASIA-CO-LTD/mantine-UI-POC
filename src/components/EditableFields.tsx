@@ -263,7 +263,6 @@ export function InlineField({
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [draftValue, setDraftValue] = useState<InlineValue>(value);
-    const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
 
     useEffect(() => {
         if (!isEditing) {
@@ -283,7 +282,6 @@ export function InlineField({
 
         if (!actualHasChanges) {
             setIsEditing(false);
-            setIsHoverSuppressed(true);
             return;
         }
 
@@ -291,7 +289,6 @@ export function InlineField({
             setIsSaving(true);
             await onSave(valueToSave);
             setIsEditing(false);
-            setIsHoverSuppressed(true);
         } catch (error) {
             console.error(`Failed to save ${label}:`, error);
         } finally {
@@ -303,7 +300,6 @@ export function InlineField({
         if (isSaving) return;
         setDraftValue(value);
         setIsEditing(false);
-        setIsHoverSuppressed(true);
     };
 
     const rootClasses = [
@@ -314,23 +310,17 @@ export function InlineField({
         disabled ? 'is-disabled' : '',
         locked ? 'editable-field--locked' : '',
         hideActionButtons ? 'editable-field--no-actions' : '',
-        isHoverSuppressed ? 'is-hover-suppressed' : '',
         className
     ].filter(Boolean).join(' ');
 
     const handleControlClick = () => {
         if (!isEditing && !disabled && !locked && !disableClickToEdit && hideEditButton) {
             setIsEditing(true);
-            setIsHoverSuppressed(false);
         }
     };
 
     return (
-        <div 
-            className={rootClasses}
-            onMouseLeave={() => setIsHoverSuppressed(false)}
-            onMouseEnter={() => !isEditing && setIsHoverSuppressed(false)}
-        >
+        <div className={rootClasses}>
             <Text size="sm" className="editable-field__label">{label}</Text>
             <div 
                 className="editable-field__control"
@@ -484,7 +474,11 @@ export function InlineLockedInput({ label, value, ...props }: TextInputProps) {
                     variant="unstyled"
                     value={(draftValue as string) || ''}
                     readOnly
-                    classNames={commonInputClassNames}
+                    classNames={{
+                        ...commonInputClassNames,
+                        section: [commonInputClassNames.section, props.leftSection ? 'editable-field__icon-section' : ''].filter(Boolean).join(' '),
+                        input: [commonInputClassNames.input, props.leftSection ? 'editable-field__input--with-left-icon' : ''].filter(Boolean).join(' ')
+                    }}
                 />
             )}
         </InlineField>
@@ -517,7 +511,7 @@ export function InlineSelect({ label, value, onSave, ...props }: SelectProps & {
                 };
 
                 return (
-                    <div ref={wrapperRef}>
+                    <div ref={wrapperRef} style={{ width: '100%' }}>
                         <MantineSelect
                             {...props}
                             searchable={props.searchable ?? true}
@@ -525,9 +519,9 @@ export function InlineSelect({ label, value, onSave, ...props }: SelectProps & {
                             value={draftValue as string}
                             searchValue={searchValue}
                             onSearchChange={setSearchValue}
-                            leftSection={<IconSearch size={16} className={`editable-field__select-search-icon${isEditing ? ' is-visible' : ''}`} />}
-                            leftSectionPointerEvents="none"
-                            leftSectionWidth={30}
+                            leftSection={!props.leftSection && isEditing ? <IconSearch size={16} className="editable-field__select-search-icon is-visible" /> : props.leftSection}
+                            leftSectionPointerEvents={!props.leftSection && isEditing ? 'none' : props.leftSectionPointerEvents}
+                            leftSectionWidth={!props.leftSection && isEditing ? 30 : props.leftSectionWidth}
                             onFocus={(event) => {
                                 props.onFocus?.(event);
                                 setIsEditing(true);
@@ -549,11 +543,11 @@ export function InlineSelect({ label, value, onSave, ...props }: SelectProps & {
                                 setSearchValue('');
                             }}
                             pointer={!props.disabled}
-                            classNames={{
-                                ...commonInputClassNames,
-                                section: [commonInputClassNames.section, 'editable-field__icon-section'].filter(Boolean).join(' '),
-                                input: [commonInputClassNames.input, 'editable-field__input--with-left-icon'].filter(Boolean).join(' ')
-                            }}
+                            classNames={mergeClassNames({
+                                wrapper: 'editable-field__mantine-root editable-field--form',
+                                input: [commonInputClassNames.input, !props.leftSection && isEditing ? 'editable-field__input--with-left-icon' : ''].filter(Boolean).join(' '),
+                                section: 'editable-field__icon-section',
+                            }, props.classNames as ClassNames)}
                             comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}
                         />
                     </div>

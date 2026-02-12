@@ -1,0 +1,91 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - link "Bourbon Mall" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e8]: Operation Manager
+        - navigation [ref=e9]:
+          - generic [ref=e10]:
+            - generic [ref=e11]: Frontoffice
+            - generic [ref=e12]:
+              - link "Sales Dashboard" [ref=e13] [cursor=pointer]:
+                - /url: /sales
+                - img [ref=e14]
+                - generic [ref=e16]: Sales Dashboard
+              - link "Create Sales Order" [ref=e17] [cursor=pointer]:
+                - /url: /sales/order
+                - img [ref=e18]
+                - generic [ref=e23]: Create Sales Order
+          - generic [ref=e24]:
+            - generic [ref=e25]: Operations
+            - link "Staff Task" [ref=e27] [cursor=pointer]:
+              - /url: /staff/tasks
+              - img [ref=e28]
+              - generic [ref=e31]: Staff Task
+          - generic [ref=e32]:
+            - generic [ref=e33]: Backoffice
+            - generic [ref=e34]:
+              - link "Business Setup" [ref=e35] [cursor=pointer]:
+                - /url: /business-setup
+                - img [ref=e36]
+                - generic [ref=e39]: Business Setup
+              - link "Dashboard" [ref=e40] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e41]
+                - generic [ref=e43]: Dashboard
+              - link "Department" [ref=e44] [cursor=pointer]:
+                - /url: /department
+                - img [ref=e45]
+                - generic [ref=e50]: Department
+              - link "Staff" [ref=e51] [cursor=pointer]:
+                - /url: /staff
+                - img [ref=e52]
+                - generic [ref=e55]: Staff
+              - link "Package" [ref=e56] [cursor=pointer]:
+                - /url: /package
+                - img [ref=e57]
+                - generic [ref=e61]: Package
+              - link "Patient" [ref=e62] [cursor=pointer]:
+                - /url: /patient
+                - img [ref=e63]
+                - generic [ref=e67]: Patient
+        - button "OM Manager Alice Administrator" [ref=e69] [cursor=pointer]:
+          - generic [ref=e70]:
+            - generic [ref=e72]: OM
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Manager Alice
+              - paragraph [ref=e75]: Administrator
+          - img [ref=e76]
+    - main [ref=e78]:
+      - generic [ref=e79]:
+        - generic [ref=e90]:
+          - generic [ref=e92]:
+            - heading "Package Management" [level=2] [ref=e93]
+            - paragraph [ref=e94]: Define and manage your service bundles.
+          - button "Create Package" [ref=e96] [cursor=pointer]:
+            - generic [ref=e97]:
+              - img [ref=e99]
+              - generic [ref=e100]: Create Package
+        - generic [ref=e102]:
+          - generic [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]:
+              - paragraph [ref=e107]: 20-day Elder Recreation
+              - generic [ref=e109]: ฿85,000
+            - paragraph [ref=e110]: Comprehensive recreation package for elders includes room meals and specialized care.
+            - generic [ref=e111]:
+              - paragraph [ref=e112]: "Duration: 20 days"
+              - paragraph [ref=e113]: •
+              - paragraph [ref=e114]: 5 services
+          - generic [ref=e117] [cursor=pointer]:
+            - generic [ref=e118]:
+              - paragraph [ref=e119]: Golden Years Premium
+              - generic [ref=e121]: ฿120,000
+            - paragraph [ref=e122]: Premium 30-day package with additional nursing support.
+            - generic [ref=e123]:
+              - paragraph [ref=e124]: "Duration: 30 days"
+              - paragraph [ref=e125]: •
+              - paragraph [ref=e126]: 2 services
+  - button "Toggle Debug Mode" [ref=e80] [cursor=pointer]:
+    - img [ref=e82]

@@ -33,7 +33,7 @@
 .editable-field__mantine-root {
     flex: 1;
     width: 100%;
-    background-color: var(--mantine-color-gray-1);
+    background-color: transparent;
     border-radius: 0;
     transition: background-color 0.2s ease;
 }
@@ -69,9 +69,16 @@
     opacity: 1;
 }
 
-.editable-field:focus-within .editable-field__mantine-root,
 .editable-field.is-editing .editable-field__mantine-root {
     background-color: var(--mantine-primary-color-light);
+}
+
+.editable-field--inline:hover:not(.is-editing) .editable-field__mantine-root {
+    background-color: var(--mantine-color-gray-1);
+}
+
+.editable-field--locked.editable-field--inline:hover:not(.is-editing) .editable-field__mantine-root {
+    background-color: var(--mantine-color-gray-0);
 }
 
 .editable-field[data-error] .editable-field__mantine-root,
@@ -122,12 +129,6 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Suppress buttons after click to prevent "clingy" hover */
-.editable-field.is-hover-suppressed .editable-field__actions {
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
 /* Standalone loader during saving */
 .editable-field.is-saving .editable-field__actions {
     opacity: 1 !important;
@@ -161,8 +162,12 @@
 }
 
 /* Add padding only when hovered to avoid text overlap with internal pencil icon */
-.editable-field--inline:not(.is-editing):hover .editable-field__input {
+.editable-field--inline:not(.is-editing):not(.editable-field--no-actions):hover .editable-field__input {
     padding-right: 2rem !important;
+}
+
+.editable-field--locked.editable-field--inline:not(.is-editing):hover .editable-field__input {
+    padding-right: 0.75rem !important;
 }
 
 .editable-field--no-actions .editable-field__actions {

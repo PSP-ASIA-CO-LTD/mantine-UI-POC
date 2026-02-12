@@ -1,7 +1,5 @@
 .patient-page {
-    display: flex;
-    flex-direction: column;
-    gap: var(--mantine-spacing-lg);
+    --_gap: var(--mantine-spacing-md);
 }
 
 .patient-search {

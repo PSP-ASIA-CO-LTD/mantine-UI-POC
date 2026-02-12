@@ -1,0 +1,12 @@
+.staff-search-field.editable-field--form {
+    background-color: #fff;
+    border: 1px solid var(--mantine-color-gray-3);
+    border-radius: 8px;
+}
+
+.staff-search-field.editable-field--form:focus-within,
+.staff-search-field.editable-field--form:hover,
+.staff-search-field.editable-field--form[data-error],
+.staff-search-field.editable-field--form[data-invalid] {
+    background-color: #fff;
+}

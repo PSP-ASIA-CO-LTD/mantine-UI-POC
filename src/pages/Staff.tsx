@@ -10,7 +10,7 @@ import {
     Divider,
     Stack,
 } from '@mantine/core';
-import { IconPlus, IconDotsVertical, IconSearch } from '@tabler/icons-react';
+import { IconPlus, IconDotsVertical } from '@tabler/icons-react';
 import { API } from '../api';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
@@ -18,6 +18,7 @@ import { StyledTable } from '../components/StyledTable';
 import { PageHeader } from '../components/PageHeader';
 import {
     TextInput,
+    SearchInput,
     Select,
     Textarea,
     FileInput,
@@ -28,6 +29,7 @@ import {
     InlineLockedInput,
 } from '../components/EditableFields';
 import type { Staff } from '../types';
+import './Staff.css';
 
 export function Staff() {
     const [staff, setStaff] = useState<Staff[]>([]);
@@ -344,11 +346,13 @@ export function Staff() {
 
             <Group justify="space-between" mb="md" mt="xl">
                 <Text fw={600} size="lg">Staff ({filteredStaff.length})</Text>
-                <TextInput
+                <SearchInput
                     placeholder="Search staff, role, or ID"
                     value={search}
                     onChange={(event) => setSearch(event.currentTarget.value)}
-                    leftSection={<IconSearch size={16} />}
+                    classNames={{
+                        wrapper: 'staff-search-field',
+                    }}
                     style={{ width: 280 }}
                 />
             </Group>
