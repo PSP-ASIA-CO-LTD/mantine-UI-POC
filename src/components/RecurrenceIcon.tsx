@@ -1,5 +1,6 @@
 import { Group, Text } from '@mantine/core';
 import { IconRepeat } from '@tabler/icons-react';
+import { formatServiceIntervalLabel } from '../utils/serviceRecurrence';
 
 interface RecurrenceDisplayProps {
     interval: string;
@@ -8,18 +9,12 @@ interface RecurrenceDisplayProps {
 }
 
 export function RecurrenceDisplay({ interval, size = 'xs', color = 'dimmed' }: RecurrenceDisplayProps) {
-    const isRecurring = interval.toLowerCase().startsWith('every');
-    
-    if (!isRecurring) {
-        return (
-            <Text size={size} c={color}>
-                {interval}
-            </Text>
-        );
-    }
+    const displayValue = formatServiceIntervalLabel(interval);
+    const isRecurring = displayValue.toLowerCase().startsWith('every') || displayValue.includes('Monthly');
 
-    // Replace "Every" (case insensitive) with the icon
-    const displayValue = interval.replace(/^[Ee]very\s+/, '');
+    if (!isRecurring) {
+        return <Text size={size} c={color}>{displayValue}</Text>;
+    }
 
     return (
         <Group gap={4} wrap="nowrap">

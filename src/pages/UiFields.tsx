@@ -7,8 +7,9 @@ import {
     InlineSelect,
     InlineDateInput,
     InlineTextarea,
-    SearchInput
+    IconFieldInput
 } from '../components/EditableFields';
+import { IconSearch } from '@tabler/icons-react';
 
 export function UiFields() {
     const [text, setText] = useState('John Doe');
@@ -64,7 +65,8 @@ export function UiFields() {
                         <div>
                             <Title order={4} mb="xs">2. Search Fields</Title>
                             <Text size="xs" c="dimmed" mb="md">Standard search input with icon and placeholder padding fix.</Text>
-                            <SearchInput 
+                            <IconFieldInput
+                                icon={<IconSearch size={16} />}
                                 placeholder="Search everything..." 
                                 value={searchText}
                                 onChange={(e) => setSearchText(e.currentTarget.value)}

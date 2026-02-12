@@ -6,6 +6,7 @@ import type {
     Notification, OperationTask, StaffShift, SalesDashboardStats,
     StoredContract, ContractEmailLogEntry, BusinessProfile
 } from '../types';
+import { shouldScheduleServiceOnDate } from '../utils/serviceRecurrence';
 
 // In-memory stores for JSON data
 let packageRecords: PackageRecord[] = [];
@@ -338,6 +339,41 @@ export const API = {
             .map(resolveService);
     },
 
+    saveService: async (serviceData: Partial<ServiceRecord> & { id: string }): Promise<Service | null> => {
+        await delay(500);
+        await loadAllJSON();
+        const index = serviceRecords.findIndex((service) => service.id === serviceData.id);
+        if (index === -1) return null;
+
+        serviceRecords[index] = { ...serviceRecords[index], ...serviceData } as ServiceRecord;
+        persist(STORAGE_KEYS.services, serviceRecords);
+        return resolveService(serviceRecords[index]);
+    },
+
+    createService: async (serviceData: Omit<ServiceRecord, 'id'> & { id?: string }): Promise<Service> => {
+        await delay(500);
+        await loadAllJSON();
+        const newService: ServiceRecord = {
+            id: serviceData.id || `svc-${Date.now()}`,
+            title: serviceData.title || 'Untitled Service',
+            departmentId: serviceData.departmentId,
+            interval: serviceData.interval || 'Daily',
+            description: serviceData.description || '',
+            price: Number.isFinite(serviceData.price) ? serviceData.price : 0,
+        };
+        serviceRecords.push(newService);
+        persist(STORAGE_KEYS.services, serviceRecords);
+        return resolveService(newService);
+    },
+
+    deleteService: async (id: string): Promise<boolean> => {
+        await delay(400);
+        await loadAllJSON();
+        serviceRecords = serviceRecords.filter((service) => service.id !== id);
+        persist(STORAGE_KEYS.services, serviceRecords);
+        return true;
+    },
+
     savePackage: async (pkgData: Partial<Package> & { id?: string; serviceIds?: string[] }): Promise<Package> => {
         await delay(600);
         await loadAllJSON();
@@ -387,6 +423,22 @@ export const API = {
             return departments[index];
         }
         return null;
+    },
+
+    createDepartment: async (departmentData: Omit<Department, 'id'> & { id?: string }): Promise<Department> => {
+        await delay(500);
+        await loadAllJSON();
+        const newDepartment: Department = {
+            id: departmentData.id || `dept-${Date.now()}`,
+            name: departmentData.name,
+            description: departmentData.description || '',
+            headManagerId: departmentData.headManagerId,
+            parentDepartmentId: departmentData.parentDepartmentId,
+            color: departmentData.color,
+        };
+        departments.push(newDepartment);
+        persist(STORAGE_KEYS.departments, departments);
+        return newDepartment;
     },
 
     deleteDepartment: async (id: string): Promise<boolean> => {
@@ -893,13 +945,7 @@ export const API = {
 
             while (currentDate <= checkOut) {
                 const shouldAdd = (() => {
-                    if (service.interval === 'Daily') return true;
-                    if (service.interval.includes('Every')) {
-                        const days = parseInt(service.interval.match(/\d+/)?.[0] || '1');
-                        const diffDays = Math.floor((currentDate.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-                        return diffDays % days === 0;
-                    }
-                    return true;
+                    return shouldScheduleServiceOnDate(service.interval, currentDate, checkIn);
                 })();
 
                 if (shouldAdd) {

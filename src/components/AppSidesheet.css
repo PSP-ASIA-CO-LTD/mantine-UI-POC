@@ -77,6 +77,10 @@
     color: hsl(0, 0%, 20%);
 }
 
+.sidesheet-title-node {
+    width: 100%;
+}
+
 .sidesheet-close-btn {
     background: transparent !important;
     border: none !important;

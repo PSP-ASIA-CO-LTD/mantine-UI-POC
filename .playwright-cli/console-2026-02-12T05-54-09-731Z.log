@@ -1,0 +1,16 @@
+[   23066ms] Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+    at getRootForUpdatedFiber (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:3526:128)
+    at enqueueConcurrentHookUpdate (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:3510:16)
+    at dispatchSetStateInternal (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:6832:20)
+    at dispatchSetState (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:6803:9)
+    at assignRef (http://127.0.0.1:4173/node_modules/.vite/deps/chunk-W2FFSD4K.js?v=a912d578:920:12)
+    at http://127.0.0.1:4173/node_modules/.vite/deps/chunk-W2FFSD4K.js?v=a912d578:929:23
+    at Array.forEach (<anonymous>)
+    at http://127.0.0.1:4173/node_modules/.vite/deps/chunk-W2FFSD4K.js?v=a912d578:928:10
+    at assignRef (http://127.0.0.1:4173/node_modules/.vite/deps/chunk-W2FFSD4K.js?v=a912d578:920:12)
+    at http://127.0.0.1:4173/node_modules/.vite/deps/chunk-W2FFSD4K.js?v=a912d578:929:23
+[   23066ms] [WARNING] %s
+
+%s
+ An error occurred in the <div> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:6965

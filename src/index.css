@@ -30,6 +30,12 @@
     rgb(var(--button-accent-5)),
     rgb(var(--button-accent-6))
   );
+
+  /* Design system: color dot */
+  --ds-color-dot-size: 18px;
+  --ds-color-dot-border: rgba(0, 0, 0, 0.18);
+  --ds-color-dot-gap: 10px;
+  --ds-color-dot-left-section-width: 36px;
 }
 
 body {
@@ -81,4 +87,25 @@ h2 {
 
 .mantine-Table-td {
   background-color: var(--white);
+}
+
+.ds-color-dot {
+  width: var(--ds-color-dot-size);
+  height: var(--ds-color-dot-size);
+  border-radius: 999px;
+  background-color: var(--ds-color-dot-color, transparent);
+  border: 1px solid var(--ds-color-dot-border);
+  flex-shrink: 0;
+}
+
+.ds-color-dot-label {
+  gap: var(--ds-color-dot-gap);
+}
+
+.ds-color-dot-select .mantine-Input-section {
+  width: var(--ds-color-dot-left-section-width);
+}
+
+.ds-color-dot-select .editable-field__mantine-root[data-with-left-section] .editable-field__input {
+  padding-inline-start: var(--ds-color-dot-left-section-width) !important;
 }

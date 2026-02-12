@@ -41,8 +41,10 @@ export interface Staff {
 export interface Department {
     id: string;
     name: string;
-    code?: string;
     description?: string;
+    headManagerId?: string;
+    parentDepartmentId?: string;
+    color?: string;
 }
 
 export interface Order {

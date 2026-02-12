@@ -25,13 +25,14 @@ import {
 } from '@mantine/core';
 import { DateInput as MantineDateInput, type DateInputProps } from '@mantine/dates';
 import { IconCheck, IconPencil, IconX, IconCalendar, IconSearch } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import './InlineEditableField.css';
 
 type ClassNames = Record<string, string | undefined>;
 
 const baseFormClassNames: ClassNames = {
-    root: 'editable-field editable-field--form',
+    root: 'editable-field',
+    wrapper: 'editable-field__mantine-root editable-field--form',
     label: 'editable-field__label',
     input: 'editable-field__input',
     description: 'editable-field__description',
@@ -60,12 +61,31 @@ export function TextInput(props: TextInputProps) {
 }
 
 export function SearchInput(props: TextInputProps) {
+    const mergedClassNames = mergeClassNames(baseFormClassNames, props.classNames as ClassNames);
     return (
         <MantineTextInput
-            leftSection={<IconSearch size={16} />}
             {...props}
-            variant={props.variant ?? 'default'}
-            radius={props.radius ?? 'md'}
+            leftSection={props.leftSection ?? <IconSearch size={16} />}
+            leftSectionPointerEvents={props.leftSectionPointerEvents ?? 'none'}
+            leftSectionWidth={props.leftSectionWidth ?? 30}
+            variant={props.variant ?? 'unstyled'}
+            classNames={{
+                ...mergedClassNames,
+                section: [mergedClassNames.section, 'editable-field__icon-section'].filter(Boolean).join(' '),
+                input: [mergedClassNames.input, 'editable-field__input--with-left-icon'].filter(Boolean).join(' ')
+            }}
+        />
+    );
+}
+
+export function IconFieldInput({
+    icon,
+    ...props
+}: Omit<TextInputProps, 'leftSection'> & { icon: ReactNode }) {
+    return (
+        <SearchInput
+            {...props}
+            leftSection={icon}
         />
     );
 }
@@ -81,22 +101,48 @@ export function Textarea(props: TextareaProps) {
 }
 
 export function Select(props: SelectProps) {
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
+    const handleDropdownOpen = () => {
+        props.onDropdownOpen?.();
+        window.requestAnimationFrame(() => {
+            const input = wrapperRef.current?.querySelector('input');
+            input?.focus();
+        });
+    };
+
     return (
-        <MantineSelect
-            {...props}
-            variant={props.variant ?? 'unstyled'}
-            classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
-        />
+        <div ref={wrapperRef}>
+            <MantineSelect
+                {...props}
+                onDropdownOpen={handleDropdownOpen}
+                variant={props.variant ?? 'unstyled'}
+                classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+                comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}
+            />
+        </div>
     );
 }
 
 export function MultiSelect(props: MultiSelectProps) {
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
+    const handleDropdownOpen = () => {
+        props.onDropdownOpen?.();
+        window.requestAnimationFrame(() => {
+            const input = wrapperRef.current?.querySelector('input');
+            input?.focus();
+        });
+    };
+
     return (
-        <MantineMultiSelect
-            {...props}
-            variant={props.variant ?? 'unstyled'}
-            classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
-        />
+        <div ref={wrapperRef}>
+            <MantineMultiSelect
+                {...props}
+                onDropdownOpen={handleDropdownOpen}
+                variant={props.variant ?? 'unstyled'}
+                classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+                comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}
+            />
+        </div>
     );
 }
 
@@ -342,7 +388,7 @@ export function InlineField({
     );
 }
 
-const commonInputClassNames = { 
+const commonInputClassNames: ClassNames = { 
     root: 'editable-field__mantine-root',
     input: 'editable-field__input' 
 };
@@ -377,7 +423,9 @@ export function InlineSearchInput({ label, value, onSave, ...props }: TextInputP
                 <MantineTextInput
                     {...props}
                     variant="unstyled"
-                    leftSection={<IconSearch size={16} />}
+                    leftSection={props.leftSection ?? <IconSearch size={16} />}
+                    leftSectionPointerEvents={props.leftSectionPointerEvents ?? 'none'}
+                    leftSectionWidth={props.leftSectionWidth ?? 30}
                     value={(draftValue as string) || ''}
                     onChange={(e) => setDraftValue(e.currentTarget.value)}
                     readOnly={!isEditing}
@@ -385,7 +433,11 @@ export function InlineSearchInput({ label, value, onSave, ...props }: TextInputP
                         if (e.key === 'Enter') handleSave();
                         if (e.key === 'Escape') handleCancel();
                     }}
-                    classNames={commonInputClassNames}
+                    classNames={{
+                        ...commonInputClassNames,
+                        section: [commonInputClassNames.section, 'editable-field__icon-section'].filter(Boolean).join(' '),
+                        input: [commonInputClassNames.input, 'editable-field__input--with-left-icon'].filter(Boolean).join(' ')
+                    }}
                 />
             )}
         </InlineField>
@@ -442,6 +494,8 @@ export function InlineLockedInput({ label, value, ...props }: TextInputProps) {
 // ==================== 3. SELECTION FIELDS ====================
 
 export function InlineSelect({ label, value, onSave, ...props }: SelectProps & { onSave: (val: string | null) => Promise<void> | void }) {
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
+    const [searchValue, setSearchValue] = useState('');
     return (
         <InlineField 
             label={label as string} 
@@ -452,22 +506,59 @@ export function InlineSelect({ label, value, onSave, ...props }: SelectProps & {
             hideActionButtons
             disableClickToEdit
         >
-            {({ draftValue, setDraftValue, handleSave, setIsEditing }) => (
-                <MantineSelect
-                    {...props}
-                    variant="unstyled"
-                    value={draftValue as string}
-                    onChange={(val) => {
-                        setDraftValue(val);
-                        handleSave(val);
-                    }}
-                    onDropdownOpen={() => setIsEditing(true)}
-                    onDropdownClose={() => setIsEditing(false)}
-                    pointer={!props.disabled}
-                    classNames={commonInputClassNames}
-                    comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}
-                />
-            )}
+            {({ draftValue, setDraftValue, handleSave, setIsEditing, isEditing }) => {
+                const focusSelectInput = () => {
+                    window.requestAnimationFrame(() => {
+                        const input = wrapperRef.current?.querySelector('input');
+                        if (!input) return;
+                        input.focus();
+                        input.setSelectionRange(0, 0);
+                    });
+                };
+
+                return (
+                    <div ref={wrapperRef}>
+                        <MantineSelect
+                            {...props}
+                            searchable={props.searchable ?? true}
+                            variant="unstyled"
+                            value={draftValue as string}
+                            searchValue={searchValue}
+                            onSearchChange={setSearchValue}
+                            leftSection={<IconSearch size={16} className={`editable-field__select-search-icon${isEditing ? ' is-visible' : ''}`} />}
+                            leftSectionPointerEvents="none"
+                            leftSectionWidth={30}
+                            onFocus={(event) => {
+                                props.onFocus?.(event);
+                                setIsEditing(true);
+                            }}
+                            onChange={(val) => {
+                                setDraftValue(val);
+                                setSearchValue('');
+                                handleSave(val);
+                            }}
+                            onDropdownOpen={() => {
+                                props.onDropdownOpen?.();
+                                setIsEditing(true);
+                                setSearchValue('');
+                                focusSelectInput();
+                            }}
+                            onDropdownClose={() => {
+                                props.onDropdownClose?.();
+                                setIsEditing(false);
+                                setSearchValue('');
+                            }}
+                            pointer={!props.disabled}
+                            classNames={{
+                                ...commonInputClassNames,
+                                section: [commonInputClassNames.section, 'editable-field__icon-section'].filter(Boolean).join(' '),
+                                input: [commonInputClassNames.input, 'editable-field__input--with-left-icon'].filter(Boolean).join(' ')
+                            }}
+                            comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}
+                        />
+                    </div>
+                );
+            }}
         </InlineField>
     );
 }

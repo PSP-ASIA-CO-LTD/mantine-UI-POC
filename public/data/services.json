@@ -70,5 +70,21 @@
     "interval": "Daily",
     "description": "",
     "price": 400
+  },
+  {
+    "id": "svc-1770876926175",
+    "title": "Room Cleaning",
+    "departmentId": "dept-medical",
+    "interval": "WEEKLY:2,4",
+    "description": "Clean the floor, make the bed, add fragrance incense, and clean the curtains.",
+    "price": 1500
+  },
+  {
+    "id": "svc-1770877054628",
+    "title": "Curtain Deep Clean",
+    "departmentId": "dept-medical",
+    "interval": "MONTHLY:31",
+    "description": "Deep-clean all curtains and sanitize rails.",
+    "price": 2800
   }
 ]

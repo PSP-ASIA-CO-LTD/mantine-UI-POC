@@ -5,6 +5,7 @@ import { AppSidesheetFooter } from '../components/AppSidesheetFooter';
 interface SidesheetState {
     opened: boolean;
     title: string;
+    titleNode?: ReactNode;
     titleDataAttribute?: string;
     subtitle?: string;
     leftPane: ReactNode | null;
@@ -15,6 +16,7 @@ interface SidesheetState {
 interface SidesheetContextType {
     open: (config: {
         title?: string;
+        titleNode?: ReactNode;
         titleDataAttribute?: string;
         subtitle?: string;
         leftPane?: ReactNode;
@@ -24,6 +26,7 @@ interface SidesheetContextType {
     close: () => void;
     updateContent: (config: {
         title?: string;
+        titleNode?: ReactNode;
         titleDataAttribute?: string;
         subtitle?: string;
         leftPane?: ReactNode;
@@ -38,6 +41,7 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
     const [state, setState] = useState<SidesheetState>({
         opened: false,
         title: '',
+        titleNode: undefined,
         titleDataAttribute: undefined,
         subtitle: undefined,
         leftPane: null,
@@ -47,6 +51,7 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
 
     const open = (config: {
         title?: string;
+        titleNode?: ReactNode;
         titleDataAttribute?: string;
         subtitle?: string;
         leftPane?: ReactNode;
@@ -64,6 +69,7 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
         setState({
             opened: true,
             title: config.title || '',
+            titleNode: config.titleNode,
             titleDataAttribute: config.titleDataAttribute,
             subtitle: config.subtitle,
             leftPane: config.leftPane || null,
@@ -76,6 +82,7 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
         setState({
             opened: false,
             title: '',
+            titleNode: undefined,
             titleDataAttribute: undefined,
             subtitle: undefined,
             leftPane: null,
@@ -86,6 +93,7 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
 
     const updateContent = (config: {
         title?: string;
+        titleNode?: ReactNode;
         titleDataAttribute?: string;
         subtitle?: string;
         leftPane?: ReactNode;
@@ -95,6 +103,7 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
         setState(prev => ({
             ...prev,
             ...(config.title !== undefined && { title: config.title }),
+            ...(config.titleNode !== undefined && { titleNode: config.titleNode }),
             ...(config.titleDataAttribute !== undefined && { titleDataAttribute: config.titleDataAttribute }),
             ...(config.subtitle !== undefined && { subtitle: config.subtitle }),
             ...(config.leftPane !== undefined && { leftPane: config.leftPane }),
@@ -110,6 +119,7 @@ export function SidesheetProvider({ children }: { children: ReactNode }) {
                 opened={state.opened}
                 onClose={close}
                 title={state.title}
+                titleNode={state.titleNode}
                 titleDataAttribute={state.titleDataAttribute}
                 subtitle={state.subtitle}
                 leftPane={state.leftPane}
