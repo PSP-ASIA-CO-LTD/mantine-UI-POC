@@ -116,21 +116,25 @@ const hexToRgba = (hex: string, alpha: number) => {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-const renderParentTag = (label: string, color: string) => (
-    <Badge
-        radius="xl"
-        size="sm"
-        variant="outline"
-        style={{
-            borderColor: color,
-            color,
-            backgroundColor: hexToRgba(color, 0.12),
-            textTransform: 'none',
-        }}
-    >
-        {label}
-    </Badge>
-);
+const renderParentTag = (label: string, color: string) => {
+    const isMainDepartment = normalizeText(label) === 'main';
+    return (
+        <Badge
+            radius="xl"
+            size="sm"
+            variant={isMainDepartment ? 'filled' : 'outline'}
+            style={{
+                borderColor: isMainDepartment ? 'transparent' : color,
+                borderWidth: isMainDepartment ? 0 : undefined,
+                color: isMainDepartment ? '#fff' : color,
+                backgroundColor: isMainDepartment ? color : hexToRgba(color, 0.12),
+                textTransform: 'none',
+            }}
+        >
+            {label}
+        </Badge>
+    );
+};
 
 const renderColorLabel = (color: string, label?: string) => (
     <Group className="ds-color-dot-label" wrap="nowrap">
