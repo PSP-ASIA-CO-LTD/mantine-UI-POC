@@ -37,6 +37,15 @@ yarn-error.log*
 *.tsbuildinfo
 .todos/
 
+# Codex and local automation artifacts
+.codex/
+.playwright-cli/
+output/
+
+# Local non-production working files
+doc/
+temp/
+
 # Sidecar worktree state files
 .sidecar/
 .sidecar-agent
