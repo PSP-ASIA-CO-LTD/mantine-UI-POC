@@ -1,0 +1,16 @@
+[   28476ms] TypeError: Cannot read properties of null (reading 'value')
+    at http://127.0.0.1:4173/src/pages/Departments.tsx:199:68
+    at basicStateReducer (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:5854:47)
+    at updateReducerImpl (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:5943:54)
+    at updateReducer (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:5887:16)
+    at Object.useState (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:18996:20)
+    at exports.useState (http://127.0.0.1:4173/node_modules/.vite/deps/chunk-WUR7D6NS.js?v=a912d578:959:36)
+    at DepartmentCreateForm (http://127.0.0.1:4173/src/pages/Departments.tsx:171:29)
+    at Object.react_stack_bottom_frame (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:18509:20)
+    at renderWithHooks (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:5654:24)
+    at updateFunctionComponent (http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:7475:21)
+[   28475ms] [WARNING] %s
+
+%s
+ An error occurred in the <DepartmentCreateForm> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://127.0.0.1:4173/node_modules/.vite/deps/react-dom_client.js?v=a912d578:6965

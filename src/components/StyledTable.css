@@ -1,0 +1,13 @@
+.styled-table {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.styled-table thead th {
+    font-weight: 600;
+}
+
+.styled-table tbody tr {
+    transition: background-color 0.2s ease;
+}

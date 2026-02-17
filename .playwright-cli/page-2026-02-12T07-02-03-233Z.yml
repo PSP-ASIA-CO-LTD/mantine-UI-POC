@@ -1,0 +1,305 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - link "Bourbon Mall" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e8]: Operation Manager
+        - navigation [ref=e9]:
+          - generic [ref=e10]:
+            - generic [ref=e11]: Frontoffice
+            - generic [ref=e12]:
+              - link "Sales Dashboard" [ref=e13] [cursor=pointer]:
+                - /url: /sales
+                - img [ref=e14]
+                - generic [ref=e16]: Sales Dashboard
+              - link "Create Sales Order" [ref=e17] [cursor=pointer]:
+                - /url: /sales/order
+                - img [ref=e18]
+                - generic [ref=e23]: Create Sales Order
+          - generic [ref=e24]:
+            - generic [ref=e25]: Operations
+            - link "Staff Task" [ref=e27] [cursor=pointer]:
+              - /url: /staff/tasks
+              - img [ref=e28]
+              - generic [ref=e31]: Staff Task
+          - generic [ref=e32]:
+            - generic [ref=e33]: Backoffice
+            - generic [ref=e34]:
+              - link "Business Setup" [ref=e35] [cursor=pointer]:
+                - /url: /business-setup
+                - img [ref=e36]
+                - generic [ref=e39]: Business Setup
+              - link "Dashboard" [ref=e40] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e41]
+                - generic [ref=e43]: Dashboard
+              - link "Department" [ref=e44] [cursor=pointer]:
+                - /url: /department
+                - img [ref=e45]
+                - generic [ref=e50]: Department
+              - link "Staff" [ref=e51] [cursor=pointer]:
+                - /url: /staff
+                - img [ref=e52]
+                - generic [ref=e55]: Staff
+              - link "Package" [ref=e56] [cursor=pointer]:
+                - /url: /package
+                - img [ref=e57]
+                - generic [ref=e61]: Package
+              - link "Patient" [ref=e62] [cursor=pointer]:
+                - /url: /patient
+                - img [ref=e63]
+                - generic [ref=e67]: Patient
+        - button "OM Manager Alice Administrator" [ref=e69] [cursor=pointer]:
+          - generic [ref=e70]:
+            - generic [ref=e72]: OM
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Manager Alice
+              - paragraph [ref=e75]: Administrator
+          - img [ref=e76]
+    - main [ref=e78]:
+      - generic [ref=e79]:
+        - generic [ref=e90]:
+          - heading "Create Sales Order" [level=2] [ref=e92]
+          - button [ref=e94] [cursor=pointer]:
+            - img [ref=e96]
+        - generic [ref=e99]:
+          - generic [ref=e101]:
+            - button "Select Package" [ref=e102] [cursor=pointer]:
+              - img [ref=e171]
+              - generic [ref=e108]: Select Package
+            - button "Contact Info" [ref=e110] [cursor=pointer]:
+              - img [ref=e113]
+              - generic [ref=e117]: Contact Info
+            - button "Select Room" [ref=e119] [cursor=pointer]:
+              - img [ref=e122]
+              - generic [ref=e127]: Select Room
+            - button "Invoice" [ref=e129] [cursor=pointer]:
+              - img [ref=e132]
+              - generic [ref=e135]: Invoice
+            - button "Contract" [ref=e137] [cursor=pointer]:
+              - img [ref=e140]
+              - generic [ref=e144]: Contract
+          - generic [ref=e173]:
+            - button "Auto-fill Sample Data (2 Guardians + 1 Resident)" [ref=e175] [cursor=pointer]:
+              - generic [ref=e177]: Auto-fill Sample Data (2 Guardians + 1 Resident)
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - generic [ref=e180]:
+                  - paragraph [ref=e181]: Resident Information
+                  - paragraph [ref=e182]: Person who will be staying at the facility.
+                - button "Copy from Guardian" [ref=e183] [cursor=pointer]:
+                  - generic [ref=e185]: Copy from Guardian
+              - generic [ref=e186]:
+                - generic [ref=e188]:
+                  - generic [ref=e191]:
+                    - generic [ref=e192]: Prefix
+                    - generic [ref=e193]:
+                      - textbox "Prefix" [ref=e194] [cursor=pointer]: Mrs.
+                      - generic:
+                        - img
+                  - generic [ref=e196]:
+                    - generic [ref=e197]: First Name *
+                    - textbox "First Name" [ref=e199]:
+                      - /placeholder: First name
+                  - generic [ref=e201]:
+                    - generic [ref=e202]: Last Name *
+                    - textbox "Last Name" [ref=e204]:
+                      - /placeholder: Last name
+                - generic [ref=e206]:
+                  - generic [ref=e208]:
+                    - generic [ref=e209]: Date of Birth *
+                    - generic [ref=e210]:
+                      - textbox "Date of Birth" [ref=e211]:
+                        - /placeholder: Select date
+                      - img [ref=e213]
+                  - generic [ref=e217]:
+                    - generic [ref=e218]: Gender
+                    - generic [ref=e219]:
+                      - textbox "Gender" [ref=e220] [cursor=pointer]: Female
+                      - generic:
+                        - img
+                  - generic [ref=e222]:
+                    - generic [ref=e223]: ID Number
+                    - textbox "ID Number" [ref=e225]:
+                      - /placeholder: National ID
+                - generic [ref=e227]:
+                  - generic [ref=e229]:
+                    - generic [ref=e230]: Hospital No. (HN)
+                    - textbox "Hospital No. (HN)" [ref=e232]:
+                      - /placeholder: External patient ID
+                  - generic [ref=e234]:
+                    - generic [ref=e235]: Race
+                    - textbox "Race" [ref=e237]:
+                      - /placeholder: e.g., ไทย
+                  - generic [ref=e239]:
+                    - generic [ref=e240]: Nationality
+                    - textbox "Nationality" [ref=e242]:
+                      - /placeholder: e.g., ไทย
+                - generic [ref=e244]:
+                  - generic [ref=e246]:
+                    - generic [ref=e247]: Religion
+                    - textbox "Religion" [ref=e249]:
+                      - /placeholder: e.g., Christianity
+                  - generic [ref=e252]:
+                    - generic [ref=e253]: Marital Status
+                    - generic [ref=e254]:
+                      - textbox "Marital Status" [ref=e255] [cursor=pointer]:
+                        - /placeholder: Select status
+                      - generic:
+                        - img
+                - generic [ref=e257]:
+                  - generic [ref=e259]:
+                    - generic [ref=e260]: Occupation
+                    - textbox "Occupation" [ref=e262]:
+                      - /placeholder: e.g., รับจ้าง
+                  - generic [ref=e264]:
+                    - generic [ref=e265]: Blood Group
+                    - textbox "Blood Group" [ref=e267]:
+                      - /placeholder: e.g., AB Rh+
+                - separator [ref=e268]:
+                  - generic [ref=e269]: Contact Info
+                - generic [ref=e271]:
+                  - generic [ref=e273]:
+                    - generic [ref=e274]: Mobile Phone
+                    - textbox "Mobile Phone" [active] [ref=e276]:
+                      - /placeholder: 08X-XXX-XXXX
+                  - generic [ref=e278]:
+                    - generic [ref=e279]: Home Phone
+                    - textbox "Home Phone" [ref=e281]:
+                      - /placeholder: 02-XXX-XXXX
+                - generic [ref=e282]:
+                  - generic [ref=e283]: Email
+                  - textbox "Email" [ref=e285]:
+                    - /placeholder: email@example.com
+                - separator [ref=e286]:
+                  - generic [ref=e287]: Address
+                - generic [ref=e289]:
+                  - generic [ref=e291]:
+                    - generic [ref=e292]: Address No.
+                    - textbox "Address No." [ref=e294]:
+                      - /placeholder: e.g., 36
+                  - generic [ref=e296]:
+                    - generic [ref=e297]: Moo
+                    - textbox "Moo" [ref=e299]:
+                      - /placeholder: e.g., 9
+                  - generic [ref=e301]:
+                    - generic [ref=e302]: Village/Building
+                    - textbox "Village/Building" [ref=e304]:
+                      - /placeholder: Village or Building name
+                - generic [ref=e306]:
+                  - generic [ref=e308]:
+                    - generic [ref=e309]: Street
+                    - textbox "Street" [ref=e311]:
+                      - /placeholder: Street name
+                  - generic [ref=e313]:
+                    - generic [ref=e314]: Soi
+                    - textbox "Soi" [ref=e316]:
+                      - /placeholder: Soi name / number
+                - generic [ref=e318]:
+                  - generic [ref=e320]:
+                    - generic [ref=e321]: Sub-district
+                    - textbox "Sub-district" [ref=e323]
+                  - generic [ref=e325]:
+                    - generic [ref=e326]: District
+                    - textbox "District" [ref=e328]
+                  - generic [ref=e330]:
+                    - generic [ref=e331]: Province
+                    - textbox "Province" [ref=e333]
+                - generic [ref=e337]:
+                  - generic [ref=e338]: Postal Code
+                  - textbox "Postal Code" [ref=e340]:
+                    - /placeholder: e.g., 10170
+                - separator [ref=e341]:
+                  - generic [ref=e342]: Medical
+                - generic [ref=e343]:
+                  - generic [ref=e344]: Medical Conditions
+                  - textbox "Medical Conditions" [ref=e346]:
+                    - /placeholder: List any medical conditions...
+                - generic [ref=e348]:
+                  - generic [ref=e350]:
+                    - generic [ref=e351]: Allergies
+                    - textbox "Allergies" [ref=e353]:
+                      - /placeholder: Known allergies
+                  - generic [ref=e355]:
+                    - generic [ref=e356]: Dietary Restrictions
+                    - textbox "Dietary Restrictions" [ref=e358]:
+                      - /placeholder: E.g., low sodium, vegetarian
+                - separator [ref=e359]:
+                  - generic [ref=e360]: Emergency Contact
+                - generic [ref=e362]:
+                  - generic [ref=e364]:
+                    - generic [ref=e365]: Emergency Contact Name
+                    - textbox "Emergency Contact Name" [ref=e367]:
+                      - /placeholder: Full name
+                  - generic [ref=e370]:
+                    - generic [ref=e371]: Relationship to Resident
+                    - generic [ref=e372]:
+                      - textbox "Relationship to Resident" [ref=e373] [cursor=pointer]:
+                        - /placeholder: Select relationship
+                      - generic:
+                        - img
+                - generic [ref=e374]:
+                  - generic [ref=e375]: Emergency Contact Phone
+                  - textbox "Emergency Contact Phone" [ref=e377]:
+                    - /placeholder: Phone number
+                - generic [ref=e379]:
+                  - generic [ref=e380]:
+                    - checkbox "Emergency contact address is same as resident" [checked] [ref=e381]
+                    - img
+                  - generic [ref=e383]: Emergency contact address is same as resident
+            - generic [ref=e384]:
+              - generic [ref=e385]:
+                - generic [ref=e386]:
+                  - paragraph [ref=e387]: Guardian Information
+                  - paragraph [ref=e388]: Contact persons responsible for the resident.
+                - button "Add Guardian" [ref=e389] [cursor=pointer]:
+                  - generic [ref=e390]:
+                    - img [ref=e392]
+                    - generic [ref=e393]: Add Guardian
+              - generic [ref=e395]:
+                - generic [ref=e398]: Guardian 1 (Primary)
+                - generic [ref=e399]:
+                  - generic [ref=e401]:
+                    - generic [ref=e403]:
+                      - generic [ref=e404]: First Name *
+                      - textbox "First Name" [ref=e406]:
+                        - /placeholder: Enter first name
+                    - generic [ref=e408]:
+                      - generic [ref=e409]: Last Name *
+                      - textbox "Last Name" [ref=e411]:
+                        - /placeholder: Enter last name
+                  - generic [ref=e413]:
+                    - generic [ref=e415]:
+                      - generic [ref=e416]: Phone *
+                      - textbox "Phone" [ref=e418]:
+                        - /placeholder: 08X-XXX-XXXX
+                    - generic [ref=e420]:
+                      - generic [ref=e421]: Email *
+                      - textbox "Email" [ref=e423]:
+                        - /placeholder: email@example.com
+                  - generic [ref=e424]:
+                    - generic [ref=e425]: Address
+                    - textbox "Address" [ref=e427]:
+                      - /placeholder: Full address
+                  - generic [ref=e429]:
+                    - generic [ref=e430]: Relationship to Resident
+                    - generic [ref=e431]:
+                      - textbox "Relationship to Resident" [ref=e432] [cursor=pointer]: Son
+                      - generic:
+                        - img
+                  - generic [ref=e434]:
+                    - generic [ref=e435]:
+                      - checkbox "This guardian pays for care" [checked] [ref=e436]
+                      - img
+                    - generic [ref=e437]:
+                      - generic [ref=e438]: This guardian pays for care
+                      - paragraph [ref=e439]: Check if this guardian contributes to payment
+            - generic [ref=e440]:
+              - button "Back" [ref=e441] [cursor=pointer]:
+                - generic [ref=e443]: Back
+              - button "Continue to Room Selection" [ref=e444] [cursor=pointer]:
+                - generic [ref=e446]: Continue to Room Selection
+  - button "Toggle Debug Mode" [ref=e80] [cursor=pointer]:
+    - img [ref=e82]

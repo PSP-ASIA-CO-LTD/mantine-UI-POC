@@ -1,0 +1,37 @@
+[
+  {
+    "id": "st-1",
+    "name": "Miss Alice Flexbox",
+    "role": "Senior Operator",
+    "dept": "Frontend",
+    "status": "Active"
+  },
+  {
+    "id": "st-2",
+    "name": "Mr. Max Overflow",
+    "role": "Junior Operator",
+    "dept": "Frontend",
+    "status": "Active"
+  },
+  {
+    "id": "st-3",
+    "name": "Mr.Chef Fryday",
+    "role": "Cook",
+    "dept": "Kitchen",
+    "status": "Active"
+  },
+  {
+    "id": "st-4",
+    "name": "Miss Moppa Cleaner",
+    "role": "Housekeeper",
+    "dept": "Housekeeping",
+    "status": "Active"
+  },
+  {
+    "id": "st-5",
+    "name": "Dr. Prasert",
+    "role": "Doctor",
+    "dept": "Medical",
+    "status": "Active"
+  }
+]

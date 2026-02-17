@@ -1,0 +1,187 @@
+.sidesheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: hsla(0, 0%, 0%, 0.3);
+    backdrop-filter: blur(0px);
+    z-index: 1040;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease, visibility 0s linear 0.4s;
+}
+
+.sidesheet-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    backdrop-filter: blur(8px);
+    background: hsla(0, 0%, 0%, 0.3);
+    pointer-events: auto;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease, visibility 0s linear 0s;
+}
+
+.sidesheet {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 80%;
+    max-width: 1200px;
+    height: 100vh;
+    background: var(--mantine-color-body);
+    box-shadow: -10px 0 30px hsla(0, 0%, 0%, 0.1);
+    z-index: 1050;
+    transform: translateX(100%);
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.4s;
+
+    --sidesheet-pad-x: 2em;
+    --sidesheet-pad-y: 1.5em;
+    --sidesheet-pane-pad: 2em;
+}
+
+.sidesheet-open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0s;
+}
+
+.sidesheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--sidesheet-pad-y) var(--sidesheet-pad-x);
+    border-bottom: 0.0625em solid var(--mantine-color-gray-3);
+    flex-shrink: 0;
+    min-height: 80px;
+}
+
+.sidesheet-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.sidesheet-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    padding: 0;
+    margin: 0;
+    color: var(--mantine-color-dark-6);
+}
+
+.sidesheet-title-node {
+    width: 100%;
+}
+
+.sidesheet-close-btn {
+    background: transparent !important;
+    border: none !important;
+    color: var(--mantine-color-dark-3);
+    font-size: 2.5em;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidesheet-close-btn:hover {
+    color: var(--mantine-color-indigo-5);
+    transform: scale(1.1);
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.sidesheet-main {
+    flex: 1;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0;
+    min-height: 0;
+}
+
+.sidesheet-main--two {
+    grid-template-columns: 1fr 1fr;
+}
+
+.sidesheet-left-pane {
+    display: flex;
+    flex-direction: column;
+    border-right: 0.0625em solid var(--mantine-color-gray-3);
+    padding: var(--sidesheet-pane-pad);
+    overflow: auto;
+    min-height: 0;
+}
+
+.sidesheet-right-pane {
+    display: flex;
+    flex-direction: column;
+    padding: var(--sidesheet-pane-pad);
+    overflow: auto;
+    background: var(--mantine-color-gray-0);
+    min-height: 0;
+}
+
+#sidesheet-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 1.5em;
+}
+
+.sidesheet-footer {
+    padding: var(--sidesheet-pad-y) var(--sidesheet-pad-x);
+    border-top: 0.0625em solid var(--mantine-color-gray-3);
+    background: var(--mantine-color-body);
+    flex-shrink: 0;
+}
+
+@media (max-width: 62em) {
+    .sidesheet {
+        width: 100%;
+        max-width: none;
+        --sidesheet-pad-x: 1.25em;
+        --sidesheet-pad-y: 1.25em;
+        --sidesheet-pane-pad: 1.25em;
+    }
+
+    .sidesheet-main {
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+    }
+
+    .sidesheet-left-pane {
+        border-right: none;
+        border-bottom: 0.0625em solid var(--mantine-color-gray-3);
+        overflow: visible;
+    }
+
+    .sidesheet-right-pane {
+        overflow: visible;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidesheet,
+    .sidesheet-overlay,
+    .sidesheet-close-btn {
+        transition: none !important;
+    }
+
+    .sidesheet-overlay {
+        backdrop-filter: none !important;
+    }
+}

@@ -1,0 +1,3 @@
+id,name,price,duration,description,services
+pkg-1,20-day Elder Recreation,85000,20,Comprehensive recreation package for elders includes room meals and specialized care.,"Room Cleaning:Housekeeping:Every 3 days:Clean room and make bed.:0|Amenities Update:Housekeeping:Every 3 days:Refill water towels and toiletries.:0|Daily Meals:Kitchen:Daily:3 meals per day (Breakfast Lunch Dinner).:0|Laundry Service:Laundry:Every 3 days:Wash dry and fold clothes.:0|Physical Therapy:Therapy:Daily:1 session before noon.:0"
+pkg-2,Golden Years Premium,120000,30,Premium 30-day package with additional nursing support.,"Full Service:Housekeeping:Daily:Daily room maintenance.:0|Health Monitor:Nursing:Daily:Vital signs check and medication assistance.:0"

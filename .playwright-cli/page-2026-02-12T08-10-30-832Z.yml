@@ -1,0 +1,198 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - link "Bourbon Mall" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e8]: Operation Manager
+        - navigation [ref=e9]:
+          - generic [ref=e10]:
+            - generic [ref=e11]: Frontoffice
+            - generic [ref=e12]:
+              - link "Sales Dashboard" [ref=e13] [cursor=pointer]:
+                - /url: /sales
+                - img [ref=e14]
+                - generic [ref=e16]: Sales Dashboard
+              - link "Create Sales Order" [ref=e17] [cursor=pointer]:
+                - /url: /sales/order
+                - img [ref=e18]
+                - generic [ref=e23]: Create Sales Order
+          - generic [ref=e24]:
+            - generic [ref=e25]: Operations
+            - link "Staff Task" [ref=e27] [cursor=pointer]:
+              - /url: /staff/tasks
+              - img [ref=e28]
+              - generic [ref=e31]: Staff Task
+          - generic [ref=e32]:
+            - generic [ref=e33]: Backoffice
+            - generic [ref=e34]:
+              - link "Business Setup" [ref=e35] [cursor=pointer]:
+                - /url: /business-setup
+                - img [ref=e36]
+                - generic [ref=e39]: Business Setup
+              - link "Dashboard" [ref=e40] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e41]
+                - generic [ref=e43]: Dashboard
+              - link "Department" [ref=e44] [cursor=pointer]:
+                - /url: /department
+                - img [ref=e45]
+                - generic [ref=e50]: Department
+              - link "Staff" [ref=e51] [cursor=pointer]:
+                - /url: /staff
+                - img [ref=e52]
+                - generic [ref=e55]: Staff
+              - link "Package" [ref=e56] [cursor=pointer]:
+                - /url: /package
+                - img [ref=e57]
+                - generic [ref=e61]: Package
+              - link "Patient" [ref=e62] [cursor=pointer]:
+                - /url: /patient
+                - img [ref=e63]
+                - generic [ref=e67]: Patient
+        - button "OM Manager Alice Administrator" [ref=e69] [cursor=pointer]:
+          - generic [ref=e70]:
+            - generic [ref=e72]: OM
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Manager Alice
+              - paragraph [ref=e75]: Administrator
+          - img [ref=e76]
+    - main [ref=e78]:
+      - generic [ref=e79]:
+        - generic [ref=e92]:
+          - heading "Patient" [level=2] [ref=e93]
+          - paragraph [ref=e94]: Search residents and review guardian details.
+        - generic [ref=e95]:
+          - paragraph [ref=e96]: Residents (6)
+          - generic [ref=e98]:
+            - generic:
+              - img
+            - textbox "Search resident, guardian, or ID" [ref=e99]
+        - table [ref=e100]:
+          - rowgroup [ref=e101]:
+            - row "Resident Guardians Latest Admission Status" [ref=e102]:
+              - columnheader "Resident" [ref=e103]
+              - columnheader "Guardians" [ref=e104]
+              - columnheader "Latest Admission" [ref=e105]
+              - columnheader "Status" [ref=e106]
+              - columnheader [ref=e107]
+          - rowgroup [ref=e108]:
+            - 'row "ค คุณยาย สุขใจ ID: res-1 สมชาย ใจดี 1 guardian 20-day Elder Recreation 20 ธ.ค. 2568 - 8 ม.ค. 2569 active" [ref=e109] [cursor=pointer]':
+              - 'cell "ค คุณยาย สุขใจ ID: res-1" [ref=e110]':
+                - generic [ref=e111]:
+                  - generic [ref=e113]: ค
+                  - generic [ref=e114]:
+                    - paragraph [ref=e115]: คุณยาย สุขใจ
+                    - paragraph [ref=e116]: "ID: res-1"
+              - cell "สมชาย ใจดี 1 guardian" [ref=e117]:
+                - generic [ref=e118]:
+                  - paragraph [ref=e119]: สมชาย ใจดี
+                  - paragraph [ref=e120]: 1 guardian
+              - cell "20-day Elder Recreation 20 ธ.ค. 2568 - 8 ม.ค. 2569" [ref=e121]:
+                - generic [ref=e122]:
+                  - paragraph [ref=e123]: 20-day Elder Recreation
+                  - paragraph [ref=e124]: 20 ธ.ค. 2568 - 8 ม.ค. 2569
+              - cell "active" [ref=e125]:
+                - generic [ref=e127]: active
+              - cell [ref=e128]:
+                - button "View profile" [ref=e129]:
+                  - img [ref=e131]
+            - 'row "G Grandma Smith ID: res-2 John Doe 1 guardian Golden Years Premium 10 ม.ค. 2569 - 9 ก.พ. 2569 paid" [ref=e134] [cursor=pointer]':
+              - 'cell "G Grandma Smith ID: res-2" [ref=e135]':
+                - generic [ref=e136]:
+                  - generic [ref=e138]: G
+                  - generic [ref=e139]:
+                    - paragraph [ref=e140]: Grandma Smith
+                    - paragraph [ref=e141]: "ID: res-2"
+              - cell "John Doe 1 guardian" [ref=e142]:
+                - generic [ref=e143]:
+                  - paragraph [ref=e144]: John Doe
+                  - paragraph [ref=e145]: 1 guardian
+              - cell "Golden Years Premium 10 ม.ค. 2569 - 9 ก.พ. 2569" [ref=e146]:
+                - generic [ref=e147]:
+                  - paragraph [ref=e148]: Golden Years Premium
+                  - paragraph [ref=e149]: 10 ม.ค. 2569 - 9 ก.พ. 2569
+              - cell "paid" [ref=e150]:
+                - generic [ref=e152]: paid
+              - cell [ref=e153]:
+                - button "View profile" [ref=e154]:
+                  - img [ref=e156]
+            - 'row "ส สมทรง ใจดี ID: res-1770202912457 สมชาย ใจดี 2 guardians 20-day Elder Recreation 11 ก.พ. 2569 - 2 มี.ค. 2569 paid" [ref=e159] [cursor=pointer]':
+              - 'cell "ส สมทรง ใจดี ID: res-1770202912457" [ref=e160]':
+                - generic [ref=e161]:
+                  - generic [ref=e163]: ส
+                  - generic [ref=e164]:
+                    - paragraph [ref=e165]: สมทรง ใจดี
+                    - paragraph [ref=e166]: "ID: res-1770202912457"
+              - cell "สมชาย ใจดี 2 guardians" [ref=e167]:
+                - generic [ref=e168]:
+                  - paragraph [ref=e169]: สมชาย ใจดี
+                  - paragraph [ref=e170]: 2 guardians
+              - cell "20-day Elder Recreation 11 ก.พ. 2569 - 2 มี.ค. 2569" [ref=e171]:
+                - generic [ref=e172]:
+                  - paragraph [ref=e173]: 20-day Elder Recreation
+                  - paragraph [ref=e174]: 11 ก.พ. 2569 - 2 มี.ค. 2569
+              - cell "paid" [ref=e175]:
+                - generic [ref=e177]: paid
+              - cell [ref=e178]:
+                - button "View profile" [ref=e179]:
+                  - img [ref=e181]
+            - 'row "ส สมศรี ใจดี ID: res-1770273185953 สมชาย ใจดี 2 guardians No admissions —" [ref=e184] [cursor=pointer]':
+              - 'cell "ส สมศรี ใจดี ID: res-1770273185953" [ref=e185]':
+                - generic [ref=e186]:
+                  - generic [ref=e188]: ส
+                  - generic [ref=e189]:
+                    - paragraph [ref=e190]: สมศรี ใจดี
+                    - paragraph [ref=e191]: "ID: res-1770273185953"
+              - cell "สมชาย ใจดี 2 guardians" [ref=e192]:
+                - generic [ref=e193]:
+                  - paragraph [ref=e194]: สมชาย ใจดี
+                  - paragraph [ref=e195]: 2 guardians
+              - cell "No admissions" [ref=e196]:
+                - paragraph [ref=e197]: No admissions
+              - cell "—" [ref=e198]:
+                - generic [ref=e200]: —
+              - cell [ref=e201]:
+                - button "View profile" [ref=e202]:
+                  - img [ref=e204]
+            - 'row "ส สมชาย ใจดี ID: res-1770273387284 สมชาย ใจดี 2 guardians Golden Years Premium 20 ก.พ. 2569 - 21 มี.ค. 2569 paid" [ref=e207] [cursor=pointer]':
+              - 'cell "ส สมชาย ใจดี ID: res-1770273387284" [ref=e208]':
+                - generic [ref=e209]:
+                  - generic [ref=e211]: ส
+                  - generic [ref=e212]:
+                    - paragraph [ref=e213]: สมชาย ใจดี
+                    - paragraph [ref=e214]: "ID: res-1770273387284"
+              - cell "สมชาย ใจดี 2 guardians" [ref=e215]:
+                - generic [ref=e216]:
+                  - paragraph [ref=e217]: สมชาย ใจดี
+                  - paragraph [ref=e218]: 2 guardians
+              - cell "Golden Years Premium 20 ก.พ. 2569 - 21 มี.ค. 2569" [ref=e219]:
+                - generic [ref=e220]:
+                  - paragraph [ref=e221]: Golden Years Premium
+                  - paragraph [ref=e222]: 20 ก.พ. 2569 - 21 มี.ค. 2569
+              - cell "paid" [ref=e223]:
+                - generic [ref=e225]: paid
+              - cell [ref=e226]:
+                - button "View profile" [ref=e227]:
+                  - img [ref=e229]
+            - 'row "ส สมศรี ใจดี ID: res-1770611621570 สมชาย ใจดี 2 guardians No admissions —" [ref=e232] [cursor=pointer]':
+              - 'cell "ส สมศรี ใจดี ID: res-1770611621570" [ref=e233]':
+                - generic [ref=e234]:
+                  - generic [ref=e236]: ส
+                  - generic [ref=e237]:
+                    - paragraph [ref=e238]: สมศรี ใจดี
+                    - paragraph [ref=e239]: "ID: res-1770611621570"
+              - cell "สมชาย ใจดี 2 guardians" [ref=e240]:
+                - generic [ref=e241]:
+                  - paragraph [ref=e242]: สมชาย ใจดี
+                  - paragraph [ref=e243]: 2 guardians
+              - cell "No admissions" [ref=e244]:
+                - paragraph [ref=e245]: No admissions
+              - cell "—" [ref=e246]:
+                - generic [ref=e248]: —
+              - cell [ref=e249]:
+                - button "View profile" [ref=e250]:
+                  - img [ref=e252]
+  - button "Toggle Debug Mode" [ref=e80] [cursor=pointer]:
+    - img [ref=e82]

@@ -1,0 +1,16 @@
+.sidesheet-footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border-top: none;
+    gap: 1em;
+    box-sizing: border-box;
+}
+
+.sidesheet-footer-group {
+    display: flex;
+    gap: 0.75em;
+}

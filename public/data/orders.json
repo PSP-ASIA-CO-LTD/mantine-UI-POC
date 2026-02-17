@@ -1,0 +1,11 @@
+[
+  {
+    "id": "ord-101",
+    "customer": "John Doe",
+    "package_id": "pkg-1",
+    "room": "101",
+    "check_in": "2025-12-20",
+    "check_out": "2026-01-08",
+    "status": "Confirmed"
+  }
+]

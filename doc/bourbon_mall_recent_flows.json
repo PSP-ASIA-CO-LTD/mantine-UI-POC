@@ -1,0 +1,2248 @@
+{
+  "metadata": {
+    "title": "Bourbon Mall - Recent User Flows (Audit Checklist)",
+    "version": "3.1.0",
+    "auditedAt": "2026-02-13",
+    "description": "Ordered, screen-level user journey from business onboarding to contract signing and task execution, with checklist status for each step.",
+    "scope": "Business setup -> Department/services -> Staff -> Package -> Frontdesk sales order + invoice + contract -> Task calendar execution",
+    "auditedFrom": [
+      "src/components/BusinessSetupFlow.tsx",
+      "src/pages/Departments.tsx",
+      "src/pages/Staff.tsx",
+      "src/pages/Packages.tsx",
+      "src/pages/SalesDashboard.tsx",
+      "src/pages/SalesOrder.tsx",
+      "src/pages/SalesOrderInvoice.tsx",
+      "src/pages/SalesOrderContract.tsx",
+      "src/pages/PublicContractView.tsx",
+      "src/pages/StaffTasks.tsx",
+      "src/api/index.ts"
+    ]
+  },
+  "statusLegend": {
+    "implementationStatus": {
+      "implemented": "Flow exists and is reachable in UI.",
+      "partial": "Flow exists but has notable functional gap or weak UX coverage.",
+      "missing": "Expected flow is not implemented/reachable in UI."
+    },
+    "qaStatus": {
+      "passed": "Validated in current audit run.",
+      "failed": "Validated but did not behave as expected.",
+      "not_tested": "Not executed in current audit run."
+    },
+    "checklistState": {
+      "done": "Ready for production acceptance.",
+      "pending": "Needs manual verification or completion.",
+      "blocked": "Cannot complete because implementation is missing/partial."
+    }
+  },
+  "flowOrder": [
+    "business-and-legal-onboarding",
+    "department-and-service-design",
+    "staff-enablement",
+    "package-definition",
+    "frontdesk-sales-and-contracting",
+    "operations-calendar-execution"
+  ],
+  "flows": [
+    {
+      "id": "business-and-legal-onboarding",
+      "title": "1. Business + Legal Onboarding",
+      "goal": "Create company profile, collect legal license info, accept terms, land on dashboard.",
+      "subflows": [
+        {
+          "id": "business-setup-step-form",
+          "screen": {
+            "route": "/business-setup",
+            "screenName": "Business Profile Capture (/business-setup)",
+            "component": "src/components/BusinessSetupFlow.tsx"
+          },
+          "steps": [
+            {
+              "id": "BUS-001",
+              "action": "Enter business profile details",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "BUS-002",
+              "action": "Create owner account credentials",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "BUS-003",
+              "action": "Validate required fields before moving to agreements.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "BUS-004",
+              "action": "Upload legal verification documents",
+              "implementationStatus": "missing",
+              "qaStatus": "not_tested",
+              "checklistState": "blocked",
+              "notes": "Only license number text input exists; no legal document upload workflow."
+            }
+          ]
+        },
+        {
+          "id": "business-setup-step-agreement",
+          "screen": {
+            "route": "/business-setup",
+            "screenName": "Terms Acceptance (/business-setup)",
+            "component": "src/components/BusinessSetupFlow.tsx"
+          },
+          "steps": [
+            {
+              "id": "BUS-005",
+              "action": "Read terms and conditions page.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "BUS-006",
+              "action": "Agree with terms to complete setup and save business profile.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "BUS-007",
+              "action": "Disagree flow (open modal, clear entered data, reset setup).",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "business-landing",
+          "screen": {
+            "route": "/dashboard",
+            "screenName": "Onboarding Completion (/dashboard)",
+            "component": "src/pages/Dashboard.tsx"
+          },
+          "steps": [
+            {
+              "id": "BUS-008",
+              "action": "Navigate to dashboard after successful setup completion.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "BUS-009",
+              "action": "Mark business as verification completed by legal workflow.",
+              "implementationStatus": "partial",
+              "qaStatus": "not_tested",
+              "checklistState": "blocked",
+              "notes": "Profile is saved, but no explicit verification status lifecycle is modeled."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "department-and-service-design",
+      "title": "2. Department + Service Design",
+      "goal": "Build team structure and define operational services with recurrence.",
+      "subflows": [
+        {
+          "id": "department-list-screen",
+          "screen": {
+            "route": "/department",
+            "screenName": "Department Management List",
+            "component": "src/pages/Departments.tsx"
+          },
+          "steps": [
+            {
+              "id": "DEP-001",
+              "action": "View department cards with member and service count.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "DEP-002",
+              "action": "Open Create Department sidesheet from list header button.",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "DEP-003",
+              "action": "Open existing Department sidesheet by clicking department card.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "department-create-sidesheet",
+          "screen": {
+            "route": "/department",
+            "screenName": "Create Department Sidesheet",
+            "component": "src/pages/Departments.tsx"
+          },
+          "steps": [
+            {
+              "id": "DEP-004",
+              "action": "Enter department details.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "DEP-005",
+              "action": "Set department color (direct or inherited from parent).",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "DEP-006",
+              "action": "Select head manager from matching department staff list.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "DEP-007",
+              "action": "Draft department services",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "DEP-008",
+              "action": "Save department and publish drafted services",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "department-detail-sidesheet",
+          "screen": {
+            "route": "/department",
+            "screenName": "Department Detail/Edit Sidesheet",
+            "component": "src/pages/Departments.tsx"
+          },
+          "steps": [
+            {
+              "id": "DEP-009",
+              "action": "Inline edit department name, description, parent link, and color.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "DEP-010",
+              "action": "Assign/replace head manager from member table.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "DEP-011",
+              "action": "Add additional services from detail pane using + action.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "staff-enablement",
+      "title": "3. Staff Enablement",
+      "goal": "Add staff into departments and maintain operational roles/status.",
+      "subflows": [
+        {
+          "id": "staff-list-screen",
+          "screen": {
+            "route": "/staff",
+            "screenName": "Staff Management List",
+            "component": "src/pages/Staff.tsx"
+          },
+          "steps": [
+            {
+              "id": "STF-001",
+              "action": "Browse and search staff list",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "STF-002",
+              "action": "Open Add Staff sidesheet.",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "STF-003",
+              "action": "Open existing staff detail sidesheet by row click.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "staff-create-sidesheet",
+          "screen": {
+            "route": "/staff",
+            "screenName": "Create Staff Profile",
+            "component": "src/pages/Staff.tsx"
+          },
+          "steps": [
+            {
+              "id": "STF-004",
+              "action": "Fill basic/contact info sections.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "STF-005",
+              "action": "Enter employment details",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "STF-006",
+              "action": "Save new staff into system and return to list.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "staff-detail-sidesheet",
+          "screen": {
+            "route": "/staff",
+            "screenName": "Staff Detail/Edit",
+            "component": "src/pages/Staff.tsx"
+          },
+          "steps": [
+            {
+              "id": "STF-007",
+              "action": "Inline edit core staff fields (name, department, status, role).",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "package-definition",
+      "title": "4. Package Definition",
+      "goal": "Bundle services into sellable package with pricing for frontdesk purchase.",
+      "subflows": [
+        {
+          "id": "package-list-screen",
+          "screen": {
+            "route": "/package",
+            "screenName": "Package Management List",
+            "component": "src/pages/Packages.tsx"
+          },
+          "steps": [
+            {
+              "id": "PKG-001",
+              "action": "View package cards (name, price, duration, included service count).",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "PKG-002",
+              "action": "Click package card to open detail/edit sidesheet.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "PKG-003",
+              "action": "Start package creation from \"Create Package\" button.",
+              "implementationStatus": "missing",
+              "qaStatus": "failed",
+              "checklistState": "blocked",
+              "notes": "Button is present but does not trigger create flow in current UI."
+            }
+          ]
+        },
+        {
+          "id": "package-detail-sidesheet",
+          "screen": {
+            "route": "/package",
+            "screenName": "Package Detail/Edit",
+            "component": "src/pages/Packages.tsx"
+          },
+          "steps": [
+            {
+              "id": "PKG-004",
+              "action": "Review package summary and services.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "PKG-005",
+              "action": "Edit package services and save",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "PKG-006",
+              "action": "Add new service item directly from package detail.",
+              "implementationStatus": "partial",
+              "qaStatus": "not_tested",
+              "checklistState": "blocked",
+              "notes": "Add icon exists only in edit mode but has no creation handler wired."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "frontdesk-sales-and-contracting",
+      "title": "5. Frontdesk Sales + Invoice + Contract",
+      "goal": "Sell package, collect payment, generate contract, and complete order lifecycle.",
+      "subflows": [
+        {
+          "id": "sales-dashboard-screen",
+          "screen": {
+            "route": "/sales",
+            "screenName": "Sales Dashboard",
+            "component": "src/pages/SalesDashboard.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-001",
+              "action": "Review sales stats, notifications, and recent sales list.",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-002",
+              "action": "Open recent sales detail sidesheet (resident/guardian/room/order summary).",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-003",
+              "action": "Start new order from \"Create Sales Order\" button.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "sales-order-step-0",
+          "screen": {
+            "route": "/sales/order",
+            "screenName": "Package Selection (/sales/order)",
+            "component": "src/pages/SalesOrder.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-004",
+              "action": "Select package",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-005",
+              "action": "Set stay period and confirm package",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "sales-order-step-1",
+          "screen": {
+            "route": "/sales/order",
+            "screenName": "Resident and Guardian Details (/sales/order)",
+            "component": "src/pages/SalesOrder.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-006",
+              "action": "Enter resident profile",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-007",
+              "action": "Add guardian contacts",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "sales-order-step-2",
+          "screen": {
+            "route": "/sales/order",
+            "screenName": "Room and Add-ons Selection (/sales/order)",
+            "component": "src/pages/SalesOrder.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-008",
+              "action": "Select room card.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-009",
+              "action": "Add optional services",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-010",
+              "action": "Set primary guardian contact and create invoice.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "sales-order-step-3",
+          "screen": {
+            "route": "/sales/order",
+            "screenName": "Invoice and Payment (/sales/order)",
+            "component": "src/pages/SalesOrder.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-011",
+              "action": "Review generated invoice details and pricing rows.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-012",
+              "action": "Record payment method",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-013",
+              "action": "Use payment confirmation modals to mark invoice paid.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-014",
+              "action": "Optional: save draft or open full invoice page.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "sales-order-invoice-page",
+          "screen": {
+            "route": "/sales/order/invoice",
+            "screenName": "Printable Invoice (/sales/order/invoice)",
+            "component": "src/pages/SalesOrderInvoice.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-015",
+              "action": "View printable A4 invoice layout and billing details.",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-016",
+              "action": "Export or print invoice",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "sales-order-step-4",
+          "screen": {
+            "route": "/sales/order",
+            "screenName": "Contract Review and Signing (/sales/order)",
+            "component": "src/pages/SalesOrder.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-017",
+              "action": "Review contract summary.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-018",
+              "action": "Open full contract page for print/email/sign flow.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-019",
+              "action": "Complete order from contract step.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "sales-order-contract-page",
+          "screen": {
+            "route": "/sales/order/contract",
+            "screenName": "Internal Contract Workspace (/sales/order/contract)",
+            "component": "src/pages/SalesOrderContract.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-020",
+              "action": "Review contract terms and policies.",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-021",
+              "action": "Share contract and update signature status",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-022",
+              "action": "Sign contract through signer-email verification modal.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "public-contract-page",
+          "screen": {
+            "route": "/contract/:id",
+            "screenName": "Guardian Contract View (/contract/:id)",
+            "component": "src/pages/PublicContractView.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-023",
+              "action": "Verify guardian email gate before showing public contract.",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-024",
+              "action": "Allow authorized contract view and print action.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        },
+        {
+          "id": "sales-order-step-5",
+          "screen": {
+            "route": "/sales/order",
+            "screenName": "Order Completion (/sales/order)",
+            "component": "src/pages/SalesOrder.tsx"
+          },
+          "steps": [
+            {
+              "id": "SLS-025",
+              "action": "Show completion summary and guardian onboarding instructions.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "SLS-026",
+              "action": "Return to sales dashboard or reopen contract page.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "operations-calendar-execution",
+      "title": "6. Operations Calendar Execution",
+      "goal": "Parse purchased package services into dated operation tasks, allow staff execution and manager reassignment.",
+      "subflows": [
+        {
+          "id": "task-generation-system",
+          "screen": {
+            "route": "system",
+            "screenName": "Task Generation Hook",
+            "component": "src/pages/SalesOrder.tsx + src/api/index.ts"
+          },
+          "steps": [
+            {
+              "id": "OPS-001",
+              "action": "Generate tasks for the stay period",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending",
+              "evidence": "generateTasks(...) -> API.generateTasksFromPackage(...)"
+            }
+          ]
+        },
+        {
+          "id": "staff-task-calendar",
+          "screen": {
+            "route": "/staff/tasks",
+            "screenName": "Staff Tasks Calendar Board",
+            "component": "src/pages/StaffTasks.tsx"
+          },
+          "steps": [
+            {
+              "id": "OPS-002",
+              "action": "View daily task board by status",
+              "implementationStatus": "implemented",
+              "qaStatus": "passed",
+              "checklistState": "pending"
+            },
+            {
+              "id": "OPS-003",
+              "action": "Filter tasks by staff, department, and date.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "OPS-004",
+              "action": "Start and complete tasks with optional completion notes.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "OPS-005",
+              "action": "Reassign tasks to other staff through assignment modal.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "OPS-006",
+              "action": "Use 2-week staff availability forecast for capacity planning.",
+              "implementationStatus": "implemented",
+              "qaStatus": "not_tested",
+              "checklistState": "pending"
+            },
+            {
+              "id": "OPS-007",
+              "action": "Use personal calendar in \"my tasks\" mode.",
+              "implementationStatus": "partial",
+              "qaStatus": "not_tested",
+              "checklistState": "blocked",
+              "notes": "Can filter by staff manually, but no role-aware personal-only screen mode exists."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "globalChecklist": [
+    {
+      "id": "CHK-001",
+      "summary": "Business and legal onboarding flow complete",
+      "dependsOn": [
+        "BUS-001",
+        "BUS-002",
+        "BUS-003",
+        "BUS-005",
+        "BUS-006",
+        "BUS-008"
+      ],
+      "implementationStatus": "partial",
+      "qaStatus": "not_tested",
+      "checklistState": "blocked",
+      "blockingItems": [
+        "BUS-004",
+        "BUS-009"
+      ]
+    },
+    {
+      "id": "CHK-002",
+      "summary": "Department creation with service definitions complete",
+      "dependsOn": [
+        "DEP-001",
+        "DEP-002",
+        "DEP-004",
+        "DEP-007",
+        "DEP-008",
+        "DEP-009",
+        "DEP-011"
+      ],
+      "implementationStatus": "implemented",
+      "qaStatus": "not_tested",
+      "checklistState": "pending"
+    },
+    {
+      "id": "CHK-003",
+      "summary": "Staff onboarding and assignment complete",
+      "dependsOn": [
+        "STF-001",
+        "STF-002",
+        "STF-004",
+        "STF-005",
+        "STF-006",
+        "STF-007"
+      ],
+      "implementationStatus": "implemented",
+      "qaStatus": "not_tested",
+      "checklistState": "pending"
+    },
+    {
+      "id": "CHK-004",
+      "summary": "Package definition and maintenance complete",
+      "dependsOn": [
+        "PKG-001",
+        "PKG-002",
+        "PKG-003",
+        "PKG-004",
+        "PKG-005",
+        "PKG-006"
+      ],
+      "implementationStatus": "partial",
+      "qaStatus": "not_tested",
+      "checklistState": "blocked",
+      "blockingItems": [
+        "PKG-003",
+        "PKG-006"
+      ]
+    },
+    {
+      "id": "CHK-005",
+      "summary": "Frontdesk sales to contract lifecycle complete",
+      "dependsOn": [
+        "SLS-001",
+        "SLS-003",
+        "SLS-004",
+        "SLS-005",
+        "SLS-006",
+        "SLS-007",
+        "SLS-008",
+        "SLS-009",
+        "SLS-010",
+        "SLS-011",
+        "SLS-012",
+        "SLS-013",
+        "SLS-017",
+        "SLS-018",
+        "SLS-019",
+        "SLS-020",
+        "SLS-021",
+        "SLS-022",
+        "SLS-023",
+        "SLS-024",
+        "SLS-025",
+        "SLS-026"
+      ],
+      "implementationStatus": "implemented",
+      "qaStatus": "not_tested",
+      "checklistState": "pending"
+    },
+    {
+      "id": "CHK-006",
+      "summary": "Task parsing and execution board complete",
+      "dependsOn": [
+        "OPS-001",
+        "OPS-002",
+        "OPS-003",
+        "OPS-004",
+        "OPS-005",
+        "OPS-006",
+        "OPS-007"
+      ],
+      "implementationStatus": "partial",
+      "qaStatus": "not_tested",
+      "checklistState": "blocked",
+      "blockingItems": [
+        "OPS-007"
+      ]
+    }
+  ],
+  "knownGaps": [
+    {
+      "id": "GAP-LEGAL-UPLOAD",
+      "title": "No legal-document upload/verification stage",
+      "relatedStepIds": [
+        "BUS-004",
+        "BUS-009"
+      ],
+      "impact": "Cannot complete explicit company-paper verification workflow."
+    },
+    {
+      "id": "GAP-PACKAGE-CREATE",
+      "title": "Package creation entry is not wired",
+      "relatedStepIds": [
+        "PKG-003",
+        "PKG-006"
+      ],
+      "impact": "Packages can be edited but not created from UI flow."
+    },
+    {
+      "id": "GAP-STAFF-PERSONAL-VIEW",
+      "title": "No dedicated personal task mode",
+      "relatedStepIds": [
+        "OPS-007"
+      ],
+      "impact": "Individual staff can filter manually, but there is no strict role-bound \"my tasks\" calendar route."
+    }
+  ],
+  "testRun": {
+    "type": "playwright-smoke",
+    "status": "completed_with_findings",
+    "executedAt": "2026-02-13T14:22:45+07:00",
+    "baseUrl": "http://127.0.0.1:4173",
+    "screens": [
+      {
+        "route": "/business-setup",
+        "assertion": "Business setup header is visible",
+        "result": "passed"
+      },
+      {
+        "route": "/department",
+        "assertion": "Create Department opens sidesheet",
+        "result": "passed"
+      },
+      {
+        "route": "/staff",
+        "assertion": "Add Staff opens sidesheet",
+        "result": "passed"
+      },
+      {
+        "route": "/package",
+        "assertion": "Create Package opens create flow",
+        "result": "failed",
+        "evidence": {
+          "openSidesheetCountAfterClick": 0,
+          "screenshot": "output/playwright/flow-audit-package-create-button.png"
+        }
+      },
+      {
+        "route": "/sales",
+        "assertion": "Sales dashboard renders",
+        "result": "passed"
+      },
+      {
+        "route": "/sales/order",
+        "assertion": "Sales order stepper renders",
+        "result": "passed",
+        "evidence": {
+          "screenshot": "output/playwright/flow-audit-sales-order.png"
+        }
+      },
+      {
+        "route": "/sales/order/invoice",
+        "assertion": "Invoice screen/fallback renders",
+        "result": "passed"
+      },
+      {
+        "route": "/sales/order/contract",
+        "assertion": "Contract screen/fallback renders",
+        "result": "passed"
+      },
+      {
+        "route": "/staff/tasks",
+        "assertion": "Task calendar board renders",
+        "result": "passed"
+      },
+      {
+        "route": "/contract/demo",
+        "assertion": "Public contract invalid-id fallback renders",
+        "result": "passed"
+      }
+    ]
+  },
+  "diagrams": {
+    "overview": {
+      "title": "Overview",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "1. Business + Legal Onboarding",
+          "status": "blocked"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "2. Department + Service Design",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "3. Staff Enablement",
+          "status": "active"
+        },
+        {
+          "id": "D",
+          "type": "block",
+          "label": "4. Package Definition",
+          "status": "blocked"
+        },
+        {
+          "id": "E",
+          "type": "block",
+          "label": "5. Frontdesk Sales + Invoice + Contract",
+          "status": "active"
+        },
+        {
+          "id": "F",
+          "type": "block",
+          "label": "6. Operations Calendar Execution",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        },
+        {
+          "from": "C",
+          "to": "D"
+        },
+        {
+          "from": "D",
+          "to": "E"
+        },
+        {
+          "from": "E",
+          "to": "F"
+        }
+      ]
+    },
+    "flow-business-and-legal-onboarding": {
+      "title": "1. Business + Legal Onboarding",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "Business Profile Capture (/business-setup)",
+          "status": "blocked"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "Terms Acceptance (/business-setup)",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "Backoffice Dashboard Landing (/dashboard)",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-business-and-legal-onboarding-business-setup-step-form": {
+      "title": "Business Profile Capture (/business-setup)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "BUS-001: Enter business profile details",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "BUS-002: Create owner account credentials",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "BUS-003: Validate required fields before moving to agreements.",
+          "status": "active"
+        },
+        {
+          "id": "D",
+          "type": "block",
+          "label": "BUS-004: Upload legal verification documents",
+          "status": "blocked"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        },
+        {
+          "from": "C",
+          "to": "D"
+        }
+      ]
+    },
+    "subflow-business-and-legal-onboarding-business-setup-step-agreement": {
+      "title": "Terms Acceptance (/business-setup)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "BUS-005: Read terms and conditions page.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "BUS-006: Agree with terms to complete setup and save business profile.",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "BUS-007: Disagree flow (open modal, clear entered data, reset setup).",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-business-and-legal-onboarding-business-landing": {
+      "title": "Onboarding Completion (/dashboard)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "BUS-008: Navigate to dashboard after successful setup completion.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "BUS-009: Mark business as verification completed by legal workflow.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        }
+      ]
+    },
+    "flow-department-and-service-design": {
+      "title": "2. Department + Service Design",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "Department Management List (/department)",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "Create Department Sidesheet (/department)",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "Department Detail/Edit Sidesheet (/department)",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-department-and-service-design-department-list-screen": {
+      "title": "Department Management List",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "DEP-001: View department cards with member and service count.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "DEP-002: Open Create Department sidesheet from list header button.",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "DEP-003: Open existing Department sidesheet by clicking department card.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-department-and-service-design-department-create-sidesheet": {
+      "title": "Create Department Sidesheet",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "DEP-004: Enter department details.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "DEP-005: Set department color (direct or inherited from parent).",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "DEP-006: Select head manager from matching department staff list.",
+          "status": "active"
+        },
+        {
+          "id": "D",
+          "type": "block",
+          "label": "DEP-007: Draft department services",
+          "status": "active"
+        },
+        {
+          "id": "E",
+          "type": "block",
+          "label": "DEP-008: Save department and publish drafted services",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        },
+        {
+          "from": "C",
+          "to": "D"
+        },
+        {
+          "from": "D",
+          "to": "E"
+        }
+      ]
+    },
+    "subflow-department-and-service-design-department-detail-sidesheet": {
+      "title": "Department Detail/Edit Sidesheet",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "DEP-009: Inline edit department name, description, parent link, and color.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "DEP-010: Assign/replace head manager from member table.",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "DEP-011: Add additional services from detail pane using + action.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "flow-staff-enablement": {
+      "title": "3. Staff Enablement",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "Staff Management List (/staff)",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "Create Staff Profile (/staff)",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "Staff Detail/Edit (/staff)",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-staff-enablement-staff-list-screen": {
+      "title": "Staff Management List",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "STF-001: Browse and search staff list",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "STF-002: Open Add Staff sidesheet.",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "STF-003: Open existing staff detail sidesheet by row click.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-staff-enablement-staff-create-sidesheet": {
+      "title": "Create Staff Profile",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "STF-004: Fill basic/contact info sections.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "STF-005: Enter employment details",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "STF-006: Save new staff into system and return to list.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-staff-enablement-staff-detail-sidesheet": {
+      "title": "Staff Detail/Edit",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "STF-007: Inline edit core staff fields (name, department, status, role).",
+          "status": "active"
+        }
+      ],
+      "connections": []
+    },
+    "flow-package-definition": {
+      "title": "4. Package Definition",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "Package Management List (/package)",
+          "status": "blocked"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "Package Detail/Edit (/package)",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        }
+      ]
+    },
+    "subflow-package-definition-package-list-screen": {
+      "title": "Package Management List",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "PKG-001: View package cards (name, price, duration, included service count).",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "PKG-002: Click package card to open detail/edit sidesheet.",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "PKG-003: Start package creation from \"Create Package\" button.",
+          "status": "blocked"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-package-definition-package-detail-sidesheet": {
+      "title": "Package Detail/Edit",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "PKG-004: Review package summary and services.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "PKG-005: Edit package services and save",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "PKG-006: Add new service item directly from package detail.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "flow-frontdesk-sales-and-contracting": {
+      "title": "5. Frontdesk Sales + Invoice + Contract",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "Sales Dashboard (/sales)",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "Package Selection (/sales/order)",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "Resident and Guardian Details (/sales/order)",
+          "status": "active"
+        },
+        {
+          "id": "D",
+          "type": "block",
+          "label": "Room and Add-ons Selection (/sales/order)",
+          "status": "active"
+        },
+        {
+          "id": "E",
+          "type": "block",
+          "label": "Invoice and Payment (/sales/order)",
+          "status": "active"
+        },
+        {
+          "id": "F",
+          "type": "block",
+          "label": "Printable Invoice (/sales/order/invoice)",
+          "status": "active"
+        },
+        {
+          "id": "G",
+          "type": "block",
+          "label": "Contract Review and Signing (/sales/order)",
+          "status": "active"
+        },
+        {
+          "id": "H",
+          "type": "block",
+          "label": "Internal Contract Workspace (/sales/order/contract)",
+          "status": "active"
+        },
+        {
+          "id": "I",
+          "type": "block",
+          "label": "Guardian Contract View (/contract/:id)",
+          "status": "active"
+        },
+        {
+          "id": "J",
+          "type": "block",
+          "label": "Order Completion (/sales/order)",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        },
+        {
+          "from": "C",
+          "to": "D"
+        },
+        {
+          "from": "D",
+          "to": "E"
+        },
+        {
+          "from": "E",
+          "to": "F"
+        },
+        {
+          "from": "F",
+          "to": "G"
+        },
+        {
+          "from": "G",
+          "to": "H"
+        },
+        {
+          "from": "H",
+          "to": "I"
+        },
+        {
+          "from": "I",
+          "to": "J"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-dashboard-screen": {
+      "title": "Sales Dashboard",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-001: Review sales stats, notifications, and recent sales list.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-002: Open recent sales detail sidesheet (resident/guardian/room/order summary).",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "SLS-003: Start new order from \"Create Sales Order\" button.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-order-step-0": {
+      "title": "Package Selection (/sales/order)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-004: Select package",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-005: Set stay period and confirm package",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-order-step-1": {
+      "title": "Resident and Guardian Details (/sales/order)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-006: Enter resident profile",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-007: Add guardian contacts",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-order-step-2": {
+      "title": "Room and Add-ons Selection (/sales/order)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-008: Select room card.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-009: Add optional services",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "SLS-010: Set primary guardian contact and create invoice.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-order-step-3": {
+      "title": "Invoice and Payment (/sales/order)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-011: Review generated invoice details and pricing rows.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-012: Record payment method",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "SLS-013: Use payment confirmation modals to mark invoice paid.",
+          "status": "active"
+        },
+        {
+          "id": "D",
+          "type": "block",
+          "label": "SLS-014: Optional: save draft or open full invoice page.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        },
+        {
+          "from": "C",
+          "to": "D"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-order-invoice-page": {
+      "title": "Printable Invoice (/sales/order/invoice)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-015: View printable A4 invoice layout and billing details.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-016: Export or print invoice",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-order-step-4": {
+      "title": "Contract Review and Signing (/sales/order)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-017: Review contract summary.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-018: Open full contract page for print/email/sign flow.",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "SLS-019: Complete order from contract step.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-order-contract-page": {
+      "title": "Internal Contract Workspace (/sales/order/contract)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-020: Review contract terms and policies.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-021: Share contract and update signature status",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "SLS-022: Sign contract through signer-email verification modal.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-public-contract-page": {
+      "title": "Guardian Contract View (/contract/:id)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-023: Verify guardian email gate before showing public contract.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-024: Allow authorized contract view and print action.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        }
+      ]
+    },
+    "subflow-frontdesk-sales-and-contracting-sales-order-step-5": {
+      "title": "Order Completion (/sales/order)",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "SLS-025: Show completion summary and guardian onboarding instructions.",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "SLS-026: Return to sales dashboard or reopen contract page.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        }
+      ]
+    },
+    "flow-operations-calendar-execution": {
+      "title": "6. Operations Calendar Execution",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "Task Generation Hook (system)",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "Staff Tasks Calendar Board (/staff/tasks)",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        }
+      ]
+    },
+    "subflow-operations-calendar-execution-task-generation-system": {
+      "title": "Task Generation Hook",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "OPS-001: Generate tasks for the stay period",
+          "status": "active"
+        }
+      ],
+      "connections": []
+    },
+    "subflow-operations-calendar-execution-staff-task-calendar": {
+      "title": "Staff Tasks Calendar Board",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "block",
+          "label": "OPS-002: View daily task board by status",
+          "status": "active"
+        },
+        {
+          "id": "B",
+          "type": "block",
+          "label": "OPS-003: Filter tasks by staff, department, and date.",
+          "status": "active"
+        },
+        {
+          "id": "C",
+          "type": "block",
+          "label": "OPS-004: Start and complete tasks with optional completion notes.",
+          "status": "active"
+        },
+        {
+          "id": "D",
+          "type": "block",
+          "label": "OPS-005: Reassign tasks to other staff through assignment modal.",
+          "status": "active"
+        },
+        {
+          "id": "E",
+          "type": "block",
+          "label": "OPS-006: Use 2-week staff availability forecast for capacity planning.",
+          "status": "active"
+        },
+        {
+          "id": "F",
+          "type": "block",
+          "label": "OPS-007: Use personal calendar in \"my tasks\" mode.",
+          "status": "active"
+        }
+      ],
+      "connections": [
+        {
+          "from": "A",
+          "to": "B"
+        },
+        {
+          "from": "B",
+          "to": "C"
+        },
+        {
+          "from": "C",
+          "to": "D"
+        },
+        {
+          "from": "D",
+          "to": "E"
+        },
+        {
+          "from": "E",
+          "to": "F"
+        }
+      ]
+    }
+  },
+  "relationships": [
+    {
+      "id": "rel-overview-business-and-legal-onboarding",
+      "parentDiagram": "overview",
+      "parentNode": "A",
+      "childDiagram": "flow-business-and-legal-onboarding",
+      "type": "detail"
+    },
+    {
+      "id": "rel-business-and-legal-onboarding-business-setup-step-form",
+      "parentDiagram": "flow-business-and-legal-onboarding",
+      "parentNode": "A",
+      "childDiagram": "subflow-business-and-legal-onboarding-business-setup-step-form",
+      "type": "detail"
+    },
+    {
+      "id": "rel-business-and-legal-onboarding-business-setup-step-agreement",
+      "parentDiagram": "flow-business-and-legal-onboarding",
+      "parentNode": "B",
+      "childDiagram": "subflow-business-and-legal-onboarding-business-setup-step-agreement",
+      "type": "detail"
+    },
+    {
+      "id": "rel-business-and-legal-onboarding-business-landing",
+      "parentDiagram": "flow-business-and-legal-onboarding",
+      "parentNode": "C",
+      "childDiagram": "subflow-business-and-legal-onboarding-business-landing",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-department-and-service-design",
+      "parentDiagram": "overview",
+      "parentNode": "B",
+      "childDiagram": "flow-department-and-service-design",
+      "type": "detail"
+    },
+    {
+      "id": "rel-department-and-service-design-department-list-screen",
+      "parentDiagram": "flow-department-and-service-design",
+      "parentNode": "A",
+      "childDiagram": "subflow-department-and-service-design-department-list-screen",
+      "type": "detail"
+    },
+    {
+      "id": "rel-department-and-service-design-department-create-sidesheet",
+      "parentDiagram": "flow-department-and-service-design",
+      "parentNode": "B",
+      "childDiagram": "subflow-department-and-service-design-department-create-sidesheet",
+      "type": "detail"
+    },
+    {
+      "id": "rel-department-and-service-design-department-detail-sidesheet",
+      "parentDiagram": "flow-department-and-service-design",
+      "parentNode": "C",
+      "childDiagram": "subflow-department-and-service-design-department-detail-sidesheet",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-staff-enablement",
+      "parentDiagram": "overview",
+      "parentNode": "C",
+      "childDiagram": "flow-staff-enablement",
+      "type": "detail"
+    },
+    {
+      "id": "rel-staff-enablement-staff-list-screen",
+      "parentDiagram": "flow-staff-enablement",
+      "parentNode": "A",
+      "childDiagram": "subflow-staff-enablement-staff-list-screen",
+      "type": "detail"
+    },
+    {
+      "id": "rel-staff-enablement-staff-create-sidesheet",
+      "parentDiagram": "flow-staff-enablement",
+      "parentNode": "B",
+      "childDiagram": "subflow-staff-enablement-staff-create-sidesheet",
+      "type": "detail"
+    },
+    {
+      "id": "rel-staff-enablement-staff-detail-sidesheet",
+      "parentDiagram": "flow-staff-enablement",
+      "parentNode": "C",
+      "childDiagram": "subflow-staff-enablement-staff-detail-sidesheet",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-package-definition",
+      "parentDiagram": "overview",
+      "parentNode": "D",
+      "childDiagram": "flow-package-definition",
+      "type": "detail"
+    },
+    {
+      "id": "rel-package-definition-package-list-screen",
+      "parentDiagram": "flow-package-definition",
+      "parentNode": "A",
+      "childDiagram": "subflow-package-definition-package-list-screen",
+      "type": "detail"
+    },
+    {
+      "id": "rel-package-definition-package-detail-sidesheet",
+      "parentDiagram": "flow-package-definition",
+      "parentNode": "B",
+      "childDiagram": "subflow-package-definition-package-detail-sidesheet",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-frontdesk-sales-and-contracting",
+      "parentDiagram": "overview",
+      "parentNode": "E",
+      "childDiagram": "flow-frontdesk-sales-and-contracting",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-dashboard-screen",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "A",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-dashboard-screen",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-order-step-0",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "B",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-order-step-0",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-order-step-1",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "C",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-order-step-1",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-order-step-2",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "D",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-order-step-2",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-order-step-3",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "E",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-order-step-3",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-order-invoice-page",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "F",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-order-invoice-page",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-order-step-4",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "G",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-order-step-4",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-order-contract-page",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "H",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-order-contract-page",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-public-contract-page",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "I",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-public-contract-page",
+      "type": "detail"
+    },
+    {
+      "id": "rel-frontdesk-sales-and-contracting-sales-order-step-5",
+      "parentDiagram": "flow-frontdesk-sales-and-contracting",
+      "parentNode": "J",
+      "childDiagram": "subflow-frontdesk-sales-and-contracting-sales-order-step-5",
+      "type": "detail"
+    },
+    {
+      "id": "rel-overview-operations-calendar-execution",
+      "parentDiagram": "overview",
+      "parentNode": "F",
+      "childDiagram": "flow-operations-calendar-execution",
+      "type": "detail"
+    },
+    {
+      "id": "rel-operations-calendar-execution-task-generation-system",
+      "parentDiagram": "flow-operations-calendar-execution",
+      "parentNode": "A",
+      "childDiagram": "subflow-operations-calendar-execution-task-generation-system",
+      "type": "detail"
+    },
+    {
+      "id": "rel-operations-calendar-execution-staff-task-calendar",
+      "parentDiagram": "flow-operations-calendar-execution",
+      "parentNode": "B",
+      "childDiagram": "subflow-operations-calendar-execution-staff-task-calendar",
+      "type": "detail"
+    }
+  ]
+}

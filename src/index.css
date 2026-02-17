@@ -1,0 +1,111 @@
+:root {
+  font-family: 'Google Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light;
+  color: var(--mantine-color-gray-8);
+  background-color: var(--mantine-color-white);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Semantic HSL Foundation from bourbon project */
+  --surface: var(--mantine-color-gray-1);
+  --white: var(--mantine-color-white);
+  --border: var(--mantine-color-gray-2);
+
+  --button-accent-1: 2, 222, 252;
+  --button-accent-2: 127, 254, 0;
+  --button-accent-3: 253, 243, 1;
+  --button-accent-4: 246, 99, 21;
+  --button-accent-5: 252, 1, 151;
+  --button-accent-6: 254, 158, 251;
+  --button-accent-gradient: linear-gradient(
+    90deg,
+    rgb(var(--button-accent-1)),
+    rgb(var(--button-accent-2)),
+    rgb(var(--button-accent-3)),
+    rgb(var(--button-accent-4)),
+    rgb(var(--button-accent-5)),
+    rgb(var(--button-accent-6))
+  );
+
+  /* Design system: color dot */
+  --ds-color-dot-size: 18px;
+  --ds-color-dot-border: rgba(0, 0, 0, 0.18);
+  --ds-color-dot-gap: 10px;
+  --ds-color-dot-left-section-width: 36px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--surface);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Custom Mantine Component Overrides */
+
+h2 {
+  padding-block: var(--mantine-spacing-md);
+}
+
+/* Main content area background */
+.mantine-AppShell-main {
+  background-color: var(--surface);
+}
+
+@media print {
+  /* Hide AppShell navigation/sidebar when printing (e.g. full invoice view) */
+  .mantine-AppShell-navbar,
+  .mantine-AppShell-header,
+  .mantine-AppShell-aside,
+  nav[role="navigation"] {
+    display: none !important;
+  }
+
+  .mantine-AppShell-main {
+    padding: 0 !important;
+  }
+}
+
+/* Table styling - matching original bourbon project */
+.mantine-Table-root {
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mantine-Table-th {
+  background-color: var(--mantine-color-gray-0);
+}
+
+.mantine-Table-td {
+  background-color: var(--white);
+}
+
+.ds-color-dot {
+  width: var(--ds-color-dot-size);
+  height: var(--ds-color-dot-size);
+  border-radius: 999px;
+  background-color: var(--ds-color-dot-color, transparent);
+  border: 1px solid var(--ds-color-dot-border);
+  flex-shrink: 0;
+}
+
+.ds-color-dot-label {
+  gap: var(--ds-color-dot-gap);
+}
+
+.ds-color-dot-select .mantine-Input-section {
+  width: var(--ds-color-dot-left-section-width);
+}
+
+.ds-color-dot-select .editable-field__mantine-root[data-with-left-section] .editable-field__input {
+  padding-inline-start: var(--ds-color-dot-left-section-width) !important;
+}

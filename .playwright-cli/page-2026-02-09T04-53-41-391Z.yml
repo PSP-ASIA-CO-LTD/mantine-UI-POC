@@ -1,0 +1,352 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - link "Bourbon Mall" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e8]: Operation Manager
+        - navigation [ref=e9]:
+          - generic [ref=e10]:
+            - generic [ref=e11]: Frontoffice
+            - generic [ref=e12]:
+              - link "Sales Dashboard" [ref=e13] [cursor=pointer]:
+                - /url: /sales
+                - img [ref=e14]
+                - generic [ref=e16]: Sales Dashboard
+              - link "Create Sales Order" [ref=e17] [cursor=pointer]:
+                - /url: /sales/order
+                - img [ref=e18]
+                - generic [ref=e23]: Create Sales Order
+          - generic [ref=e24]:
+            - generic [ref=e25]: Operations
+            - link "Staff Task" [ref=e27] [cursor=pointer]:
+              - /url: /staff/tasks
+              - img [ref=e28]
+              - generic [ref=e31]: Staff Task
+          - generic [ref=e32]:
+            - generic [ref=e33]: Backoffice
+            - generic [ref=e34]:
+              - link "Business Setup" [ref=e35] [cursor=pointer]:
+                - /url: /business-setup
+                - img [ref=e36]
+                - generic [ref=e39]: Business Setup
+              - link "Dashboard" [ref=e40] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e41]
+                - generic [ref=e43]: Dashboard
+              - link "Package" [ref=e44] [cursor=pointer]:
+                - /url: /package
+                - img [ref=e45]
+                - generic [ref=e49]: Package
+              - link "Department" [ref=e50] [cursor=pointer]:
+                - /url: /department
+                - img [ref=e51]
+                - generic [ref=e56]: Department
+              - link "Staff" [ref=e57] [cursor=pointer]:
+                - /url: /staff
+                - img [ref=e58]
+                - generic [ref=e61]: Staff
+              - link "Patient" [ref=e62] [cursor=pointer]:
+                - /url: /patient
+                - img [ref=e63]
+                - generic [ref=e67]: Patient
+        - button "OM Manager Alice Administrator" [ref=e69] [cursor=pointer]:
+          - generic [ref=e70]:
+            - generic [ref=e72]: OM
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Manager Alice
+              - paragraph [ref=e75]: Administrator
+          - img [ref=e76]
+    - main [ref=e78]:
+      - generic [ref=e254]:
+        - generic [ref=e255]:
+          - generic [ref=e256]:
+            - heading "Patient" [level=2] [ref=e257]
+            - paragraph [ref=e258]: Search residents and review guardian details.
+          - generic [ref=e260]:
+            - img [ref=e262]
+            - textbox "Search resident, guardian, or ID" [ref=e265]
+        - generic [ref=e266]:
+          - paragraph [ref=e268]: Residents (6)
+          - table [ref=e269]:
+            - rowgroup [ref=e270]:
+              - row "Resident Guardians Latest Admission Status" [ref=e271]:
+                - columnheader "Resident" [ref=e272]
+                - columnheader "Guardians" [ref=e273]
+                - columnheader "Latest Admission" [ref=e274]
+                - columnheader "Status" [ref=e275]
+                - columnheader [ref=e276]
+            - rowgroup [ref=e277]:
+              - 'row "ค คุณยาย สุขใจ ID: res-1 สมชาย ใจดี 1 guardian 20-day Elder Recreation 20 ธ.ค. 2568 - 8 ม.ค. 2569 active" [ref=e278] [cursor=pointer]':
+                - 'cell "ค คุณยาย สุขใจ ID: res-1" [ref=e279]':
+                  - generic [ref=e280]:
+                    - generic [ref=e282]: ค
+                    - generic [ref=e283]:
+                      - paragraph [ref=e284]: คุณยาย สุขใจ
+                      - paragraph [ref=e285]: "ID: res-1"
+                - cell "สมชาย ใจดี 1 guardian" [ref=e286]:
+                  - generic [ref=e287]:
+                    - paragraph [ref=e288]: สมชาย ใจดี
+                    - paragraph [ref=e289]: 1 guardian
+                - cell "20-day Elder Recreation 20 ธ.ค. 2568 - 8 ม.ค. 2569" [ref=e290]:
+                  - generic [ref=e291]:
+                    - paragraph [ref=e292]: 20-day Elder Recreation
+                    - paragraph [ref=e293]: 20 ธ.ค. 2568 - 8 ม.ค. 2569
+                - cell "active" [ref=e294]:
+                  - generic [ref=e296]: active
+                - cell [ref=e297]:
+                  - button "View profile" [ref=e298]:
+                    - img [ref=e300]
+              - 'row "G Grandma Smith ID: res-2 John Doe 1 guardian Golden Years Premium 10 ม.ค. 2569 - 9 ก.พ. 2569 paid" [ref=e303] [cursor=pointer]':
+                - 'cell "G Grandma Smith ID: res-2" [ref=e304]':
+                  - generic [ref=e305]:
+                    - generic [ref=e307]: G
+                    - generic [ref=e308]:
+                      - paragraph [ref=e309]: Grandma Smith
+                      - paragraph [ref=e310]: "ID: res-2"
+                - cell "John Doe 1 guardian" [ref=e311]:
+                  - generic [ref=e312]:
+                    - paragraph [ref=e313]: John Doe
+                    - paragraph [ref=e314]: 1 guardian
+                - cell "Golden Years Premium 10 ม.ค. 2569 - 9 ก.พ. 2569" [ref=e315]:
+                  - generic [ref=e316]:
+                    - paragraph [ref=e317]: Golden Years Premium
+                    - paragraph [ref=e318]: 10 ม.ค. 2569 - 9 ก.พ. 2569
+                - cell "paid" [ref=e319]:
+                  - generic [ref=e321]: paid
+                - cell [ref=e322]:
+                  - button "View profile" [ref=e323]:
+                    - img [ref=e325]
+              - 'row "ส สมศรี ใจดี ID: res-1770202912457 สมชาย ใจดี 2 guardians 20-day Elder Recreation 11 ก.พ. 2569 - 2 มี.ค. 2569 paid" [ref=e328] [cursor=pointer]':
+                - 'cell "ส สมศรี ใจดี ID: res-1770202912457" [ref=e329]':
+                  - generic [ref=e330]:
+                    - generic [ref=e332]: ส
+                    - generic [ref=e333]:
+                      - paragraph [ref=e334]: สมศรี ใจดี
+                      - paragraph [ref=e335]: "ID: res-1770202912457"
+                - cell "สมชาย ใจดี 2 guardians" [ref=e336]:
+                  - generic [ref=e337]:
+                    - paragraph [ref=e338]: สมชาย ใจดี
+                    - paragraph [ref=e339]: 2 guardians
+                - cell "20-day Elder Recreation 11 ก.พ. 2569 - 2 มี.ค. 2569" [ref=e340]:
+                  - generic [ref=e341]:
+                    - paragraph [ref=e342]: 20-day Elder Recreation
+                    - paragraph [ref=e343]: 11 ก.พ. 2569 - 2 มี.ค. 2569
+                - cell "paid" [ref=e344]:
+                  - generic [ref=e346]: paid
+                - cell [ref=e347]:
+                  - button "View profile" [ref=e348]:
+                    - img [ref=e350]
+              - 'row "ส สมศรี ใจดี ID: res-1770273185953 สมชาย ใจดี 2 guardians No admissions —" [ref=e353] [cursor=pointer]':
+                - 'cell "ส สมศรี ใจดี ID: res-1770273185953" [ref=e354]':
+                  - generic [ref=e355]:
+                    - generic [ref=e357]: ส
+                    - generic [ref=e358]:
+                      - paragraph [ref=e359]: สมศรี ใจดี
+                      - paragraph [ref=e360]: "ID: res-1770273185953"
+                - cell "สมชาย ใจดี 2 guardians" [ref=e361]:
+                  - generic [ref=e362]:
+                    - paragraph [ref=e363]: สมชาย ใจดี
+                    - paragraph [ref=e364]: 2 guardians
+                - cell "No admissions" [ref=e365]:
+                  - paragraph [ref=e366]: No admissions
+                - cell "—" [ref=e367]:
+                  - generic [ref=e369]: —
+                - cell [ref=e370]:
+                  - button "View profile" [ref=e371]:
+                    - img [ref=e373]
+              - 'row "ส สมชาย ใจดี ID: res-1770273387284 สมชาย ใจดี 2 guardians Golden Years Premium 20 ก.พ. 2569 - 21 มี.ค. 2569 paid" [ref=e376] [cursor=pointer]':
+                - 'cell "ส สมชาย ใจดี ID: res-1770273387284" [ref=e377]':
+                  - generic [ref=e378]:
+                    - generic [ref=e380]: ส
+                    - generic [ref=e381]:
+                      - paragraph [ref=e382]: สมชาย ใจดี
+                      - paragraph [ref=e383]: "ID: res-1770273387284"
+                - cell "สมชาย ใจดี 2 guardians" [ref=e384]:
+                  - generic [ref=e385]:
+                    - paragraph [ref=e386]: สมชาย ใจดี
+                    - paragraph [ref=e387]: 2 guardians
+                - cell "Golden Years Premium 20 ก.พ. 2569 - 21 มี.ค. 2569" [ref=e388]:
+                  - generic [ref=e389]:
+                    - paragraph [ref=e390]: Golden Years Premium
+                    - paragraph [ref=e391]: 20 ก.พ. 2569 - 21 มี.ค. 2569
+                - cell "paid" [ref=e392]:
+                  - generic [ref=e394]: paid
+                - cell [ref=e395]:
+                  - button "View profile" [ref=e396]:
+                    - img [ref=e398]
+              - 'row "ส สมศรี ใจดี ID: res-1770611621570 สมชาย ใจดี 2 guardians No admissions —" [ref=e401] [cursor=pointer]':
+                - 'cell "ส สมศรี ใจดี ID: res-1770611621570" [ref=e402]':
+                  - generic [ref=e403]:
+                    - generic [ref=e405]: ส
+                    - generic [ref=e406]:
+                      - paragraph [ref=e407]: สมศรี ใจดี
+                      - paragraph [ref=e408]: "ID: res-1770611621570"
+                - cell "สมชาย ใจดี 2 guardians" [ref=e409]:
+                  - generic [ref=e410]:
+                    - paragraph [ref=e411]: สมชาย ใจดี
+                    - paragraph [ref=e412]: 2 guardians
+                - cell "No admissions" [ref=e413]:
+                  - paragraph [ref=e414]: No admissions
+                - cell "—" [ref=e415]:
+                  - generic [ref=e417]: —
+                - cell [ref=e418]:
+                  - button "View profile" [ref=e419]:
+                    - img [ref=e421]
+  - button "Toggle Debug Mode" [ref=e80] [cursor=pointer]:
+    - img [ref=e82]
+  - dialog "คุณยาย สุขใจ" [ref=e425]:
+    - banner [ref=e426]:
+      - generic [ref=e427]:
+        - paragraph [ref=e428]: Resident Profile
+        - heading "คุณยาย สุขใจ" [level=2] [ref=e429]
+      - button [active] [ref=e430] [cursor=pointer]:
+        - img [ref=e433]
+    - generic [ref=e436]:
+      - generic [ref=e438]:
+        - generic [ref=e439]:
+          - generic [ref=e440]: Resident ID
+          - paragraph [ref=e441]: res-1
+        - generic [ref=e442]:
+          - generic [ref=e443]: First Name
+          - paragraph [ref=e444]: คุณยาย
+        - generic [ref=e445]:
+          - generic [ref=e446]: Last Name
+          - paragraph [ref=e447]: สุขใจ
+        - generic [ref=e448]:
+          - generic [ref=e449]: Hospital No. (HN)
+          - paragraph [ref=e450]: —
+        - generic [ref=e451]:
+          - generic [ref=e452]: ID Number
+          - paragraph [ref=e453]: 1-1001-00001-00-1
+        - separator [ref=e454]
+        - generic [ref=e455]:
+          - generic [ref=e456]: Prefix
+          - paragraph [ref=e457]: —
+        - generic [ref=e458]:
+          - generic [ref=e459]: Date of Birth
+          - paragraph [ref=e460]: 15 มี.ค. 2488
+        - generic [ref=e461]:
+          - generic [ref=e462]: Gender
+          - generic [ref=e464]: female
+        - generic [ref=e465]:
+          - generic [ref=e466]: Race
+          - paragraph [ref=e467]: —
+        - generic [ref=e468]:
+          - generic [ref=e469]: Nationality
+          - paragraph [ref=e470]: —
+        - generic [ref=e471]:
+          - generic [ref=e472]: Religion
+          - paragraph [ref=e473]: —
+        - generic [ref=e474]:
+          - generic [ref=e475]: Marital Status
+          - paragraph [ref=e476]: —
+        - generic [ref=e477]:
+          - generic [ref=e478]: Occupation
+          - paragraph [ref=e479]: —
+        - generic [ref=e480]:
+          - generic [ref=e481]: Blood Group
+          - paragraph [ref=e482]: —
+        - separator [ref=e483]
+        - generic [ref=e484]:
+          - generic [ref=e485]: Mobile Phone
+          - paragraph [ref=e486]: —
+        - generic [ref=e487]:
+          - generic [ref=e488]: Home Phone
+          - paragraph [ref=e489]: —
+        - generic [ref=e490]:
+          - generic [ref=e491]: Email
+          - paragraph [ref=e492]: —
+        - generic [ref=e493]:
+          - generic [ref=e494]: Address No.
+          - paragraph [ref=e495]: —
+        - generic [ref=e496]:
+          - generic [ref=e497]: Moo
+          - paragraph [ref=e498]: —
+        - generic [ref=e499]:
+          - generic [ref=e500]: Village/Building
+          - paragraph [ref=e501]: —
+        - generic [ref=e502]:
+          - generic [ref=e503]: Street
+          - paragraph [ref=e504]: —
+        - generic [ref=e505]:
+          - generic [ref=e506]: Soi
+          - paragraph [ref=e507]: —
+        - generic [ref=e508]:
+          - generic [ref=e509]: Sub-district
+          - paragraph [ref=e510]: —
+        - generic [ref=e511]:
+          - generic [ref=e512]: District
+          - paragraph [ref=e513]: —
+        - generic [ref=e514]:
+          - generic [ref=e515]: Province
+          - paragraph [ref=e516]: —
+        - generic [ref=e517]:
+          - generic [ref=e518]: Postal Code
+          - paragraph [ref=e519]: —
+        - separator [ref=e520]
+        - generic [ref=e521]:
+          - generic [ref=e522]: Medical Conditions
+          - paragraph [ref=e523]: Diabetes Type 2, Hypertension
+        - generic [ref=e524]:
+          - generic [ref=e525]: Allergies
+          - paragraph [ref=e526]: Penicillin
+        - generic [ref=e527]:
+          - generic [ref=e528]: Dietary Restrictions
+          - paragraph [ref=e529]: Low sodium, Low sugar
+        - separator [ref=e530]
+        - generic [ref=e531]:
+          - generic [ref=e532]: Emergency Contact Name
+          - paragraph [ref=e533]: —
+        - generic [ref=e534]:
+          - generic [ref=e535]: Emergency Contact Relationship
+          - paragraph [ref=e536]: —
+        - generic [ref=e537]:
+          - generic [ref=e538]: Emergency Contact Phone
+          - paragraph [ref=e539]: 081-234-5678
+        - generic [ref=e540]:
+          - generic [ref=e541]: Emergency Contact Address Same as Resident
+          - paragraph [ref=e542]: —
+        - generic [ref=e543]:
+          - generic [ref=e544]: Emergency Contact Address
+          - paragraph [ref=e545]: —
+      - generic [ref=e546]:
+        - generic [ref=e547]:
+          - heading "Guardians (1)" [level=3] [ref=e549]
+          - generic [ref=e553]:
+            - generic [ref=e554]:
+              - paragraph [ref=e555]: สมชาย ใจดี
+              - generic [ref=e558]: Primary
+            - generic [ref=e559]:
+              - generic [ref=e560]:
+                - img [ref=e561]
+                - paragraph [ref=e563]: 081-234-5678
+              - generic [ref=e564]:
+                - img [ref=e565]
+                - paragraph [ref=e568]: somchai@email.com
+              - paragraph [ref=e569]: 123 ถ.สุขุมวิท กรุงเทพฯ 10110
+              - paragraph [ref=e570]: "Relationship: Son"
+              - paragraph [ref=e571]: "Pays: No"
+        - generic [ref=e573]:
+          - heading "Admissions (1)" [level=3] [ref=e575]
+          - generic [ref=e579]:
+            - generic [ref=e580]:
+              - paragraph [ref=e581]: 20-day Elder Recreation
+              - generic [ref=e583]: active
+            - generic [ref=e584]:
+              - generic [ref=e585]:
+                - img [ref=e586]
+                - paragraph [ref=e588]: Arrive 20 ธ.ค. 2568
+                - paragraph [ref=e589]: •
+                - paragraph [ref=e590]: Leave 8 ม.ค. 2569
+              - generic [ref=e591]:
+                - paragraph [ref=e592]: Room
+                - paragraph [ref=e593]: "101"
+                - paragraph [ref=e594]: •
+                - paragraph [ref=e595]: Days
+                - paragraph [ref=e596]: "20"
+              - paragraph [ref=e597]: ฿85,000
+    - contentinfo [ref=e599]:
+      - button "Close" [ref=e601] [cursor=pointer]:
+        - generic [ref=e603]: Close

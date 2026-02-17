@@ -1,0 +1,61 @@
+[
+  {
+    "id": "ctr-1",
+    "salesOrderId": "so-1",
+    "contractNumber": "CTR-2025-0001",
+    "guardianId": "gdn-1",
+    "residentId": "res-1",
+    "startDate": "2025-12-20",
+    "endDate": "2026-01-08",
+    "terms": "Standard care agreement for 20-day Elder Recreation package. Includes room, meals, and specialized care services as per package details.",
+    "signedAt": "2025-12-15T12:30:00Z",
+    "signedBy": "สมชาย ใจดี",
+    "status": "signed"
+  },
+  {
+    "id": "ctr-2",
+    "salesOrderId": "so-2",
+    "contractNumber": "CTR-2025-0002",
+    "guardianId": "gdn-2",
+    "residentId": "res-2",
+    "startDate": "2026-01-10",
+    "endDate": "2026-02-09",
+    "terms": "Premium care agreement for Golden Years Premium package. Includes deluxe room, meals, nursing support, and all specialized care services.",
+    "signedAt": "2025-12-19T09:30:00Z",
+    "signedBy": "John Doe",
+    "status": "signed"
+  },
+  {
+    "salesOrderId": "so-1770202920962",
+    "guardianId": "gdn-1770202911654-o3rqe",
+    "residentId": "res-1770202912457",
+    "startDate": "2026-02-11",
+    "endDate": "2026-03-02",
+    "terms": "Care agreement for 20-day Elder Recreation. Includes all services as per package details.",
+    "status": "pending",
+    "id": "ctr-1770202924489",
+    "contractNumber": "CTR-2026-0003"
+  },
+  {
+    "salesOrderId": "so-1770273394194",
+    "guardianId": "gdn-1770273386882-e94co",
+    "residentId": "res-1770273387284",
+    "startDate": "2026-02-20",
+    "endDate": "2026-03-21",
+    "terms": "Care agreement for Golden Years Premium. Includes all services as per package details.",
+    "status": "pending",
+    "id": "ctr-1770273445098",
+    "contractNumber": "CTR-2026-0004"
+  },
+  {
+    "salesOrderId": "so-1770273394194",
+    "guardianId": "gdn-1770273386882-e94co",
+    "residentId": "res-1770273387284",
+    "startDate": "2026-02-20",
+    "endDate": "2026-03-21",
+    "terms": "Care agreement for Golden Years Premium. Includes all services as per package details.",
+    "status": "pending",
+    "id": "ctr-1770273466260",
+    "contractNumber": "CTR-2026-0005"
+  }
+]

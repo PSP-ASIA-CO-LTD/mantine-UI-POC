@@ -1,0 +1,6 @@
+query GetSalesOrders {
+  sales_orders {
+    id
+    created_at
+  }
+}
