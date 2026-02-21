@@ -60,7 +60,7 @@ const DEPARTMENT_COLOR_PRESETS = [
     tokenColor('--mantine-color-blue-8'),
     tokenColor('--mantine-color-pink-9'),
     tokenColor('--mantine-color-orange-8'),
-    tokenColor('--mantine-color-cyan-6'),
+    tokenColor('--mantine-color-cyan-4'),
     tokenColor('--mantine-color-violet-4'),
     tokenColor('--mantine-color-pink-6'),
     tokenColor('--mantine-color-lime-3'),
