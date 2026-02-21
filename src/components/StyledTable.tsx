@@ -5,7 +5,7 @@ const BaseStyledTable = ({ className, ...props }: TableProps) => {
     return (
         <Table
             {...props}
-            className={['styled-table', className].filter(Boolean).join(' ')}
+            className={['styled-table', 'table', 'table-striped', 'table-hover', 'align-middle', className].filter(Boolean).join(' ')}
             striped
             highlightOnHover
             verticalSpacing="sm"

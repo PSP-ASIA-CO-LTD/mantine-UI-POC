@@ -8,7 +8,8 @@ interface FieldInfo {
     entity: string;
     field: string;
     element: HTMLElement;
-    rect: DOMRect;
+    bootstrapCovered: boolean;
+    bootstrapSource: string;
 }
 
 // Entity color mapping based on ER diagram domains
@@ -37,6 +38,124 @@ const entityColors: Record<string, string> = {
     CONTRACT: 'var(--mantine-color-yellow-7)',
 };
 
+const bootstrapComponentClasses = new Set([
+    'accordion',
+    'alert',
+    'badge',
+    'card-body',
+    'card-footer',
+    'card-header',
+    'card-title',
+    'card-text',
+    'breadcrumb',
+    'btn',
+    'btn-group',
+    'btn-close',
+    'card',
+    'col',
+    'container',
+    'container-fluid',
+    'dropdown-item',
+    'dropdown-menu',
+    'form-check',
+    'form-check-input',
+    'form-check-label',
+    'form-control',
+    'form-floating',
+    'form-label',
+    'form-select',
+    'form-text',
+    'input-group',
+    'input-group-text',
+    'list-group',
+    'list-group-item',
+    'modal',
+    'nav',
+    'nav-link',
+    'navbar',
+    'offcanvas',
+    'page-link',
+    'pagination',
+    'progress',
+    'row',
+    'table',
+    'table-responsive',
+]);
+
+const bootstrapClassPrefixes = [
+    'align-items-',
+    'align-content-',
+    'align-self-',
+    'bg-',
+    'border-',
+    'btn-',
+    'col-',
+    'd-',
+    'display-',
+    'flex-',
+    'float-',
+    'font-monospace',
+    'fs-',
+    'fst-',
+    'fw-',
+    'g-',
+    'gap-',
+    'h-',
+    'justify-content-',
+    'lh-',
+    'm-',
+    'mb-',
+    'me-',
+    'ms-',
+    'mt-',
+    'mx-',
+    'my-',
+    'p-',
+    'pb-',
+    'pe-',
+    'position-',
+    'ps-',
+    'pt-',
+    'px-',
+    'py-',
+    'rounded',
+    'row-cols-',
+    'shadow',
+    'small',
+    'text-',
+    'text-bg-',
+    'vstack',
+    'hstack',
+    'w-',
+];
+
+const bootstrapDataAttributes = ['data-bs-dismiss', 'data-bs-target', 'data-bs-toggle', 'data-bs-spy'];
+
+function hasBootstrapClass(className: string) {
+    if (bootstrapComponentClasses.has(className)) return true;
+    return bootstrapClassPrefixes.some((prefix) => className.startsWith(prefix));
+}
+
+function getBootstrapCoverage(element: HTMLElement): { covered: boolean; source: string } {
+    let current: HTMLElement | null = element;
+    while (current && current !== document.body) {
+        const currentElement: HTMLElement = current;
+        const matchedClass = Array.from(currentElement.classList.values()).find((className) => hasBootstrapClass(className));
+        if (matchedClass) {
+            return { covered: true, source: `.${matchedClass}` };
+        }
+
+        const matchedAttribute = bootstrapDataAttributes.find((attr) => currentElement.hasAttribute(attr));
+        if (matchedAttribute) {
+            return { covered: true, source: matchedAttribute };
+        }
+
+        current = currentElement.parentElement;
+    }
+
+    return { covered: false, source: 'No Bootstrap class/data-bs ancestor' };
+}
+
 function parseErField(value: string): { entity: string; field: string } | null {
     const parts = value.split('.');
     if (parts.length !== 2) return null;
@@ -53,6 +172,15 @@ export function DebugOverlay() {
     const [isDragging, setIsDragging] = useState(false);
     const dragOffset = useRef({ x: 0, y: 0 });
     const panelRef = useRef<HTMLDivElement>(null);
+    const markedElementsRef = useRef<Set<HTMLElement>>(new Set());
+
+    const clearBootstrapMarkers = useCallback(() => {
+        markedElementsRef.current.forEach((element) => {
+            element.classList.remove('debug-bootstrap-missing');
+            element.removeAttribute('data-bs-coverage');
+        });
+        markedElementsRef.current.clear();
+    }, []);
 
     // Drag handlers
     const handleDragStart = useCallback((e: React.MouseEvent) => {
@@ -96,6 +224,7 @@ export function DebugOverlay() {
     }, [isDragging]);
 
     const scanForFields = useCallback(() => {
+        clearBootstrapMarkers();
         const elements = document.querySelectorAll('[data-er-field]');
         const fieldInfos: FieldInfo[] = [];
 
@@ -107,20 +236,32 @@ export function DebugOverlay() {
             const parsed = parseErField(value);
             if (!parsed) return;
 
+            const coverage = getBootstrapCoverage(htmlEl);
+            if (!coverage.covered) {
+                htmlEl.classList.add('debug-bootstrap-missing');
+                htmlEl.setAttribute('data-bs-coverage', 'missing');
+                markedElementsRef.current.add(htmlEl);
+            } else {
+                htmlEl.setAttribute('data-bs-coverage', 'covered');
+                markedElementsRef.current.add(htmlEl);
+            }
+
             fieldInfos.push({
                 entity: parsed.entity,
                 field: parsed.field,
                 element: htmlEl,
-                rect: htmlEl.getBoundingClientRect(),
+                bootstrapCovered: coverage.covered,
+                bootstrapSource: coverage.source,
             });
         });
 
         setFields(fieldInfos);
-    }, []);
+    }, [clearBootstrapMarkers]);
 
     // Rescan when debug mode changes or on scroll/resize
     useEffect(() => {
         if (!isDebugMode) {
+            clearBootstrapMarkers();
             setFields([]);
             return;
         }
@@ -140,8 +281,9 @@ export function DebugOverlay() {
             window.removeEventListener('scroll', handleChange, true);
             window.removeEventListener('resize', handleChange);
             observer.disconnect();
+            clearBootstrapMarkers();
         };
-    }, [isDebugMode, scanForFields]);
+    }, [clearBootstrapMarkers, isDebugMode, scanForFields]);
 
     // Add/remove debug class to body
     useEffect(() => {
@@ -149,8 +291,9 @@ export function DebugOverlay() {
             document.body.classList.add('debug-mode');
         } else {
             document.body.classList.remove('debug-mode');
+            clearBootstrapMarkers();
         }
-    }, [isDebugMode]);
+    }, [clearBootstrapMarkers, isDebugMode]);
 
     // Create a field identifier helper
     const getFieldId = (entity: string, field: string) => `${entity}.${field}`;
@@ -164,6 +307,9 @@ export function DebugOverlay() {
             firstInstance.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     };
+
+    const totalFieldInstances = fields.length;
+    const missingFieldInstances = fields.filter((field) => !field.bootstrapCovered).length;
 
     // Group fields by entity, then by unique field name
     // For display, we only show one entry per unique field
@@ -199,7 +345,9 @@ export function DebugOverlay() {
                 <>
                     {/* Field Highlights - Only show when hovered */}
                     {fields.map((field, idx) => {
-                        const color = entityColors[field.entity] || 'var(--mantine-color-dark-3)';
+                        const color = field.bootstrapCovered
+                            ? (entityColors[field.entity] || 'var(--mantine-color-dark-3)')
+                            : 'var(--bs-danger)';
                         const fieldId = getFieldId(field.entity, field.field);
                         const isHovered = hoveredFieldId === fieldId;
                         
@@ -243,6 +391,7 @@ export function DebugOverlay() {
                                     }}
                                 >
                                     {field.entity}.{field.field}
+                                    {!field.bootstrapCovered ? ' • no-bootstrap' : ''}
                                 </span>
                             </div>
                         );
@@ -273,6 +422,12 @@ export function DebugOverlay() {
                             </Group>
                             <CloseButton size="sm" onClick={toggleDebugMode} />
                         </Group>
+                        <div className="debug-bootstrap-summary">
+                            <Text size="xs" fw={600}>Bootstrap Coverage</Text>
+                            <Text size="xs" c="dimmed">
+                                Missing: {missingFieldInstances}/{totalFieldInstances} field instances
+                            </Text>
+                        </div>
 
                         {Object.keys(groupedFields).length === 0 ? (
                             <Text size="xs" c="dimmed" ta="center" py="md">
@@ -285,6 +440,13 @@ export function DebugOverlay() {
                                     // Count total instances of each field
                                     const fieldCounts = fields.reduce((acc, field) => {
                                         if (field.entity === entity) {
+                                            const count = acc.get(field.field) || 0;
+                                            acc.set(field.field, count + 1);
+                                        }
+                                        return acc;
+                                    }, new Map<string, number>());
+                                    const missingCounts = fields.reduce((acc, field) => {
+                                        if (field.entity === entity && !field.bootstrapCovered) {
                                             const count = acc.get(field.field) || 0;
                                             acc.set(field.field, count + 1);
                                         }
@@ -309,6 +471,7 @@ export function DebugOverlay() {
                                                 {uniqueFields.map((field) => {
                                                     const fieldId = getFieldId(entity, field.field);
                                                     const count = fieldCounts.get(field.field) || 1;
+                                                    const missingCount = missingCounts.get(field.field) || 0;
                                                     const isHovered = hoveredFieldId === fieldId;
                                                     return (
                                                         <Text
@@ -324,7 +487,9 @@ export function DebugOverlay() {
                                                                 borderRadius: 4,
                                                                 backgroundColor: isHovered ? 'var(--mantine-color-gray-1)' : 'transparent',
                                                                 fontFamily: 'monospace',
+                                                                borderLeft: missingCount > 0 ? '3px solid var(--bs-danger)' : '3px solid transparent',
                                                             }}
+                                                            title={field.bootstrapSource}
                                                         >
                                                             .{field.field}
                                                             {count > 1 && (
@@ -335,6 +500,16 @@ export function DebugOverlay() {
                                                                     ml={4}
                                                                 >
                                                                     ({count})
+                                                                </Text>
+                                                            )}
+                                                            {missingCount > 0 && (
+                                                                <Text
+                                                                    component="span"
+                                                                    size="xs"
+                                                                    c="red"
+                                                                    ml={4}
+                                                                >
+                                                                    missing:{missingCount}
                                                                 </Text>
                                                             )}
                                                         </Text>

@@ -31,11 +31,11 @@ import './InlineEditableField.css';
 type ClassNames = Record<string, string | undefined>;
 
 const baseFormClassNames: ClassNames = {
-    root: 'editable-field',
+    root: 'editable-field mb-3',
     wrapper: 'editable-field__mantine-root editable-field--form',
-    label: 'editable-field__label',
-    input: 'editable-field__input',
-    description: 'editable-field__description',
+    label: 'editable-field__label form-label mb-1',
+    input: 'editable-field__input form-control',
+    description: 'editable-field__description form-text',
 };
 
 const mergeClassNames = (base: ClassNames, incoming?: ClassNames) => {
@@ -116,7 +116,10 @@ export function Select(props: SelectProps) {
                 {...props}
                 onDropdownOpen={handleDropdownOpen}
                 variant={props.variant ?? 'unstyled'}
-                classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+                classNames={mergeClassNames({
+                    ...baseFormClassNames,
+                    input: `${baseFormClassNames.input ?? ''} form-select`.trim(),
+                }, props.classNames as ClassNames)}
                 comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}
             />
         </div>
@@ -139,7 +142,10 @@ export function MultiSelect(props: MultiSelectProps) {
                 {...props}
                 onDropdownOpen={handleDropdownOpen}
                 variant={props.variant ?? 'unstyled'}
-                classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+                classNames={mergeClassNames({
+                    ...baseFormClassNames,
+                    input: `${baseFormClassNames.input ?? ''} form-select`.trim(),
+                }, props.classNames as ClassNames)}
                 comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}
             />
         </div>
@@ -191,7 +197,11 @@ export function Checkbox(props: CheckboxProps) {
     return (
         <MantineCheckbox
             {...props}
-            classNames={mergeClassNames({ root: 'editable-field--checkbox' }, props.classNames as ClassNames)}
+            classNames={mergeClassNames({
+                root: 'editable-field--checkbox form-check mb-2',
+                input: 'form-check-input',
+                label: 'form-check-label',
+            }, props.classNames as ClassNames)}
         />
     );
 }
@@ -200,7 +210,10 @@ export function CheckboxGroup(props: CheckboxGroupProps) {
     return (
         <MantineCheckbox.Group
             {...props}
-            classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+            classNames={mergeClassNames({
+                ...baseFormClassNames,
+                root: `${baseFormClassNames.root ?? ''} mb-2`.trim(),
+            }, props.classNames as ClassNames)}
         />
     );
 }
@@ -209,7 +222,11 @@ export function Radio(props: RadioProps) {
     return (
         <MantineRadio
             {...props}
-            classNames={mergeClassNames({ root: 'editable-field--radio' }, props.classNames as ClassNames)}
+            classNames={mergeClassNames({
+                root: 'editable-field--radio form-check mb-2',
+                input: 'form-check-input',
+                label: 'form-check-label',
+            }, props.classNames as ClassNames)}
         />
     );
 }
@@ -218,7 +235,10 @@ export function RadioGroup(props: RadioGroupProps) {
     return (
         <MantineRadio.Group
             {...props}
-            classNames={mergeClassNames(baseFormClassNames, props.classNames as ClassNames)}
+            classNames={mergeClassNames({
+                ...baseFormClassNames,
+                root: `${baseFormClassNames.root ?? ''} mb-2`.trim(),
+            }, props.classNames as ClassNames)}
         />
     );
 }
@@ -380,7 +400,7 @@ export function InlineField({
 
 const commonInputClassNames: ClassNames = { 
     root: 'editable-field__mantine-root',
-    input: 'editable-field__input' 
+    input: 'editable-field__input form-control'
 };
 
 // ==================== 1. INPUT FIELDS ====================
@@ -545,7 +565,11 @@ export function InlineSelect({ label, value, onSave, ...props }: SelectProps & {
                             pointer={!props.disabled}
                             classNames={mergeClassNames({
                                 wrapper: 'editable-field__mantine-root editable-field--form',
-                                input: [commonInputClassNames.input, !props.leftSection && isEditing ? 'editable-field__input--with-left-icon' : ''].filter(Boolean).join(' '),
+                                input: [
+                                    commonInputClassNames.input,
+                                    'form-select',
+                                    !props.leftSection && isEditing ? 'editable-field__input--with-left-icon' : '',
+                                ].filter(Boolean).join(' '),
                                 section: 'editable-field__icon-section',
                             }, props.classNames as ClassNames)}
                             comboboxProps={{ withinPortal: true, zIndex: 3000, ...props.comboboxProps }}

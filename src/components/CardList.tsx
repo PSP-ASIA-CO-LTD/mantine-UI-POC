@@ -86,7 +86,7 @@ export function CardList({
 
         if (typeof view === 'string' || typeof view === 'number') {
             return (
-                <Text fw={500} data-er-field={titleDataErField}>
+                <Text fw={500} className="fw-semibold mb-0" data-er-field={titleDataErField}>
                     {view}
                 </Text>
             );
@@ -105,7 +105,7 @@ export function CardList({
 
         if (typeof view === 'string' || typeof view === 'number') {
             return (
-                <Text size="sm" c="dimmed" data-er-field={descriptionDataErField}>
+                <Text size="sm" c="dimmed" className="text-body-secondary small mb-0" data-er-field={descriptionDataErField}>
                     {view}
                 </Text>
             );
@@ -121,7 +121,13 @@ export function CardList({
     const renderMeta = editing && editMeta !== undefined ? editMeta : meta;
 
     return (
-        <Card padding="md" mb={mb} withBorder className={className} data-er-field={cardDataErField}>
+        <Card
+            padding="md"
+            mb={mb}
+            withBorder
+            className={['card', 'shadow-sm', className].filter(Boolean).join(' ')}
+            data-er-field={cardDataErField}
+        >
             <Stack gap="xs">
                 <Group justify="space-between">
                     {renderTitle()}
@@ -131,18 +137,12 @@ export function CardList({
                 {renderDescription()}
                 {renderMeta}
 
-                <div
-                    style={{
-                        minHeight: 28,
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: 6,
-                    }}
-                >
+                <div className="d-flex justify-content-end gap-1 mt-2" style={{ minHeight: 28 }}>
                     {isEditing && !editing && canEdit && (
                         <ActionIcon
                             size={28}
                             variant="subtle"
+                            className="btn btn-outline-secondary btn-sm"
                             onClick={handleStartEdit}
                             aria-label="Edit"
                         >
@@ -156,6 +156,7 @@ export function CardList({
                                 size={28}
                                 variant="subtle"
                                 color="green"
+                                className="btn btn-outline-success btn-sm"
                                 onClick={(event) => {
                                     void handleSubmitEdit(event);
                                 }}
@@ -168,6 +169,7 @@ export function CardList({
                                 size={28}
                                 variant="subtle"
                                 color="red"
+                                className="btn btn-outline-danger btn-sm"
                                 onClick={handleCancelEdit}
                                 aria-label="Cancel edit"
                             >
@@ -181,6 +183,7 @@ export function CardList({
                             size={28}
                             color="red"
                             variant="light"
+                            className="btn btn-outline-danger btn-sm"
                             onClick={handleRemove}
                             aria-label="Remove"
                         >

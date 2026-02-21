@@ -9,10 +9,36 @@ import App from './App';
 import './index.css';
 import { GraphQLProvider } from './components/GraphQLProvider';
 
+const APP_FONT_FAMILY = '"Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <GraphQLProvider>
-      <MantineProvider>
+      <MantineProvider
+        theme={{
+          fontFamily: APP_FONT_FAMILY,
+          headings: {
+            fontFamily: APP_FONT_FAMILY,
+          },
+          components: {
+            Text: {
+              classNames: {
+                root: 'mb-0 text-body',
+              },
+            },
+            Title: {
+              classNames: {
+                root: 'mb-0',
+              },
+            },
+            Badge: {
+              classNames: {
+                root: 'badge',
+              },
+            },
+          },
+        }}
+      >
         <Notifications />
         <App />
       </MantineProvider>

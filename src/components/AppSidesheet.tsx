@@ -93,16 +93,16 @@ export function AppSidesheet({
             >
                 {/* Header */}
                 <header className="sidesheet-header">
-                    <div className="sidesheet-header-content">
+                    <div className="sidesheet-header-content d-flex flex-column gap-1">
                         {subtitle && (
-                            <Text size="sm" c="dimmed" className="sidesheet-subtitle">
+                            <Text size="sm" c="dimmed" className="sidesheet-subtitle text-body-secondary mb-0 small">
                                 {subtitle}
                             </Text>
                         )}
                         {titleNode ? (
                             <div
                                 id={titleId}
-                                className="sidesheet-title-node"
+                                className="sidesheet-title-node h4 mb-0"
                                 {...(titleDataAttribute ? { 'data-er-field': titleDataAttribute } : {})}
                             >
                                 {titleNode}
@@ -111,7 +111,7 @@ export function AppSidesheet({
                             <Title
                                 id={titleId}
                                 order={2}
-                                className="sidesheet-title"
+                                className="sidesheet-title h4 mb-0"
                                 {...(titleDataAttribute ? { 'data-er-field': titleDataAttribute } : {})}
                             >
                                 {title}
@@ -123,7 +123,7 @@ export function AppSidesheet({
                         variant="subtle"
                         color="gray"
                         onClick={onClose}
-                        className="sidesheet-close-btn"
+                        className="sidesheet-close-btn btn btn-link text-body p-0"
                     >
                         <IconX size={24} />
                     </Button>
@@ -132,12 +132,12 @@ export function AppSidesheet({
                 {/* Main Content - Two Pane Layout */}
                 <div className={`sidesheet-main ${hasLeftPane ? 'sidesheet-main--two' : ''}`}>
                     {leftPane && (
-                        <div className="sidesheet-left-pane">
+                        <div className="sidesheet-left-pane bg-body">
                             {leftPane}
                         </div>
                     )}
                     {(rightPane || children) && (
-                        <div className="sidesheet-right-pane">
+                        <div className="sidesheet-right-pane bg-body-tertiary">
                             {rightPane || children}
                         </div>
                     )}
