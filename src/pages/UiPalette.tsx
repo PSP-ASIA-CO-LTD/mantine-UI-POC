@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import './UiPalette.css';
 
 type TokenRow = {
     token: string;
@@ -102,7 +101,7 @@ export function UiPalette() {
                     <div className="card-body">
                         <h2 className="h4 mb-2">Bootstrap Quartz Palette</h2>
                         <p className="text-body-secondary mb-0">
-                            Live output from current <code>/public/bootstrap.min.css</code>. Only tokens available in this CSS are shown.
+                            Live output from current <code>/public/bootswatch/quartz/bootstrap.min.css</code>. Only tokens available in this CSS are shown.
                         </p>
                     </div>
                 </section>

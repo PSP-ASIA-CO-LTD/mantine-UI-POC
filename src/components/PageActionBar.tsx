@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { Group, Paper, Box } from '@mantine/core';
-import './PageActionBar.css';
 
 type PageActionBarProps = {
     left: ReactNode;

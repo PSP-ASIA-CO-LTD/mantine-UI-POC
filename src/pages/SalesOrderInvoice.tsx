@@ -25,7 +25,6 @@ import type { Package, Room, Guardian, Resident, Invoice, AdditionalServices } f
 import { buildInvoiceItems, calculateInvoiceTotals } from '../utils/invoiceCalculator';
 import { getBusinessSettings } from '../utils/businessSettings';
 import { PageActionBar } from '../components/PageActionBar';
-import './SalesOrderInvoice.css';
 
 interface InvoiceLocationState {
     draftId?: string;

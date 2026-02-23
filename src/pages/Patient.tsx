@@ -25,7 +25,6 @@ import {
     SearchInput
 } from '../components/EditableFields';
 import type { Guardian, Resident, SalesOrder, Room } from '../types';
-import './Patient.css';
 
 const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '—';

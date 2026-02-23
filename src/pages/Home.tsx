@@ -1,7 +1,6 @@
 import { Button, Container, Title, Stack } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconBellRinging } from '@tabler/icons-react';
-// import classes from './Home.module.css'; // ปิดไว้ก่อนถ้าไฟล์ CSS ยังว่างอยู่
 
 export function Home() {
     const handleNotify = () => {

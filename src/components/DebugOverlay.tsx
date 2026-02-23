@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useDebug } from '../contexts/DebugContext';
 import { Badge, Stack, Text, Paper, Group, CloseButton, ActionIcon, Tooltip } from '@mantine/core';
 import { IconBug, IconBugOff, IconGripVertical } from '@tabler/icons-react';
-import './DebugOverlay.css';
 
 interface FieldInfo {
     entity: string;

@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "run-p styles:watch dev:vite",
     "dev:vite": "vite",
-    "styles:build": "node ./scripts/sync-bootstrap-min-css.mjs",
-    "styles:watch": "node ./scripts/sync-bootstrap-min-css.mjs --watch",
+    "styles:build": "node ./scripts/build-bootswatch-css.mjs",
+    "styles:watch": "node ./scripts/build-bootswatch-css.mjs --watch",
     "build": "node ./scripts/run-codegen.mjs && npm run styles:build && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

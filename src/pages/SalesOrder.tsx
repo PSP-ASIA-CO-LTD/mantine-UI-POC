@@ -48,7 +48,6 @@ import { getBusinessSettings } from '../utils/businessSettings';
 import { buildInvoiceItems, calculateInvoiceTotals } from '../utils/invoiceCalculator';
 import { TextInput, Select, NumberInput, Textarea, DateInput, Checkbox, CheckboxGroup, Radio, RadioGroup } from '../components/EditableFields';
 import { RecurrenceDisplay } from '../components/RecurrenceIcon';
-import './SalesOrder.css';
 
 interface GuardianFormValues {
     id?: string;

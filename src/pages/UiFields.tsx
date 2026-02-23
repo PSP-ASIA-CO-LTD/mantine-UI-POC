@@ -63,7 +63,7 @@ export function UiFields() {
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">Bootstrap DS Native Field Styles</Title>
                                 <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-                                    public/bootstrap.min.css (official Quartz) + src/styles/ds/_field-tokens.scss
+                                    public/bootswatch/quartz/bootstrap.min.css (official Quartz) + src/styles/ds/field-tokens.scss
                                 </Text>
                             </Group>
                             <Text size="xs" c="dimmed" mb="md">
@@ -201,7 +201,7 @@ export function UiFields() {
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">1. Input Fields</Title>
                                 <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                    src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
                             <Text size="xs" c="dimmed" mb="md">Standard inputs with explicit edit buttons (Pencil icon).</Text>
@@ -225,7 +225,7 @@ export function UiFields() {
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">2. Search Fields</Title>
                                 <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                    src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
                             <Text size="xs" c="dimmed" mb="md">Standard search input with icon and placeholder padding fix.</Text>
@@ -243,7 +243,7 @@ export function UiFields() {
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">3. Locked Input Fields</Title>
                                 <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                    src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
                             <Text size="xs" c="dimmed" mb="md">Read-only fields with dashed border and "Locked" visual state.</Text>
@@ -259,7 +259,7 @@ export function UiFields() {
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">4. Selection Fields</Title>
                                 <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                    src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
                             <Text size="xs" c="dimmed" mb="md">No edit button. Click the field directly to trigger selection.</Text>
@@ -285,7 +285,7 @@ export function UiFields() {
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">5. Date Picker Fields</Title>
                                 <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                    src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
                             <Text size="xs" c="dimmed" mb="md">No edit button. Click to open date picker.</Text>
@@ -302,7 +302,7 @@ export function UiFields() {
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">6. Text Area Fields</Title>
                                 <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                    src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
                             <Text size="xs" c="dimmed" mb="md">Multi-line text support with auto-resize.</Text>

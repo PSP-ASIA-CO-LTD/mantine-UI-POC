@@ -1,0 +1,29 @@
+// Neutral Quartz overrides: keep Quartz structure while shifting to light surfaces.
+
+$body-bg: $white;
+$body-color: $gray-800;
+$link-color: $blue;
+$link-hover-color: shade-color($blue, 12%);
+
+$secondary: rgba($black, .08);
+$text-muted: rgba($gray-700, .85);
+$border-color: rgba($black, .12);
+
+$table-bg: $white;
+$table-border-color: rgba($black, .12);
+$table-striped-bg-factor: .03;
+$table-hover-bg-factor: .06;
+
+$input-bg: $white;
+$input-disabled-bg: $gray-200;
+$input-border-color: rgba($black, .15);
+$form-check-input-bg: $white;
+$form-switch-color: $gray-700;
+$form-select-indicator-color: $gray-700;
+
+$card-color: $gray-800;
+$card-cap-color: $gray-800;
+$list-group-color: $gray-800;
+
+$body-bg-image: none;
+$frosted-opacity: .08;

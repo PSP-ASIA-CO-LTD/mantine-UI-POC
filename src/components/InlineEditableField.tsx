@@ -1,7 +1,6 @@
 import { ActionIcon, NumberInput, Text, TextInput, Textarea } from '@mantine/core';
 import { IconCheck, IconPencil, IconX } from '@tabler/icons-react';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import './InlineEditableField.css';
 
 type InlineEditableFieldType = 'text' | 'email' | 'tel' | 'textarea' | 'number';
 
@@ -144,30 +143,31 @@ export function InlineEditableField({
                 <div className="editable-field__actions">
                     {!isEditing ? (
                         <ActionIcon
-                            variant="subtle"
+                            variant="transparent"
                             aria-label={`Edit ${label}`}
                             onClick={handleStartEdit}
                             disabled={disabled}
+                            className="editable-field__action-btn btn btn-sm btn-link text-secondary p-1 border-0"
                         >
                             <IconPencil size={16} />
                         </ActionIcon>
                     ) : (
                         <>
                             <ActionIcon
-                                variant="subtle"
-                                color="green"
+                                variant="transparent"
                                 aria-label={`Save ${label}`}
                                 onClick={handleSave}
                                 disabled={isSaving}
+                                className="editable-field__action-btn btn btn-sm btn-link text-success p-1 border-0"
                             >
                                 <IconCheck size={16} />
                             </ActionIcon>
                             <ActionIcon
-                                variant="subtle"
-                                color="red"
+                                variant="transparent"
                                 aria-label={`Cancel ${label}`}
                                 onClick={handleCancel}
                                 disabled={isSaving}
+                                className="editable-field__action-btn btn btn-sm btn-link text-danger p-1 border-0"
                             >
                                 <IconX size={16} />
                             </ActionIcon>

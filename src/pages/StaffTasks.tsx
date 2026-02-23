@@ -33,7 +33,6 @@ import {
 import { API } from '../api';
 import { Select, Textarea } from '../components/EditableFields';
 import type { OperationTask, Staff, StaffShift } from '../types';
-import './StaffTasks.css';
 
 export function StaffTasks() {
     const [tasks, setTasks] = useState<OperationTask[]>([]);

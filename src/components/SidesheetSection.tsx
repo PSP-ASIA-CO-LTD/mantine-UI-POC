@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import './SidesheetSection.css';
 
 interface SidesheetSectionProps {
     title: ReactNode;

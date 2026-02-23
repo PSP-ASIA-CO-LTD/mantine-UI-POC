@@ -1,6 +1,5 @@
 import type { ButtonHTMLAttributes, ComponentPropsWithoutRef } from 'react';
 import { forwardRef, useEffect, useRef } from 'react';
-import './Button.css';
 
 export type PrimaryButtonVariant = 'solid' | 'border';
 

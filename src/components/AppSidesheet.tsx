@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { Title, Button, Text } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
-import './AppSidesheet.css';
 
 interface AppSidesheetProps {
     opened: boolean;

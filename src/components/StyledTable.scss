@@ -1,0 +1,17 @@
+.styled-table {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.styled-table thead th {
+  font-weight: 600;
+  background-color: var(--bs-gray-100);
+}
+
+.styled-table tbody tr {
+  transition: background-color 0.2s ease;
+}

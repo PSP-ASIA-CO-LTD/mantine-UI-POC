@@ -22,7 +22,6 @@ import { Select, TextInput } from '../components/EditableFields';
 import { useSalesOrder } from '../contexts/SalesOrderContext';
 import { RecurrenceDisplay } from '../components/RecurrenceIcon';
 import type { ContractLanguage, StoredContract, Contract } from '../types';
-import './SalesOrderContract.css';
 
 type ContractLocationState = {
     draftId?: string;

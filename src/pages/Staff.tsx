@@ -29,7 +29,6 @@ import {
     InlineLockedInput,
 } from '../components/EditableFields';
 import type { Staff } from '../types';
-import './Staff.css';
 
 export function Staff() {
     const [staff, setStaff] = useState<Staff[]>([]);

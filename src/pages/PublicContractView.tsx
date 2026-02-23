@@ -7,7 +7,6 @@ import { API } from '../api';
 import { PageActionBar } from '../components/PageActionBar';
 import { TextInput } from '../components/EditableFields';
 import type { StoredContract } from '../types';
-import './PublicContractView.css';
 
 export function PublicContractView() {
     const navigate = useNavigate();

@@ -6,8 +6,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import App from './App';
-import './index.css';
-import './styles/ds/field-tokens.scss';
+import './styles/app.scss';
 import { GraphQLProvider } from './components/GraphQLProvider';
 
 const APP_FONT_FAMILY = '"Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';

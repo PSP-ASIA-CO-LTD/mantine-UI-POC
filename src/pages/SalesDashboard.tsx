@@ -29,7 +29,6 @@ import { StyledTable } from '../components/StyledTable';
 import { PageHeader } from '../components/PageHeader';
 import { buildLeftSection } from '../utils/sidesheetHelper';
 import type { SalesDashboardStats, Notification, SalesOrder, Resident, Guardian, Room } from '../types';
-import './SalesDashboard.css';
 
 export function SalesDashboard() {
     const navigate = useNavigate();

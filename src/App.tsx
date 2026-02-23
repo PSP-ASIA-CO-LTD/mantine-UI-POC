@@ -22,7 +22,6 @@ import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
 import { SalesOrderProvider } from './contexts/SalesOrderContext';
 import { DebugOverlay } from './components/DebugOverlay';
-import './App.css';
 
 // Routes that should hide the navbar (standalone/mobile-focused pages)
 const STANDALONE_ROUTES = ['/staff/tasks'];

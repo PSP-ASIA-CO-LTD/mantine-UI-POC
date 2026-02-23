@@ -26,7 +26,6 @@ import {
 import { DateInput as MantineDateInput, type DateInputProps } from '@mantine/dates';
 import { IconCheck, IconPencil, IconX, IconCalendar, IconSearch } from '@tabler/icons-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import './InlineEditableField.css';
 
 type ClassNames = Record<string, string | undefined>;
 
@@ -364,10 +363,11 @@ export function InlineField({
                     ) : !isEditing && !locked ? (
                         !hideEditButton && (
                             <ActionIcon
-                                variant="subtle"
+                                variant="transparent"
                                 onClick={() => !disabled && setIsEditing(true)}
                                 disabled={disabled}
                                 size="sm"
+                                className="editable-field__action-btn btn btn-sm btn-link text-secondary p-1 border-0"
                             >
                                 <IconPencil size={16} />
                             </ActionIcon>
@@ -375,18 +375,18 @@ export function InlineField({
                     ) : isEditing && !hideActionButtons ? (
                         <>
                             <ActionIcon
-                                variant="subtle"
-                                color="green"
+                                variant="transparent"
                                 onClick={(e) => { e.stopPropagation(); handleSave(); }}
                                 size="sm"
+                                className="editable-field__action-btn btn btn-sm btn-link text-success p-1 border-0"
                             >
                                 <IconCheck size={16} />
                             </ActionIcon>
                             <ActionIcon
-                                variant="subtle"
-                                color="red"
+                                variant="transparent"
                                 onClick={(e) => { e.stopPropagation(); handleCancel(); }}
                                 size="sm"
+                                className="editable-field__action-btn btn btn-sm btn-link text-danger p-1 border-0"
                             >
                                 <IconX size={16} />
                             </ActionIcon>

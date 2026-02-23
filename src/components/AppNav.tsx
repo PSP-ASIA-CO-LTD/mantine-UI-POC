@@ -18,7 +18,6 @@ import {
     IconColumns3,
     IconForms
 } from '@tabler/icons-react';
-import './AppNav.css';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { API } from '../api';
 import { buildCompanySettingsPanels } from './CompanySettingsPanels.builder';

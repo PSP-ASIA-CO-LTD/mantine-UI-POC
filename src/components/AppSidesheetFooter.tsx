@@ -1,5 +1,4 @@
 import { Group, Button } from '@mantine/core';
-import './AppSidesheetFooter.css';
 
 interface AppSidesheetFooterProps {
     onCancel?: () => void;
