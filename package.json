@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "run-p styles:watch dev:vite",
     "dev:vite": "vite",
-    "styles:build": "sass --load-path=node_modules src/styles/bootstrap.quartz.scss public/bootstrap.min.css --style=compressed --no-source-map",
-    "styles:watch": "sass --load-path=node_modules src/styles/bootstrap.quartz.scss public/bootstrap.min.css --watch --style=compressed --no-source-map",
+    "styles:build": "node ./scripts/sync-bootstrap-min-css.mjs",
+    "styles:watch": "node ./scripts/sync-bootstrap-min-css.mjs --watch",
     "build": "node ./scripts/run-codegen.mjs && npm run styles:build && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

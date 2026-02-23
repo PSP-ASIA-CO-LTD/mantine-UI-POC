@@ -38,6 +38,39 @@
   --ds-color-dot-left-section-width: 36px;
 }
 
+/* Quartz sets light-theme body text vars to white; remap for this app's light surfaces. */
+:root,
+[data-bs-theme='light'] {
+  --bs-body-color: #212529;
+  --bs-body-color-rgb: 33, 37, 41;
+  --bs-secondary-color: rgba(73, 80, 87, 0.75);
+  --bs-secondary-color-rgb: 73, 80, 87;
+  --bs-tertiary-color: rgba(108, 117, 125, 0.6);
+  --bs-tertiary-color-rgb: 108, 117, 125;
+  --bs-link-color: #0d6efd;
+  --bs-link-color-rgb: 13, 110, 253;
+  --bs-link-hover-color: #0a58ca;
+  --bs-link-hover-color-rgb: 10, 88, 202;
+  --bs-card-color: #212529;
+  --bs-card-cap-color: #212529;
+}
+
+.text-body {
+  --bs-text-opacity: 1;
+  color: rgba(33, 37, 41, var(--bs-text-opacity)) !important;
+}
+
+.text-body-secondary,
+.text-muted {
+  --bs-text-opacity: 1;
+  color: rgba(73, 80, 87, calc(var(--bs-text-opacity) * 0.85)) !important;
+}
+
+.card {
+  --bs-card-color: #212529;
+  --bs-card-cap-color: #212529;
+}
+
 body {
   font-family: var(--mantine-font-family, 'Google Sans', system-ui, Avenir, Helvetica, Arial, sans-serif);
   margin: 0;

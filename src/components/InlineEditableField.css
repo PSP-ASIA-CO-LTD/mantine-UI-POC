@@ -7,7 +7,7 @@
 }
 
 .editable-field__label {
-    color: var(--mantine-primary-color-filled);
+    color: var(--ds-field-label-color);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.02em;
@@ -17,7 +17,7 @@
 
 .editable-field__description {
     font-size: 0.75rem;
-    color: var(--mantine-color-gray-6);
+    color: var(--ds-field-muted-color);
     margin-top: -4px;
     margin-bottom: 4px;
 }
@@ -47,7 +47,7 @@
     padding-inline: 0.75rem !important;
     font-size: 0.95rem;
     line-height: 1.4;
-    color: var(--mantine-color-dark-7);
+    color: var(--ds-field-text-color);
     resize: none;
     display: block;
 }
@@ -57,7 +57,7 @@
 }
 
 .editable-field__icon-section {
-    color: var(--mantine-color-gray-6);
+    color: var(--ds-field-muted-color);
 }
 
 .editable-field__select-search-icon {
@@ -70,22 +70,22 @@
 }
 
 .editable-field.is-editing .editable-field__mantine-root {
-    background-color: var(--mantine-primary-color-light);
+    background-color: var(--ds-field-edit-bg);
 }
 
 .editable-field--inline:hover:not(.is-editing) .editable-field__mantine-root {
-    background-color: var(--mantine-color-gray-1);
+    background-color: var(--ds-field-hover-bg);
 }
 
 .editable-field--locked.editable-field--inline:hover:not(.is-editing) .editable-field__mantine-root {
-    background-color: var(--mantine-color-gray-0);
+    background-color: var(--ds-field-locked-bg);
 }
 
 .editable-field[data-error] .editable-field__mantine-root,
 .editable-field[data-invalid] .editable-field__mantine-root,
 .editable-field:has(.editable-field__input[data-error]) .editable-field__mantine-root,
 .editable-field:has(.editable-field__input[data-invalid]) .editable-field__mantine-root {
-    background-color: var(--mantine-color-red-light);
+    background-color: var(--ds-field-error-bg);
 }
 
 .editable-field__input:focus {
@@ -105,6 +105,17 @@
     white-space: nowrap;
 }
 
+.editable-field__action-btn.btn.btn-sm {
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    border-radius: var(--bs-border-radius-sm);
+    line-height: 1;
+}
+
+.editable-field__action-btn.btn.btn-sm:hover {
+    background: var(--ds-field-hover-bg);
+}
+
 /* HOVER STATE: Show edit button INSIDE the field */
 .editable-field:hover:not(.is-editing) .editable-field__actions {
     opacity: 1;
@@ -112,7 +123,7 @@
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    background: var(--mantine-color-body);
+    background: var(--ds-field-actions-bg);
     padding-left: 0;
 }
 
@@ -123,7 +134,7 @@
     top: calc(100% + 4px); /* Step down to keep the line visible */
     right: 0;
     transform: none;
-    background: var(--mantine-color-body);
+    background: var(--ds-field-actions-bg);
     padding: 2px 4px;
     border-radius: 4px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -136,7 +147,7 @@
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    background: var(--mantine-color-body);
+    background: var(--ds-field-actions-bg);
     padding-left: 0;
 }
 
@@ -186,31 +197,31 @@
 }
 
 .editable-field--locked .editable-field__mantine-root {
-    background-color: var(--mantine-color-gray-0);
-    border: 1px dashed var(--mantine-color-gray-3);
+    background-color: var(--ds-field-locked-bg);
+    border: 1px dashed var(--ds-field-locked-border);
 }
 
 .editable-field--locked .editable-field__input {
-    color: var(--mantine-color-gray-6);
+    color: var(--ds-field-muted-color);
     cursor: default;
 }
 
 /* Form Styles for standard inputs to match inline style */
 .editable-field--form {
-    background-color: var(--mantine-color-gray-1);
+    background-color: var(--ds-field-idle-bg);
     border-radius: 0;
     transition: background-color 0.2s ease;
 }
 
 .editable-field--form:focus-within {
-    background-color: var(--mantine-primary-color-light);
+    background-color: var(--ds-field-edit-bg);
 }
 
 .editable-field--form[data-error],
 .editable-field--form[data-invalid],
 .editable-field--form:has(.editable-field__input[data-error]),
 .editable-field--form:has(.editable-field__input[data-invalid]) {
-    background-color: var(--mantine-color-red-light);
+    background-color: var(--ds-field-error-bg);
 }
 
 /* Form Styles for Checkbox/Radio groups */

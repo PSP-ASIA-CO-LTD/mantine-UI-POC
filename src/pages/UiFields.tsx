@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { Title, Text, Stack, Card, Group, Divider, Container } from '@mantine/core';
 import {
+    TextInput as DsTextInput,
+    SearchInput as DsSearchInput,
+    NumberInput as DsNumberInput,
+    Select as DsSelect,
+    DateInput as DsDateInput,
+    Textarea as DsTextarea,
+    Checkbox as DsCheckbox,
+    Radio as DsRadio,
     InlineTextInput,
     InlineNumberInput,
     InlineLockedInput,
@@ -18,6 +26,14 @@ export function UiFields() {
     const [select, setSelect] = useState('active');
     const [date, setDate] = useState<Date | null>(new Date());
     const [textarea, setTextarea] = useState('This is a long description about the resident that might span multiple lines.');
+    const [bootstrapText, setBootstrapText] = useState('Bootstrap text input');
+    const [bootstrapSearch, setBootstrapSearch] = useState('');
+    const [bootstrapNumber, setBootstrapNumber] = useState<number | string>(12);
+    const [bootstrapSelect, setBootstrapSelect] = useState<string | null>('active');
+    const [bootstrapDate, setBootstrapDate] = useState<string | null>('2026-02-23');
+    const [bootstrapTextarea, setBootstrapTextarea] = useState('Bootstrap textarea');
+    const [bootstrapCheckbox, setBootstrapCheckbox] = useState(false);
+    const [bootstrapRadio, setBootstrapRadio] = useState('yes');
 
     const prefixOptions = [
         { value: 'mr', label: 'Mr.' },
@@ -44,7 +60,150 @@ export function UiFields() {
                 <Card withBorder padding="xl" radius="md">
                     <Stack gap="lg">
                         <div>
-                            <Title order={4} mb="xs">1. Input Fields</Title>
+                            <Group justify="space-between" align="center">
+                                <Title order={4} mb="xs">Bootstrap DS Native Field Styles</Title>
+                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                    public/bootstrap.min.css (official Quartz) + src/styles/ds/_field-tokens.scss
+                                </Text>
+                            </Group>
+                            <Text size="xs" c="dimmed" mb="md">
+                                Pure Bootstrap-driven form styles via DS wrappers. Use this section as the baseline reference.
+                            </Text>
+                            <Stack gap="md">
+                                <div>
+                                    <Group justify="space-between" align="center">
+                                        <Text fw={600} size="sm">Text Input</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                            src/components/EditableFields.tsx (TextInput)
+                                        </Text>
+                                    </Group>
+                                    <DsTextInput
+                                        label="Bootstrap Text"
+                                        value={bootstrapText}
+                                        onChange={(event) => setBootstrapText(event.currentTarget.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Group justify="space-between" align="center">
+                                        <Text fw={600} size="sm">Search Input</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                            src/components/EditableFields.tsx (SearchInput)
+                                        </Text>
+                                    </Group>
+                                    <DsSearchInput
+                                        label="Bootstrap Search"
+                                        placeholder="Search using bootstrap style..."
+                                        value={bootstrapSearch}
+                                        onChange={(event) => setBootstrapSearch(event.currentTarget.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Group justify="space-between" align="center">
+                                        <Text fw={600} size="sm">Number Input</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                            src/components/EditableFields.tsx (NumberInput)
+                                        </Text>
+                                    </Group>
+                                    <DsNumberInput
+                                        label="Bootstrap Number"
+                                        value={bootstrapNumber}
+                                        onChange={setBootstrapNumber}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Group justify="space-between" align="center">
+                                        <Text fw={600} size="sm">Select Input</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                            src/components/EditableFields.tsx (Select)
+                                        </Text>
+                                    </Group>
+                                    <DsSelect
+                                        label="Bootstrap Select"
+                                        data={statusOptions}
+                                        value={bootstrapSelect}
+                                        onChange={setBootstrapSelect}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Group justify="space-between" align="center">
+                                        <Text fw={600} size="sm">Date Input</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                            src/components/EditableFields.tsx (DateInput)
+                                        </Text>
+                                    </Group>
+                                    <DsDateInput
+                                        label="Bootstrap Date"
+                                        value={bootstrapDate}
+                                        onChange={setBootstrapDate}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Group justify="space-between" align="center">
+                                        <Text fw={600} size="sm">Textarea</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                            src/components/EditableFields.tsx (Textarea)
+                                        </Text>
+                                    </Group>
+                                    <DsTextarea
+                                        label="Bootstrap Textarea"
+                                        value={bootstrapTextarea}
+                                        onChange={(event) => setBootstrapTextarea(event.currentTarget.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Group justify="space-between" align="center">
+                                        <Text fw={600} size="sm">Checkbox</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                            src/components/EditableFields.tsx (Checkbox)
+                                        </Text>
+                                    </Group>
+                                    <DsCheckbox
+                                        label="Bootstrap Checkbox"
+                                        checked={bootstrapCheckbox}
+                                        onChange={(event) => setBootstrapCheckbox(event.currentTarget.checked)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Group justify="space-between" align="center">
+                                        <Text fw={600} size="sm">Radio</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                            src/components/EditableFields.tsx (Radio)
+                                        </Text>
+                                    </Group>
+                                    <Stack gap={6}>
+                                        <DsRadio
+                                            label="Yes"
+                                            checked={bootstrapRadio === 'yes'}
+                                            onChange={() => setBootstrapRadio('yes')}
+                                        />
+                                        <DsRadio
+                                            label="No"
+                                            checked={bootstrapRadio === 'no'}
+                                            onChange={() => setBootstrapRadio('no')}
+                                        />
+                                    </Stack>
+                                </div>
+                            </Stack>
+                        </div>
+                    </Stack>
+                </Card>
+
+                <Card withBorder padding="xl" radius="md">
+                    <Stack gap="lg">
+                        <div>
+                            <Group justify="space-between" align="center">
+                                <Title order={4} mb="xs">1. Input Fields</Title>
+                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                </Text>
+                            </Group>
                             <Text size="xs" c="dimmed" mb="md">Standard inputs with explicit edit buttons (Pencil icon).</Text>
                             <Stack gap="md">
                                 <InlineTextInput
@@ -63,7 +222,12 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">2. Search Fields</Title>
+                            <Group justify="space-between" align="center">
+                                <Title order={4} mb="xs">2. Search Fields</Title>
+                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                </Text>
+                            </Group>
                             <Text size="xs" c="dimmed" mb="md">Standard search input with icon and placeholder padding fix.</Text>
                             <IconFieldInput
                                 icon={<IconSearch size={16} />}
@@ -76,7 +240,12 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">3. Locked Input Fields</Title>
+                            <Group justify="space-between" align="center">
+                                <Title order={4} mb="xs">3. Locked Input Fields</Title>
+                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                </Text>
+                            </Group>
                             <Text size="xs" c="dimmed" mb="md">Read-only fields with dashed border and "Locked" visual state.</Text>
                             <InlineLockedInput
                                 label="System ID (Immutable)"
@@ -87,7 +256,12 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">4. Selection Fields</Title>
+                            <Group justify="space-between" align="center">
+                                <Title order={4} mb="xs">4. Selection Fields</Title>
+                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                </Text>
+                            </Group>
                             <Text size="xs" c="dimmed" mb="md">No edit button. Click the field directly to trigger selection.</Text>
                             <Stack gap="md">
                                 <InlineSelect
@@ -108,7 +282,12 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">5. Date Picker Fields</Title>
+                            <Group justify="space-between" align="center">
+                                <Title order={4} mb="xs">5. Date Picker Fields</Title>
+                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                </Text>
+                            </Group>
                             <Text size="xs" c="dimmed" mb="md">No edit button. Click to open date picker.</Text>
                             <InlineDateInput
                                 label="Joining Date"
@@ -120,7 +299,12 @@ export function UiFields() {
                         <Divider />
 
                         <div>
-                            <Title order={4} mb="xs">6. Text Area Fields</Title>
+                            <Group justify="space-between" align="center">
+                                <Title order={4} mb="xs">6. Text Area Fields</Title>
+                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                    src/styles/ds/_field-tokens.scss + src/components/InlineEditableField.css
+                                </Text>
+                            </Group>
                             <Text size="xs" c="dimmed" mb="md">Multi-line text support with auto-resize.</Text>
                             <InlineTextarea
                                 label="Biography"

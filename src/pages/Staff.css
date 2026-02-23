@@ -1,6 +1,6 @@
 .staff-search-field.editable-field--form {
-    background-color: var(--mantine-color-white);
-    border: 1px solid var(--mantine-color-gray-3);
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
     border-radius: 8px;
 }
 
@@ -8,5 +8,5 @@
 .staff-search-field.editable-field--form:hover,
 .staff-search-field.editable-field--form[data-error],
 .staff-search-field.editable-field--form[data-invalid] {
-    background-color: var(--mantine-color-white);
+    background-color: var(--bs-body-bg);
 }
