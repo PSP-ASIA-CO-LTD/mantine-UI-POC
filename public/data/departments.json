@@ -46,7 +46,7 @@
     "name": "Medical",
     "code": "MEDICA",
     "description": "",
-    "color": "#5E35B1",
+    "color": "var(--mantine-color-green-8)",
     "headManagerId": "st-5"
   }
 ]
