@@ -1,0 +1,1306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Health Canonical Model v4 - FHIR Output Ready</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0ede8;
+  --card:#ffffff;
+  --card-soft:#f7f5f2;
+  --text:#1a1a2e;
+  --muted:#5a5a72;
+  --line:#e2ddd8;
+  --navy:#141f30;
+  --accent:#0d9db5;
+  --accent2:#5bc8d8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:'DM Sans',system-ui,sans-serif;color:var(--text);}
+.container{width:100%;padding:24px 20px 80px}
+header{background:var(--navy);color:#fff;border-radius:14px;padding:24px 26px;box-shadow:0 8px 26px rgba(0,0,0,.25)}
+h1{margin:0 0 8px;font-size:1.75rem;line-height:1.2}
+.subtitle{color:#8da4be;font-size:.92rem;line-height:1.5;margin:0}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;font-size:.75rem}
+
+.nav{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto}
+.nav-inner{display:flex;min-width:680px}
+.nav-tab{padding:12px 16px;font-size:.82rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;user-select:none;white-space:nowrap}
+.nav-tab:hover{color:var(--navy)}
+.nav-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+
+.section{display:none;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.section.active{display:block}
+.section h2{margin:0 0 10px;font-size:1.1rem}
+.section p{margin:0 0 10px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:10px;margin-top:10px}
+.kv .item{background:var(--card-soft);border:1px solid var(--line);padding:10px 12px;border-radius:10px}
+.kv .k{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.kv .v{font-size:1rem;font-weight:700}
+
+.pill-strip{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px}
+.pill-btn{border:1px solid var(--line);background:var(--card-soft);color:var(--muted);font-size:.73rem;font-weight:700;padding:6px 10px;border-radius:999px;cursor:pointer}
+.pill-btn.active{background:#e0f2fe;border-color:#93c5fd;color:#0c4a6e}
+.hint{font-size:.75rem;color:#7b7b92;margin-bottom:8px}
+
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+table{width:100%;border-collapse:collapse;min-width:1000px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:.84rem;line-height:1.45}
+th{position:sticky;top:0;background:#f8fafc;text-align:left;font-weight:700;z-index:2}
+tr:hover td{background:#fcfcff}
+.code{font-family:'JetBrains Mono',monospace;font-size:.76rem;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:2px 6px;display:inline-block}
+.priority{font-weight:700}
+.p1{color:#0f766e}.p2{color:#0369a1}.p3{color:#9a3412}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.panel{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.panel .hd{padding:10px 12px;background:#f8fafc;border-bottom:1px solid var(--line);font-weight:700}
+.panel .bd{padding:12px}
+.diagram-box{max-height:640px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px}
+.mermaid,.mermaid-host{min-width:900px}
+.code-wrap{position:relative;margin-top:10px}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--accent);border:none;color:#fff;padding:6px 10px;border-radius:6px;font-size:.78rem;cursor:pointer}
+pre{margin:0;background:#0f172a;color:#dbeafe;border-radius:12px;padding:14px;overflow:auto;font-size:.77rem;line-height:1.6}
+.note{padding:10px 12px;border-radius:10px;border:1px solid #d1fae5;background:#ecfdf5;color:#065f46;font-size:.85rem}
+.warn{padding:10px 12px;border-radius:10px;border:1px solid #fee2e2;background:#fff1f2;color:#9f1239;font-size:.85rem}
+footer{margin-top:14px;color:var(--muted);font-size:.8rem}
+
+@media (max-width:1060px){
+  .kv{grid-template-columns:1fr}
+  .grid-2{grid-template-columns:1fr}
+  .mermaid,.mermaid-host{min-width:760px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Health Canonical Data Model v4</h1>
+    <p class="subtitle">Internal DB = no duplication. FHIR payload = generated from mapping layer for MoPH export/API.</p>
+    <div class="badges">
+      <span class="badge">Clinic + Nursing Home + PHR</span>
+      <span class="badge">Canonical Storage</span>
+      <span class="badge">FHIR Output Ready</span>
+      <span class="badge">Thai Address Structure</span>
+      <span class="badge">67 Export Rules</span>
+    </div>
+  </header>
+
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="nav-tab active" onclick="showTab('overview',this)">Overview</div>
+      <div class="nav-tab" onclick="showTab('tables',this)">Table Groups</div>
+      <div class="nav-tab" onclick="showTab('mapping',this)">FHIR Mapping</div>
+      <div class="nav-tab" onclick="showTab('erd',this)">ERD + Mermaid</div>
+      <div class="nav-tab" onclick="showTab('sql',this)">SQL Artifacts</div>
+    </div>
+  </div>
+
+  <section id="tab-overview" class="section active">
+    <h2>Decision Summary (Lock This In)</h2>
+    <div class="note">เก็บข้อมูลจริงแบบไม่ซ้ำซ้อนใน canonical tables และแปลงไป FHIR ตอนส่งออกเท่านั้น เพื่อให้รองรับ report/API ภายนอกโดยไม่บิดโครงภายใน</div>
+    <div class="kv">
+      <div class="item"><span class="k">Storage Rule</span><span class="v">Single Source</span></div>
+      <div class="item"><span class="k">Exchange Rule</span><span class="v">FHIR Mapping Layer</span></div>
+      <div class="item"><span class="k">Address Rule</span><span class="v">Store Tambon FK, derive Amphur/Province</span></div>
+    </div>
+  </section>
+
+  <section id="tab-tables" class="section">
+    <h2>A) Canonical Table Breakdown (No overlap / No duplicated purpose)</h2>
+    <p>แต่ละตารางมีหน้าที่ชัด ไม่ทับซ้อนกัน และรองรับ cardinality ที่เกิดจริงในระบบ</p>
+    <div class="hint">เลือกดูทีละกลุ่มด้วย pills เพื่ออ่านง่ายแบบ v3</div>
+    <div class="pill-strip" id="table-pills">
+      <button class="pill-btn active" onclick="filterCanonical('all',this)">All</button>
+      <button class="pill-btn" onclick="filterCanonical('Reference',this)">Reference</button>
+      <button class="pill-btn" onclick="filterCanonical('Patient',this)">Patient</button>
+      <button class="pill-btn" onclick="filterCanonical('Encounter',this)">Encounter</button>
+      <button class="pill-btn" onclick="filterCanonical('Clinical Core',this)">Clinical Core</button>
+      <button class="pill-btn" onclick="filterCanonical('Clinical Common',this)">Clinical Common</button>
+      <button class="pill-btn" onclick="filterCanonical('Extended',this)">Extended</button>
+      <button class="pill-btn" onclick="filterCanonical('Admin',this)">Admin</button>
+      <button class="pill-btn" onclick="filterCanonical('Mapping',this)">Mapping Layer</button>
+    </div>
+    <div class="table-wrap">
+      <table id="canonical-table">
+        <thead>
+          <tr>
+            <th>Cluster</th>
+            <th>Table</th>
+            <th>Purpose</th>
+            <th>Key Fields</th>
+            <th>Example Stored Value</th>
+            <th>Why Not Duplicate</th>
+            <th>FHIR Output Targets</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Reference</td><td><span class="code">geo_province</span></td><td>Master จังหวัด</td><td><span class="code">code,name_th</span></td><td>ใช้ร่วมทุกโมดูล</td><td>Patient.address.state, Organization.address</td><td class="priority p1">P1</td></tr>
+          <tr><td>Reference</td><td><span class="code">geo_amphur</span></td><td>Master อำเภอ</td><td><span class="code">code,province_id</span></td><td>ไม่เก็บซ้ำใน patient_address</td><td>Patient.address.district</td><td class="priority p1">P1</td></tr>
+          <tr><td>Reference</td><td><span class="code">geo_tambon</span></td><td>Master ตำบล</td><td><span class="code">code,amphur_id,postal_code</span></td><td>เป็น location key เดียวของที่อยู่</td><td>Patient.address.city + extension addressCode</td><td class="priority p1">P1</td></tr>
+          <tr><td>Reference</td><td><span class="code">org_facility</span></td><td>หน่วยบริการ/โรงพยาบาล</td><td><span class="code">hospcode,name</span></td><td>ทุก HN/Encounter ใช้ร่วม</td><td>Organization, Patient.identifier.assigner</td><td class="priority p1">P1</td></tr>
+
+          <tr><td>Patient</td><td><span class="code">patient</span></td><td>Demographic core 1 คน 1 แถว</td><td><span class="code">birth_date,sex,nationality_code</span></td><td>ไม่เก็บ phone/address/identifier ในตารางนี้</td><td>Patient.birthDate,gender,extensions</td><td class="priority p1">P1</td></tr>
+          <tr><td>Patient</td><td><span class="code">patient_name</span></td><td>รองรับชื่อหลายภาษา/หลาย use</td><td><span class="code">patient_id,language_code,name_use</span></td><td>หลีกเลี่ยง first/last ซ้ำหลายคอลัมน์</td><td>Patient.name[thai], Patient.name[english]</td><td class="priority p1">P1</td></tr>
+          <tr><td>Patient</td><td><span class="code">patient_identifier</span></td><td>CID/HN/PID/Passport</td><td><span class="code">identifier_type,identifier_value,assigner_org_id</span></td><td>HN หลายโรงพยาบาลได้โดยไม่ซ้ำแถว</td><td>Patient.identifier slices</td><td class="priority p1">P1</td></tr>
+          <tr><td>Patient</td><td><span class="code">patient_address</span></td><td>หลายที่อยู่ต่อผู้ป่วย</td><td><span class="code">address_use,tambon_id</span></td><td>ไม่เก็บ amphur/province ซ้ำกับ master</td><td>Patient.address + TH extension</td><td class="priority p1">P1</td></tr>
+          <tr><td>Patient</td><td><span class="code">patient_telecom</span></td><td>Phone/Email แบบ array</td><td><span class="code">system,use_code,value,rank_no</span></td><td>ไม่ต้องมี phone1/phone2/email ใน patient</td><td>Patient.telecom[]</td><td class="priority p1">P1</td></tr>
+          <tr><td>Patient</td><td><span class="code">related_person</span></td><td>ญาติ/ผู้ดูแล แยกจาก contact ผู้ป่วย</td><td><span class="code">relationship_code,name</span></td><td>ไม่ทับกับ patient_contact</td><td>RelatedPerson</td><td class="priority p1">P1</td></tr>
+          <tr><td>Patient</td><td><span class="code">related_person_telecom</span></td><td>ช่องทางติดต่อญาติ</td><td><span class="code">related_person_id,system,value</span></td><td>รองรับหลายเบอร์/อีเมล</td><td>RelatedPerson.telecom[]</td><td class="priority p2">P2</td></tr>
+          <tr><td>Patient</td><td><span class="code">patient_attribute_audit</span></td><td>log field ที่เปลี่ยนน้อย</td><td><span class="code">field_name,old_value,new_value,logged_at</span></td><td>เก็บ history โดยไม่ snapshot ทั้ง patient</td><td>AuditEvent / Provenance</td><td class="priority p2">P2</td></tr>
+
+          <tr><td>Encounter</td><td><span class="code">coverage</span></td><td>สิทธิรักษา</td><td><span class="code">coverage_type,scheme_code,status</span></td><td>แยกจาก encounter เพื่อ reuse</td><td>Coverage</td><td class="priority p2">P2</td></tr>
+          <tr><td>Encounter</td><td><span class="code">encounter</span></td><td>ศูนย์กลาง event การรักษา</td><td><span class="code">visit_number,patient_id,facility_id</span></td><td>ทุก clinical record อ้างอิงจุดเดียว</td><td>Encounter</td><td class="priority p1">P1</td></tr>
+
+          <tr><td>Clinical Core</td><td><span class="code">condition_record</span></td><td>วินิจฉัย/โรคร่วม/ประวัติ</td><td><span class="code">code,diagnosis_type,clinical_status</span></td><td>รวม condition semantics ไว้ที่เดียว</td><td>Condition</td><td class="priority p1">P1</td></tr>
+          <tr><td>Clinical Core</td><td><span class="code">observation</span></td><td>Vital/Lab/Score/Symptom generic</td><td><span class="code">category_code,code,value_type,effective_at</span></td><td>เลี่ยงสร้าง table observation ซ้ำตามแผนก</td><td>Observation</td><td class="priority p1">P1</td></tr>
+          <tr><td>Clinical Core</td><td><span class="code">medication_request</span></td><td>ยาที่สั่งใช้</td><td><span class="code">medication_code,status,authored_at</span></td><td>ไม่ปนกับ self-reported meds</td><td>MedicationRequest</td><td class="priority p2">P2</td></tr>
+          <tr><td>Clinical Core</td><td><span class="code">medication_statement</span></td><td>ยาที่ผู้ป่วยรายงานเอง</td><td><span class="code">medication_code,adherence_status</span></td><td>แยก lifecycle จาก request</td><td>MedicationStatement</td><td class="priority p2">P2</td></tr>
+          <tr><td>Clinical Core</td><td><span class="code">allergy_intolerance</span></td><td>ประวัติแพ้ยา/อาหาร/สิ่งแวดล้อม</td><td><span class="code">code,reaction_text,severity</span></td><td>ไม่กระจายอยู่หลายโมดูล</td><td>AllergyIntolerance</td><td class="priority p2">P2</td></tr>
+          <tr><td>Clinical Common</td><td><span class="code">procedure_event</span></td><td>หัตถการ</td><td><span class="code">code,status,performed_at</span></td><td>รองรับ query KPI ด้าน surgery/rehab</td><td>Procedure</td><td class="priority p2">P2</td></tr>
+          <tr><td>Clinical Common</td><td><span class="code">immunization_event</span></td><td>วัคซีน</td><td><span class="code">vaccine_code,occurrence_at</span></td><td>แยกจาก observation เพื่อตรง semantic</td><td>Immunization</td><td class="priority p2">P2</td></tr>
+          <tr><td>Clinical Common</td><td><span class="code">specimen</span></td><td>สิ่งส่งตรวจ</td><td><span class="code">accession_number,specimen_type_code</span></td><td>link lab ตาม specimen ได้</td><td>Specimen</td><td class="priority p2">P2</td></tr>
+          <tr><td>Clinical Common</td><td><span class="code">diagnostic_report</span></td><td>รายงานผลตรวจ</td><td><span class="code">code,status,conclusion_text</span></td><td>ไม่ยัดกับ observation เดี่ยว</td><td>DiagnosticReport</td><td class="priority p2">P2</td></tr>
+          <tr><td>Clinical Common</td><td><span class="code">document_reference</span></td><td>เอกสารทางคลินิก</td><td><span class="code">document_type_code,content_text</span></td><td>ไม่ปนกับ diagnostic report</td><td>DocumentReference</td><td class="priority p2">P2</td></tr>
+          <tr><td>Clinical Common</td><td><span class="code">imaging_study</span></td><td>ภาพทางรังสี</td><td><span class="code">study_uid,modality_code</span></td><td>DICOM/UID เฉพาะทาง</td><td>ImagingStudy</td><td class="priority p3">P3</td></tr>
+
+          <tr><td>Extended</td><td><span class="code">episode_of_care</span></td><td>episode rehab/longitudinal</td><td><span class="code">period_start,period_end,status</span></td><td>แยกจาก encounter รายครั้ง</td><td>EpisodeOfCare</td><td class="priority p3">P3</td></tr>
+          <tr><td>Extended</td><td><span class="code">medical_device</span></td><td>อุปกรณ์ที่ใช้กับผู้ป่วย</td><td><span class="code">udi,device_code,status</span></td><td>ไม่ซ้ำใน procedure/observation</td><td>Device</td><td class="priority p3">P3</td></tr>
+          <tr><td>Extended</td><td><span class="code">device_usage</span></td><td>การใช้งานอุปกรณ์ตามช่วงเวลา</td><td><span class="code">device_id,started_at,ended_at</span></td><td>แยก master device กับ usage timeline</td><td>DeviceUsage</td><td class="priority p3">P3</td></tr>
+          <tr><td>Extended</td><td><span class="code">family_history</span></td><td>ประวัติครอบครัว</td><td><span class="code">relationship_code,condition_code</span></td><td>ไม่ยัดใน condition_record</td><td>FamilyMemberHistory</td><td class="priority p3">P3</td></tr>
+
+          <tr><td>Admin</td><td><span class="code">billing_event</span></td><td>การเงิน/การชำระ</td><td><span class="code">encounter_id,total_price,actual_paid</span></td><td>ไม่ปน clinical fact</td><td>Invoice/Claim (outside strict core)</td><td class="priority p3">P3</td></tr>
+          <tr><td>Admin</td><td><span class="code">admin_registration</span></td><td>log ระบบภายนอก เช่น WSDL</td><td><span class="code">registration_type,old_or_new</span></td><td>แยกจาก clinical exchange</td><td>Admin report only</td><td class="priority p3">P3</td></tr>
+
+          <tr><td>Mapping</td><td><span class="code">fhir_map_rule</span></td><td>กฎ map DB -> FHIR path</td><td><span class="code">resource_type,fhir_path,transform_type</span></td><td>ไม่ hardcode mapping กระจายในโค้ด</td><td>All FHIR exports</td><td class="priority p1">P1</td></tr>
+          <tr><td>Mapping</td><td><span class="code">fhir_code_map</span></td><td>แปลง code ภายในเป็น code มาตรฐาน</td><td><span class="code">map_group,source_code,target_code</span></td><td>ลด logic ซ้ำใน ETL/API</td><td>CodeableConcept across resources</td><td class="priority p1">P1</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tab-mapping" class="section">
+    <h2>B) FHIR Mapping Matrix (Complete Rules for API Export v1)</h2>
+    <p>แสดงข้อมูลจาก xlsx ต้นทางแบบ row-by-row โดยคงชื่อ Data class / Data element เดิม และเพิ่ม <span class="code">Example Stored Value</span> เป็นคอลัมน์เสริมเพื่อช่วยออกแบบ DB/API</p>
+    <div class="hint">เทียบง่าย: filter ได้ทั้งตาม Resource และตาม Sheet</div>
+    <div class="pill-strip" id="mapping-pills">
+      <button class="pill-btn active" onclick="filterMapping('all',this)">All</button>
+      <button class="pill-btn" onclick="filterMapping('Patient',this)">Patient</button>
+      <button class="pill-btn" onclick="filterMapping('RelatedPerson',this)">RelatedPerson</button>
+      <button class="pill-btn" onclick="filterMapping('Coverage',this)">Coverage</button>
+      <button class="pill-btn" onclick="filterMapping('Encounter',this)">Encounter</button>
+      <button class="pill-btn" onclick="filterMapping('Condition',this)">Condition</button>
+      <button class="pill-btn" onclick="filterMapping('Observation',this)">Observation</button>
+      <button class="pill-btn" onclick="filterMapping('Medication',this)">Medication*</button>
+      <button class="pill-btn" onclick="filterMapping('AllergyIntolerance',this)">Allergy</button>
+      <button class="pill-btn" onclick="filterMapping('Procedure',this)">Procedure</button>
+      <button class="pill-btn" onclick="filterMapping('Immunization',this)">Immunization</button>
+      <button class="pill-btn" onclick="filterMapping('Specimen',this)">Specimen</button>
+      <button class="pill-btn" onclick="filterMapping('DiagnosticReport',this)">Diagnostic</button>
+      <button class="pill-btn" onclick="filterMapping('DocumentReference',this)">Document</button>
+      <button class="pill-btn" onclick="filterMapping('ImagingStudy',this)">Imaging</button>
+      <button class="pill-btn" onclick="filterMapping('EpisodeOfCare',this)">Episode</button>
+      <button class="pill-btn" onclick="filterMapping('Device',this)">Device*</button>
+      <button class="pill-btn" onclick="filterMapping('FamilyMemberHistory',this)">Family</button>
+      <button class="pill-btn" onclick="filterMapping('AuditEvent',this)">Audit</button>
+      <button class="pill-btn" onclick="filterMapping('Provenance',this)">Provenance</button>
+    </div>
+    <div class="pill-strip" id="mapping-sheet-pills">
+      <button class="pill-btn active" onclick="filterMappingSheet('all',this)">All Sheets</button>
+      <button class="pill-btn" onclick="filterMappingSheet('Common',this)">Common</button>
+      <button class="pill-btn" onclick="filterMappingSheet('Ortho',this)">Ortho</button>
+      <button class="pill-btn" onclick="filterMappingSheet('Substance',this)">Substance</button>
+      <button class="pill-btn" onclick="filterMappingSheet('COPD',this)">COPD</button>
+      <button class="pill-btn" onclick="filterMappingSheet('Pediatrics',this)">Pediatrics</button>
+      <button class="pill-btn" onclick="filterMappingSheet('Rehab',this)">Rehab</button>
+      <button class="pill-btn" onclick="filterMappingSheet('Skin',this)">Skin</button>
+      <button class="pill-btn" onclick="filterMappingSheet('Neuro',this)">Neuro</button>
+    </div>
+    <div class="table-wrap">
+      <table id="mapping-table">
+        <thead>
+          <tr>
+            <th>Sheet</th>
+            <th>XLSX Row</th>
+            <th>Data class</th>
+            <th>Element ID</th>
+            <th>Data element</th>
+            <th>คำอธิบาย</th>
+            <th>Profile</th>
+            <th>FHIR Resource Type</th>
+            <th>FHIR Data Element (FHIR - R5)</th>
+            <th>Example Stored Value</th>
+            <th>Mapping Comments</th>
+            <th>MoPH-PC1</th>
+            <th>MoPH-PC1 Remark</th>
+            <th>43Files</th>
+            <th>43Files Remark</th>
+          </tr>
+        </thead>
+        <tbody>
+<tr data-sheet="Common"><td>Common</td><td>2</td><td>Patient demographic</td><td>1.0</td><td>First name</td><td>ชื่อ</td><td>TH Core Patient</td><td>Patient</td><td>name.given</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.NAME</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>3</td><td></td><td>2.0</td><td>Last name</td><td>นามสกุล</td><td>TH Core Patient</td><td>Patient</td><td>name.family</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.LNAME</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>4</td><td></td><td>3.0</td><td>Date of birth</td><td>วันเดือนปีเกิด</td><td>TH Core Patient</td><td>Patient</td><td>birthDate</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.BIRTH</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>5</td><td></td><td>4.0</td><td>Sex</td><td>เพศสรีระ</td><td>TH Core Patient</td><td>Patient</td><td>gender</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.SEX</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>6</td><td></td><td>5.0</td><td>Current address</td><td>ที่อยู่ปัจจุบัน</td><td>TH Core Patient</td><td>Patient</td><td>address</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>ADDRESS</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>7</td><td></td><td>6.0</td><td>Phone number</td><td>หมายเลขโทรศัพท์</td><td>TH Core Patient</td><td>Patient</td><td>telecom:phone</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.TELEPHONE</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>8</td><td></td><td>7.0</td><td>Email address</td><td>อีเมล</td><td>TH Core Patient</td><td>Patient</td><td>telecom:email</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>9</td><td></td><td>8.0</td><td>Related person&#x27;s name</td><td>ชื่อบุคคลสำหรับติดต่อ</td><td>TH Core Patient</td><td>Patient</td><td>contact</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>10</td><td></td><td></td><td></td><td></td><td>TH Core RelatedPerson</td><td>RelatedPerson</td><td>name</td><td></td><td>กรณีต้องการสร้าง resource สำหรับ contact</td><td>MoPH-PC RelatedPerson</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>11</td><td></td><td>9.0</td><td>Relationship type</td><td>ความสัมพันธ์กับบุคคลนั้น</td><td>TH Core Patient</td><td>Patient</td><td>relationship</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>12</td><td></td><td></td><td></td><td></td><td>TH Core RelatedPerson</td><td>RelatedPerson</td><td>relationship</td><td></td><td></td><td>MoPH-PC RelatedPerson</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>13</td><td></td><td>10.0</td><td>Occupation</td><td>อาชีพ</td><td>TH Core Observation: Occupation</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>PERSON.OCCUPATION_NEW</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>14</td><td>Vital Signs</td><td>11.0</td><td>Systolic blood pressure</td><td>ความดันเลือดซิสโตลิก</td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>component:sbp: valueQuantity</td><td></td><td>code = LOINC: 8480-6 Systolic blood pressure</td><td>MoPH-PC Observation: Vital</td><td></td><td>SERVICE.SBP หรือ NCDSCREEN.SBP_1 หรือ NCDSCREEN.SBP_2</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>15</td><td></td><td>12.0</td><td>Diastolic blood pressure</td><td>ความดันเลือดไดแอสโตลิก</td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>component:dbp: valueQuantity</td><td></td><td>code = LOINC: 8462-4 Diastolic blood pressure</td><td>MoPH-PC Observation: Vital</td><td></td><td>SERVICE.DBP หรือ NCDSCREEN.DBP_1 หรือ NCDSCREEN.DBP_2</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>16</td><td></td><td>13.0</td><td>Heart rate</td><td>อัตราการเต้นของหัวใจ</td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 8867-4 Heart rate</td><td>MoPH-PC Observation: Vital</td><td></td><td>SERVICE.PR</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>17</td><td></td><td>14.0</td><td>Respiratory rate</td><td>อัตราการหายใจ</td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 9279-1 Respiratory rate</td><td>MoPH-PC Observation: Vital</td><td></td><td>SERVICE.RR</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>18</td><td></td><td>15.0</td><td>Body temperature</td><td>อุณหภูมิร่างกาย</td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 8310-5 Body temperature</td><td>MoPH-PC Observation: Vital</td><td></td><td>SERVICE.BTEMP</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>19</td><td></td><td>16.0</td><td>Body height</td><td>ส่วนสูง</td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 8302-2 Body height</td><td>MoPH-PC Observation: Vital</td><td></td><td>CHRONICFU.HEIGHT หรือ NCDSCREEN.HEIGHT</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>20</td><td></td><td>17.0</td><td>Body weight</td><td>น้ำหนัก</td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 29463-7 Body weight</td><td>MoPH-PC Observation: Vital</td><td></td><td>CHRONICFU.WEIGHT หรือ NCDSCREEN.WEIGHT</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>21</td><td></td><td>18.0</td><td>Oxygen saturation</td><td>ความเข้มข้นของออกซิเจนในเลือด</td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 2708-6 Oxygen saturation in Arterial blood</td><td>MoPH-PC Observation: Vital</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>22</td><td>Allergies and Intolerances</td><td>19.0</td><td>Substance (medication)</td><td>ชนิดยาที่แพ้</td><td>TH Core AllergyIntolerance</td><td>AllergyIntolerance</td><td>code</td><td></td><td>category = medication</td><td>MoPH-PC AllergyIntolerance</td><td></td><td>DRUGALLERGY.DRUGALLERGY</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>23</td><td></td><td>20.0</td><td>Substance (environment)</td><td>สิ่งแวดล้อมที่แพ้</td><td>TH Core AllergyIntolerance</td><td>AllergyIntolerance</td><td>code</td><td></td><td>category = environment</td><td>MoPH-PC AllergyIntolerance</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>24</td><td></td><td>21.0</td><td>Substance (food, other)</td><td>อาหาร และอื่น ๆ</td><td>TH Core AllergyIntolerance</td><td>AllergyIntolerance</td><td>code</td><td></td><td>category = food, biologic</td><td>MoPH-PC AllergyIntolerance</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>25</td><td></td><td>22.0</td><td>Reaction</td><td>ลักษณะอาการ</td><td>TH Core AllergyIntolerance</td><td>AllergyIntolerance</td><td>reaction.manifestation</td><td></td><td></td><td>MoPH-PC AllergyIntolerance</td><td></td><td>DRUGALLERGY.SYMPTOM</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>26</td><td>Clinical Documents</td><td>23.0</td><td>History and physical examination note</td><td>บันทึกประวัติและการตรวจร่างกาย</td><td>TH Core DocumentReference</td><td>DocumentReference</td><td>content</td><td></td><td></td><td>FHIR DocumentReference</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ DocumentReference จาก FHIR core specs ได้ หรืออาจใช้ MoPH-PC Visit Composition ก็ได้เช่นกัน</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>27</td><td></td><td>24.0</td><td>Consultation note</td><td>บันทึกการปรึกษา</td><td>TH Core DocumentReference</td><td>DocumentReference</td><td>content</td><td></td><td></td><td>FHIR DocumentReference</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ DocumentReference จาก FHIR core specs ได้ หรืออาจใช้ MoPH-PC Visit Composition ก็ได้เช่นกัน</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>28</td><td></td><td>25.0</td><td>Discharge summary note</td><td>บันทึกสรุปการจำหน่าย</td><td>TH Core DocumentReference</td><td>DocumentReference</td><td>content</td><td></td><td></td><td>FHIR DocumentReference</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ DocumentReference จาก FHIR core specs ได้ หรืออาจใช้ MoPH-PC Visit Composition ก็ได้เช่นกัน</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>29</td><td></td><td>26.0</td><td>Procedure note</td><td>บันทึกหัตถการ</td><td>TH Core DocumentReference</td><td>DocumentReference</td><td>content</td><td></td><td></td><td>FHIR DocumentReference</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ DocumentReference จาก FHIR core specs ได้ หรืออาจใช้ MoPH-PC Visit Composition ก็ได้เช่นกัน</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>30</td><td></td><td>27.0</td><td>Progress note</td><td>บันทึกความก้าวหน้าการรักษา</td><td>TH Core DocumentReference</td><td>DocumentReference</td><td>content</td><td></td><td></td><td>FHIR DocumentReference</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ DocumentReference จาก FHIR core specs ได้ หรืออาจใช้ MoPH-PC Visit Composition ก็ได้เช่นกัน</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>31</td><td></td><td>28.0</td><td>Test report</td><td>รายงานผลการตรวจต่าง ๆ</td><td>TH Core DiagnosticReport</td><td>DiagnosticReport</td><td>conclusion</td><td></td><td></td><td>MoPH-PC DiagnosticReport</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>32</td><td>Clinical Information &amp; Tests</td><td>29.0</td><td>History</td><td>บันทึกประวัติ</td><td>TH Core Observation</td><td>Observation</td><td>valueString หรือ valueCodeableConcept</td><td></td><td>code = LOINC: 35090-0 Patient history
+value[x] ขึ้นกับต้องการบันทึกผลเป็น text หรือ code</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>33</td><td></td><td>30.0</td><td>Physical examination</td><td>บันทึกการตรวจร่างกาย</td><td>TH Core Observation</td><td>Observation</td><td>valueString หรือ valueCodeableConcept</td><td></td><td>code = LOINC: 35091-8 Patient physical
+value[x] ขึ้นกับต้องการบันทึกผลเป็น text หรือ code</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>34</td><td></td><td>31.0</td><td>Clinical test</td><td>ผลการตรวจทางคลินิก</td><td>TH Core Observation</td><td>Observation</td><td>valueString หรือ valueCodeableConcept</td><td></td><td>value[x] ขึ้นกับต้องการบันทึกผลเป็น text หรือ code</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>35</td><td>Diagnostic Imaging</td><td>32.0</td><td>Diagnostic imaging test</td><td>การตรวจทางรังสีวิทยา</td><td>TH Core ImagingStudy</td><td>ImagingStudy</td><td>code</td><td></td><td></td><td>FHIR ImagingStudy</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ ImagingStudy จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>36</td><td></td><td>33.0</td><td>Diagnostic imaging report</td><td>ผลการตรวจทางรังสีวิทยา</td><td>TH Core Observation: Imaging Result</td><td>Observation</td><td>valueString</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>37</td><td>Encounter Information</td><td>34.0</td><td>Encounter type</td><td>ชนิดการเข้ารับบริการ</td><td>TH Core Encounter</td><td>Encounter</td><td>class</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>SERVICE หรือ ADMISSION</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>38</td><td></td><td>35.0</td><td>Encounter identifier</td><td>หมายเลขการรับบริการ</td><td>TH Core Encounter</td><td>Encounter</td><td>identifier</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>SERVICE.SEQ หรือ ADMISSION.AN</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>39</td><td></td><td>36.0</td><td>Encounter diagnosis</td><td>ผลการวินิจฉัย</td><td>TH Core Encounter</td><td>Encounter</td><td>diagnosis</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>40</td><td></td><td>37.0</td><td>Encounter time</td><td>วันเวลาที่รับบริการ</td><td>TH Core Encounter</td><td>Encounter</td><td>actualPeriod.start</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>SERVICE.DATE_SERV หรือ SERVICE.TIME_SERV หรือ ADMISSION.DATETIME_ADMIT</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>41</td><td></td><td>38.0</td><td>Encounter location</td><td>สถานที่รับบริการ</td><td>TH Core Encounter</td><td>Encounter</td><td>location</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>ADMISSION.WARDADMIT</td><td>ไม่มีของ OPD</td></tr>
+<tr data-sheet="Common"><td>Common</td><td>42</td><td></td><td>39.0</td><td>Encounter disposition</td><td>สถานที่รับผู้ป่วยหลังจำหน่าย</td><td>TH Core Encounter</td><td>Encounter</td><td>admission.dischargeDisposition</td><td></td><td></td><td>MoPH-PC Encounter</td><td>ใน profile ไม่ได้ระบุให้มี element นี้</td><td>SERVICE.REFEROUTHOSP หรือ ADMISSION.REFEROUTHOSP หรือ SERVICE.TYPEOUT หรือ ADMISSION.DISCHTYPE</td><td>ไม่ตรงกันเสียทีเดียว</td></tr>
+<tr data-sheet="Common"><td>Common</td><td>43</td><td>Facility Information</td><td>40.0</td><td>Facility identifier</td><td>หมายเลขระบุสถานบริการ</td><td>TH Core Organization</td><td>Organization</td><td>identifier</td><td></td><td>ใช้ Organization เมื่อหมายถึงหน่วยงาน ใช้ Location เมื่อหมายถึงสถานที่</td><td>MoPH-PC Organization: Provider</td><td></td><td>SERVICE.MAIN</td><td>ไม่ใช่รหัสสถานที่ และไม่มี IPD</td></tr>
+<tr data-sheet="Common"><td>Common</td><td>44</td><td></td><td></td><td></td><td></td><td>TH Core Location</td><td>Location</td><td>identifier</td><td></td><td></td><td>FHIR Location</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Location จาก FHIR core specs ได้</td><td>-</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>45</td><td></td><td>41.0</td><td>Facility type</td><td>ชนิดสถานบริการ</td><td>TH Core Location</td><td>Location</td><td>type</td><td></td><td></td><td>FHIR Location</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Location จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>46</td><td></td><td>42.0</td><td>Facility name</td><td>ชื่อสถานบริการ</td><td>TH Core Organization</td><td>Organization</td><td>name</td><td></td><td></td><td>MoPH-PC Organization: Provider</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>47</td><td></td><td></td><td></td><td></td><td>TH Core Location</td><td>Location</td><td>name</td><td></td><td></td><td>FHIR Location</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Location จาก FHIR core specs ได้</td><td>-</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>48</td><td>Health Insurance Information</td><td>43.0</td><td>Coverage status</td><td>สถานะของสิทธิการรักษา</td><td>TH Core Coverage</td><td>Coverage</td><td>status</td><td></td><td></td><td>FHIR Coverage</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Coverage จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>49</td><td></td><td>44.0</td><td>Coverage type</td><td>ชนิดของสิทธิการรักษา</td><td>TH Core Coverage</td><td>Coverage</td><td>type</td><td></td><td></td><td>FHIR Coverage</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Coverage จาก FHIR core specs ได้</td><td>CARD.INSTYPE_NEW</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>50</td><td></td><td>45.0</td><td>Payer identifier</td><td>หมายเลขระบุกองทุนหรือผู้จ่าย</td><td>TH Core Coverage</td><td>Coverage</td><td>identifier</td><td></td><td></td><td>FHIR Coverage</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Coverage จาก FHIR core specs ได้</td><td>CARD.INSTYPE_NEW</td><td>อาจอนุมานได้จากชนิดของสิทธิ</td></tr>
+<tr data-sheet="Common"><td>Common</td><td>51</td><td></td><td>46.0</td><td>Group identifier</td><td>กลุ่มย่อยในสิทธิการรักษานั้น ๆ</td><td>TH Core Coverage</td><td>Coverage</td><td>class</td><td></td><td></td><td>FHIR Coverage</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Coverage จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>52</td><td>Health Status Assessment</td><td>47.0</td><td>Functional status</td><td>ความสามารถในการทำกิจกรรม</td><td>TH Core Observation</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>ICF.ICF</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>53</td><td></td><td>48.0</td><td>Mental/cognitive status</td><td>สถาวะสุขภาพจิต</td><td>TH Core Observation</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>ใช้ SPECIALPP ได้</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>54</td><td></td><td>49.0</td><td>Pregnancy status</td><td>การตั้งครรภ์</td><td>TH Core Observation: Pregnancy Status</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>PRENATAL.GRAVIDA หรือ LABFU.LABRESULT</td><td>อาจใช้แฟ้มกลุ่มการตั้งครรภ์อนุมานว่าตั้งครรภ์ หรือใช้ผลแล็บ</td></tr>
+<tr data-sheet="Common"><td>Common</td><td>55</td><td></td><td>50.0</td><td>Alcohol use</td><td>การใช้แอลกอฮอล์</td><td>TH Core Observation: Alcohol Status</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>NCDSCREEN.ALCOHOL</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>56</td><td></td><td>51.0</td><td>Substance use</td><td>การใช้สารเสพติด</td><td>TH Core Observation</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>57</td><td></td><td>52.0</td><td>Physical activity</td><td>ระดับกิจกรรมทางกาย</td><td>TH Core Observation</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>58</td><td></td><td>53.0</td><td>Smoking status</td><td>การสูบบุหรี่</td><td>TH Core Observation: Smoking Status</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>NCDSCREEN.SMOKE</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>59</td><td>Immunizations</td><td>54.0</td><td>Immunizations</td><td>การรับวัคซีน</td><td>TH Core Immunization</td><td>Immunization</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Immunization</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Immunization จาก FHIR core specs ได้</td><td>EPI.VACCINETYPE</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>60</td><td>Laboratory</td><td>55.0</td><td>Tests</td><td>ชนิดการตรวจทางห้องปฏิบัติการ</td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>code</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU.LABTEST</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>61</td><td></td><td>56.0</td><td>Values/results</td><td>ผลการตรวจ</td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity.value</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU.LABRESULT</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>62</td><td></td><td>57.0</td><td>Specimen type</td><td>สิ่งส่งตรวจ</td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>specimen</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>63</td><td></td><td>58.0</td><td>Result status</td><td>สถานะผลการตรวจ</td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>status</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>64</td><td></td><td>59.0</td><td>Result unit of measure</td><td>หน่วยนับของผลการตรวจ</td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity.unit</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>65</td><td></td><td>60.0</td><td>Result reference range</td><td>ค่าอ้างอิงของการตรวจ</td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>referenceRange</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>66</td><td></td><td>61.0</td><td>Result interpretation</td><td>การแปลผลการตรวจ</td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>interpretation</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>67</td><td></td><td>62.0</td><td>Specimen source site</td><td>อวัยวะที่เก็บสิ่งส่งตรวจ</td><td>TH Core Specimen</td><td>Specimen</td><td>collection.bodysite</td><td></td><td></td><td>MoPH-PC Specimen</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>68</td><td></td><td>63.0</td><td>Specimen identifier</td><td>หมายเลขระบุสิ่งส่งตรวจ</td><td>TH Core Specimen</td><td>Specimen</td><td>identifier</td><td></td><td></td><td>MoPH-PC Specimen</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>69</td><td></td><td>64.0</td><td>Specimen condition acceptability</td><td>คุณภาพของสิ่งส่งตรวจ</td><td>TH Core Specimen</td><td>Specimen</td><td>condition</td><td></td><td></td><td>MoPH-PC Specimen</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>70</td><td>Medical Devices</td><td>65.0</td><td>Unique device identifier</td><td>หมายเลขระบุอุปกรณ์</td><td>TH Core Device</td><td>Device</td><td>udiCarrier</td><td></td><td></td><td>FHIR Device</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Device จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>71</td><td>Medications</td><td>66.0</td><td>Medications</td><td>ชื่อยา</td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>72</td><td></td><td>67.0</td><td>Dose</td><td>ขนาดยา</td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>dosageInstruction.doseAndRate.doseQuantity.value</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>73</td><td></td><td>68.0</td><td>Dose unit of measure</td><td>หน่วยนับของขนาดยา</td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>dosageInstruction.doseAndRate.doseQuantity.unit</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>74</td><td></td><td>69.0</td><td>Indication</td><td>ข้อบ่งชี้การใช้ยา</td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>reason</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>75</td><td></td><td>70.0</td><td>Fill status</td><td>สถานะการจ่ายยา</td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>status</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>76</td><td></td><td>71.0</td><td>Medication instructions</td><td>ข้อปฏิบัติการใช้ยา</td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>dosageInstruction</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>77</td><td></td><td>72.0</td><td>Medication adherence</td><td>ความร่วมมือในการใช้ยา</td><td>TH Core MedicationStatement</td><td>MedicationStatement</td><td>adherence</td><td></td><td></td><td>MoPH-PC MedicationStatement</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>78</td><td>Problems</td><td>73.0</td><td>Problems</td><td>โรคหรือปัญหาของผู้ป่วย</td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>79</td><td></td><td>74.0</td><td>Date of diagnosis</td><td>วันที่ได้รับการวินิจฉัย</td><td>TH Core Condition</td><td>Condition</td><td>recordedDate</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DATE_SERV</td><td>ไม่มี IPD</td></tr>
+<tr data-sheet="Common"><td>Common</td><td>80</td><td></td><td>75.0</td><td>Date of resolution</td><td>วันที่หายจากโรค</td><td>TH Core Condition</td><td>Condition</td><td>abatementDateTime</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>81</td><td>Procedures</td><td>76.0</td><td>Procedures</td><td>หัตถการ</td><td>TH Core Procedure</td><td>Procedure</td><td>code</td><td></td><td></td><td>MoPH-PC Procedure</td><td></td><td>PROCEDURE_OPD.PROCEDCODE หรือ PROCEDURE_IPD.PROCEDCODE</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>82</td><td></td><td>77.0</td><td>Performance time</td><td>วันเวลาที่ทำหัตถการ</td><td>TH Core Procedure</td><td>Procedure</td><td>occurrenceDateTime</td><td></td><td></td><td>MoPH-PC Procedure</td><td></td><td>PROCEDURE_OPD.DATE_SERV หรือ PROCEDURE_IPD.DATE_SERV</td><td></td></tr>
+<tr data-sheet="Common"><td>Common</td><td>83</td><td></td><td>78.0</td><td>Reason for procedure</td><td>เหตุผลที่ทำหัตถการ</td><td>TH Core Procedure</td><td>Procedure</td><td>reason</td><td></td><td></td><td>MoPH-PC Procedure</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>2</td><td>ข้อมูลต่อไปนี้ใช้ Core IG หรือ Core FHIR สื่อสารได้</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>3</td><td>Patient demographic</td><td>1.0</td><td>hn</td><td></td><td>TH Core Patient</td><td>Patient</td><td>identifier:hn</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.HN</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>4</td><td></td><td>2.0</td><td>cid</td><td></td><td>TH Core Patient</td><td>Patient</td><td>identifier:cid</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.CID</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>5</td><td></td><td>3.0</td><td>ชื่อ</td><td></td><td>TH Core Patient</td><td>Patient</td><td>name.given</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.NAME</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>6</td><td></td><td>4.0</td><td>นามสกุล</td><td></td><td>TH Core Patient</td><td>Patient</td><td>name.family</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.LNAME</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>7</td><td></td><td>5.0</td><td>วันเกิด</td><td></td><td>TH Core Patient</td><td>Patient</td><td>birthDate</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.BIRTH</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>8</td><td></td><td>6.0</td><td>ประเภทของที่อยู่</td><td></td><td>รายการนี้เป็นหัวข้อ</td><td>-</td><td>-</td><td></td><td></td><td>-</td><td></td><td>ADDRESS.ADDRESSTYPE</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>9</td><td></td><td>6.1</td><td>- ที่อยู่ตามทะเบียนบ้าน</td><td></td><td>TH Core Patient</td><td>Patient</td><td>address</td><td></td><td>ให้ใช้ extension official address</td><td>MoPH-PC Patient</td><td>ใน profile ไม่ได้แยกประเภทที่อยู่แบบนี้</td><td>ADDRESS</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>10</td><td></td><td>6.2</td><td>- ที่อยู่ปัจจุบัน</td><td></td><td>TH Core Patient</td><td>Patient</td><td>address</td><td></td><td>ให้ address.use = home</td><td>MoPH-PC Patient</td><td>ใน profile ไม่ได้แยกประเภทที่อยู่แบบนี้</td><td>ADDRESS</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>11</td><td></td><td>7.0</td><td>รหัส/ชื่อโรงพยาบาล</td><td></td><td>TH Core Patient</td><td>Patient</td><td>managingOrganization</td><td></td><td>ไม่แน่ใจว่าข้อมูลนี้หมายถึงอะไร น่าจะหมายถึงหน่วยงานที่ส่งข้อมูล</td><td>MoPH-PC Patient</td><td>ใน profile ไม่ได้ระบุให้มี element นี้</td><td>PERSON.HOSPCODE</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>12</td><td></td><td>8.0</td><td>เพศ</td><td></td><td>TH Core Patient</td><td>Patient</td><td>gender</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.SEX</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>13</td><td>Vital Signs</td><td>9.0</td><td>อายุ</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 30525-0 Age</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>14</td><td></td><td>10.0</td><td>น้ำหนัก (กิโลกรัม)</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 29463-7 Body weight</td><td>MoPH-PC Observation: Vital</td><td></td><td>CHRONICFU.HEIGHT หรือ NCDSCREEN.HEIGHT</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>15</td><td></td><td>11.0</td><td>ส่วนสูง (เซ็นติเมตร)</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 8302-2 Body height</td><td>MoPH-PC Observation: Vital</td><td></td><td>CHRONICFU.WEIGHT หรือ NCDSCREEN.WEIGHT</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>16</td><td></td><td>12.0</td><td>ดัชนีมวลกาย BMI</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 39156-5 Body mass index (BMI) [Ratio]</td><td>MoPH-PC Observation: Vital</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>17</td><td>Health Status Assessment</td><td>13.0</td><td>ประวัติสูบบุหรี่</td><td></td><td>TH Core Observation: Smoking Status</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>NCDSCREEN.SMOKE</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>18</td><td>Clinical Information &amp; Tests</td><td>14.0</td><td>ประวัติบิดามารดากระดูกสะโพกหัก</td><td></td><td>TH Core FamilyMemberHistory</td><td>FamilyMemberHistory</td><td>Condition.code</td><td></td><td>code = SNOMED: IS-A 263225007 | Fracture of proximal end of femur (disorder) |</td><td>FHIR FamilyMemberHistory</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ FamilyMemberHistory จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>19</td><td>Observations</td><td>15.0</td><td>LMP</td><td>อายุที่หมดประจำเดือน</td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>PRENATAL.LMP</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>20</td><td></td><td>16.0</td><td>The Single Leg Stance (SLS)</td><td>ยืนขาเดียว ได้น้อยกว่า 15 วินาที (เสี่ยงการหกล้ม)</td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>21</td><td></td><td>17.0</td><td>eGFR</td><td>ค่าการทำงานของไต (eGFR)</td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>23</td><td>ข้อมูลต่อไปนี้ใช้วิธีการ query จาก server ได้</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>24</td><td>Past History</td><td>18.0</td><td>ประวัติกระดูกหัก</td><td></td><td>ดึงจาก Condition resource ที่เป็นโรคในกลุ่มกระดูกหัก SNOMED IS-A 125605004 | Fracture of bone (disorder) |</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>25</td><td></td><td>19.0</td><td>ประวัติโรครูมาตอยด์</td><td></td><td>ดึงจาก Condition resource ที่เป็นโรคในกลุ่มโรครูมาตอยด์ SNOMED IS-A 69896004 | Rheumatoid arthritis (disorder) |</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>26</td><td></td><td>20.0</td><td>ประวัติโรคตับเรื้อรัง</td><td></td><td>ดึงจาก Condition resource ที่เป็นโรคในกลุ่มโรคตับเรื้อรัง SNOMED IS-A 328383001 | Chronic liver disease (disorder) |</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>27</td><td></td><td>21.0</td><td>การใช้ยาสเตียรอยด์</td><td></td><td>ดึงจาก MedicationRequest/MedicationStatement ของยาที่เป็นยา steroid SNOMED IS-A 116566001 | Steroid (substance) |</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Ortho"><td>Ortho</td><td>28</td><td></td><td>22.0</td><td>ประวัติยาโรคกระดูกพรุน</td><td></td><td>อาจต้องนิยามก่อนว่ายาโรคกระดูกพรุนได้แก่อะไรบ้าง เช่น SNOMED IS-A 373301002 | Bone resorption inhibitor (substance) |</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>2</td><td>Adminstrative</td><td>1.0</td><td>WsdlRegister</td><td>ข้อมูลการลงทะเบียนไปยัง บสต</td><td>-</td><td></td><td>ควรอยู่นอก scope การแลกเปลี่ยนหรือไม่?</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>3</td><td></td><td>2.0</td><td>WsdlRegisterDataLog</td><td>เก็บประวัติการลงทะเบียน บสต</td><td>-</td><td></td><td>ควรอยู่นอก scope การแลกเปลี่ยนหรือไม่?</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>4</td><td></td><td>3.0</td><td>oldOrNew</td><td>ผู้ป่วยใหม่หรือเก่า</td><td>-</td><td></td><td>ควรอยู่นอก scope การแลกเปลี่ยนหรือไม่?</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>5</td><td>Patient demographic</td><td>4.0</td><td>name</td><td>ชื่อผู้ป่วย</td><td>TH Core Patient</td><td>Patient</td><td>name</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.NAME</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>6</td><td></td><td>5.0</td><td>cid</td><td>บัตรประชาชน</td><td>TH Core Patient</td><td>Patient</td><td>identifier:cid</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.CID</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>7</td><td></td><td>6.0</td><td>birthDay</td><td>วันเกิด</td><td>TH Core Patient</td><td>Patient</td><td>birthDate</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.BIRTH</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>8</td><td></td><td>7.0</td><td>age</td><td>อายุ</td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 30525-0 Age แต่หากมี birthDate ควรคำนวณจาก birthDate</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>9</td><td></td><td>8.0</td><td>sex</td><td>เพศ</td><td>TH Core Patient</td><td>Patient</td><td>gender</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.SEX</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>10</td><td></td><td>9.0</td><td>citizenship</td><td>สัญชาติ</td><td>TH Core Patient</td><td>Patient</td><td>extension: citizenship</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.NATION</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>11</td><td></td><td>10.0</td><td>WsdlNationality</td><td>ข้อมูลเชื้อชาติ</td><td>TH Core Patient</td><td>Patient</td><td>extension: race</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.RACE</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>12</td><td></td><td>11.0</td><td>religion</td><td>ศาสนา</td><td>TH Core Patient</td><td>Patient</td><td>extension: religion</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.RELIGION</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>13</td><td></td><td>12.0</td><td>tel</td><td>เบอร์ติดต่อ</td><td>TH Core Patient</td><td>Patient</td><td>telecom</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.TELEPHONE</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>14</td><td></td><td>13.0</td><td>marryStatus</td><td>สถานะการสมรส</td><td>TH Core Patient</td><td>Patient</td><td>maritalStatus</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.MSTATUS</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>15</td><td></td><td>14.0</td><td>addrPart</td><td>ที่อยู่</td><td>TH Core Patient</td><td>Patient</td><td>address</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>ADDRESS</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>16</td><td></td><td>15.0</td><td>mooPart</td><td>หมู่</td><td>TH Core Patient</td><td>Patient</td><td>address.extension: structuredLine</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>ADDRESS.VILLAGE</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>17</td><td></td><td>16.0</td><td>WsdlMooBan</td><td>ข้อมูลหมู่บ้าน</td><td>TH Core Patient</td><td>Patient</td><td>address.extension: structuredLine</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>ADDRESS.VILLANAME</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>18</td><td></td><td>17.0</td><td>address</td><td>ที่อยู่เต็ม</td><td>TH Core Patient</td><td>Patient</td><td>address.text</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>19</td><td></td><td>18.0</td><td>WsdlTambon</td><td>ข้อมูลตำบล</td><td>TH Core Patient</td><td>Patient</td><td>address.city</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>ADDRESS.TAMBON</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>20</td><td></td><td>19.0</td><td>WsdlAmphur</td><td>ข้อมูลอำเภอ</td><td>TH Core Patient</td><td>Patient</td><td>address.district</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>ADDRESS.AMPUR</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>21</td><td></td><td>20.0</td><td>WsdlProvince</td><td>ข้อมูลจังหวัด</td><td>TH Core Patient</td><td>Patient</td><td>address.state</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>ADDRESS.CHANGWAT</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>22</td><td></td><td>21.0</td><td>educat</td><td>การศึกษา</td><td>TH Core Observation: Education Level</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.EDUCATION</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>23</td><td></td><td>22.0</td><td>occupType</td><td>อาชีพ</td><td>TH Core Observation: Occupation</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>PERSON.OCCUPATION_NEW</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>24</td><td></td><td>23.0</td><td>sarary</td><td>เงินเดือน</td><td></td><td></td><td></td><td></td><td>ยังไม่มี profile หรือ extension สำหรับข้อมูลนี้ หากต้องใช้อาจต้องมีการทำเพิ่มและรวบรวมไว้บางแห่ง</td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>25</td><td></td><td>24.0</td><td>WsdlParentStatus</td><td>ข้อมูลสถานะในครอบครัว</td><td></td><td></td><td></td><td></td><td>ยังไม่มี profile หรือ extension สำหรับข้อมูลนี้ หากต้องใช้อาจต้องมีการทำเพิ่มและรวบรวมไว้บางแห่ง</td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>26</td><td>Encounter Information</td><td>25.0</td><td>treatDate</td><td>วันที่เข้ารับการรักษา</td><td>TH Core Encounter</td><td>Encounter</td><td>actualPeriod</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>SERVICE.DATE_SERV หรือ SERVICE.TIME_SERV หรือ ADMISSION.DATETIME_ADMIT</td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>27</td><td></td><td>26.0</td><td>treatType</td><td>ประเภทการรักษา</td><td>ไม่แน่ใจลักษณะข้อมูล</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Substance"><td>Substance</td><td>28</td><td></td><td>27.0</td><td>treatAmo</td><td>การรักษา</td><td>ไม่แน่ใจลักษณะข้อมูล</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>2</td><td>Encounter Information</td><td>1.0</td><td>วัน เดือน ปี ที่ให้บริการ</td><td></td><td>TH Core Encounter</td><td>Encounter</td><td>actualPeriod</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>SERVICE.DATE_SERV หรือ SERVICE.TIME_SERV หรือ ADMISSION.DATETIME_ADMIT</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>3</td><td>Patient demographic</td><td>2.0</td><td>Hospital Number (HN)</td><td></td><td>TH Core Patient</td><td>Patient</td><td>identifier:hn</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.HN</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>4</td><td></td><td>3.0</td><td>เลขที่บัตรประชาชน</td><td></td><td>TH Core Patient</td><td>Patient</td><td>identifier:cid</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.CID</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>5</td><td></td><td>4.0</td><td>ชื่อ-นามสกุล</td><td></td><td>TH Core Patient</td><td>Patient</td><td>name.given</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.NAME และ PERSON.LNAME</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>6</td><td></td><td>5.0</td><td>เพศ</td><td></td><td>TH Core Patient</td><td>Patient</td><td>gender</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.SEX</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>7</td><td></td><td>6.0</td><td>อายุ</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 30525-0 Age แต่หากมี birthDate ควรคำนวณจาก birthDate</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>8</td><td>Clinical Information &amp; Tests</td><td>7.0</td><td>อาการ</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString หรือ valueCodeableConcept</td><td></td><td>code = LOINC: 35090-0 Patient history
+value[x] ขึ้นกับต้องการบันทึกผลเป็น text หรือ code</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>SERVICE.CHIEFCOMP</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>9</td><td></td><td>8.0</td><td>การตรวจร่างกาย</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString หรือ valueCodeableConcept</td><td></td><td>code = LOINC: 35091-8 Patient physical
+value[x] ขึ้นกับต้องการบันทึกผลเป็น text หรือ code</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>10</td><td>Vital Signs</td><td>9.0</td><td>BMI</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 39156-5 Body mass index (BMI) [Ratio]</td><td>MoPH-PC Observation: Vital</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>11</td><td>Problems</td><td>10.0</td><td>การวินิจฉัยโรคปอดอุดกั้นเรื้อรัง</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>12</td><td></td><td>11.0</td><td>โรคร่วม</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>13</td><td>Health Status Assessment</td><td>12.0</td><td>สถานะการสูบบุหรี่</td><td>1) เลิกแล้ว 2) ยังสูบอยู่</td><td>TH Core Observation: Smoking Status</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>NCDSCREEN.SMOKE</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>14</td><td></td><td>13.0</td><td>อาชีพหรือสิ่งแวดล้อมที่มีผลต่อการเกิด COPD</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString หรือ valueCodeableConcept</td><td></td><td>code = SNOMED CT 102487004 | Environmental risk factor (observable entity) |
+value[x] ขึ้นกับต้องการบันทึกผลเป็น text หรือ code</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>15</td><td></td><td>14.0</td><td>ประเมินภาวะซึมเศร้า</td><td></td><td>TH Core Observation</td><td>Observation</td><td>value[x]</td><td></td><td>การรายงานผลขึ้นกับชนิดการประเมิน</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>ใช้ SPECIALPP ได้</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>16</td><td>Diagnostic Imaging</td><td>15.0</td><td>CXR</td><td></td><td>TH Core Observation: Imaging Result</td><td>Observation</td><td>valueString</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>17</td><td>PFT</td><td>16.0</td><td>FEV1/FVC</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 19926-5 FEV1/FVC</td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>18</td><td></td><td>17.0</td><td>FEV1 ….. L ….. %</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 20150-9 FEV1</td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>19</td><td></td><td></td><td></td><td></td><td>TH Core DiagnosticReport</td><td>DiagnosticReport</td><td>code</td><td></td><td>น่าจะต้องมี DiagnosticReport เพื่อจัดกลุ่มและรายงานผล PFT ทั้งหมด</td><td>MoPH-PC DiagnosticReport</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>20</td><td>Observations</td><td>18.0</td><td>mMRC (Modified Medical Research Council) Dyspnea Scale</td><td>ประเมินความรู้สึกเหนื่อย MMRC</td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = SNOMED CT 870179002 | modified Medical Research Council Dyspnea Scale (assessment scale) |</td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>21</td><td></td><td>19.0</td><td>6 minute walk</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = SNOMED CT 252478000 | 6-minute walk test (procedure) |</td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>22</td><td></td><td>20.0</td><td>CAT Score</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = SNOMED CT 57671000052108 | Chronic Obstructive Pulmonary Disease Assessment Test scale (assessment scale) |</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>23</td><td>Laboratory</td><td>21.0</td><td>CBC: absolute count eosinophil</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>24</td><td>Immunizations</td><td>22.0</td><td>Influenza Vaccine</td><td></td><td>TH Core Immunization</td><td>Immunization</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Immunization</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Immunization จาก FHIR core specs ได้</td><td>EPI.VACCINETYPE</td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>26</td><td>ข้อมูลต่อไปนี้ใช้วิธีการ query จาก server ได้</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="COPD"><td>COPD</td><td>27</td><td></td><td>23.0</td><td>ประวัติหอบกำเริบ........จำนวนครั้ง/12เดือน</td><td></td><td>ดึงจาก Condition resource ที่เป็นโรคในกลุ่ม COPD w AE SNOMED CT IS-A 195951007 | Acute exacerbation of chronic obstructive pulmonary disease (disorder) |</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>2</td><td>ข้อมูลต่อไปนี้ใช้วิธีการ query จาก server ได้</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>3</td><td></td><td>1.0</td><td>อัตราการตายปริกำเนิด (อายุครรภ์ตั้งแต่ 24 สัปดาห์)</td><td></td><td>ดึงจาก Patient resource ที่เสียชีวิตในช่วงอายุที่กำหนด</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>4</td><td></td><td></td><td>- จำนวนทารกที่ตายปริกำเนิด ในช่วงเดือนนั้น</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>5</td><td></td><td></td><td>- จำนวนทารกเกิดทั้งหมด ในช่วงเดือนเดียวกัน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>6</td><td></td><td>2.0</td><td>อัตราการตายของทารกแรกเกิด</td><td></td><td>ดึงจาก Patient resource ที่เสียชีวิตในช่วงอายุที่กำหนด ใน 28 วันหลังคลอด</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>7</td><td></td><td></td><td>- จำนวนทารกแรกเกิด (Neonate) ที่เสียชีวิตภายใน 28 วันหลังคลอด</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>8</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพทั้งหมด</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>9</td><td></td><td>3.0</td><td>ร้อยละการเสียชีวิตในโรงพยาบาลของทารกแรกเกิดน้ำหนักต่ำกว่า1,000 กรัม ภายใน 28 วัน</td><td></td><td>ดึงจาก Patient resource ร่วมกับ Observation resource ที่น้ำหนักต่ำกว่า 1,000 กรัม</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>10</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพน้ำหนักต่ำกว่า 1,000 กรัมที่เสียชีวิตภายใน 28 วัน หลังการคลอด ใน 1 เดือน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>11</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพน้ำหนักต่ำกว่า 1,000 กรัมทั้งหมด (ในเดือนเดียวกัน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>12</td><td></td><td>4.0</td><td>ร้อยละการเสียชีวิตในโรงพยาบาลของทารกแรกเกิดน้ำหนัก 1,000-1,499 กรัม ภายใน 28 วัน</td><td></td><td>ดึงจาก Patient resource ร่วมกับ Observation resource ที่น้ำหนักระหว่าง 1,000-1,499 กรัม</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>13</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพน้ำหนัก 1,000-1,499 กรัมที่เสียชีวิตภายใน 28 วันหลังการคลอด ใน 1 เดือน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>14</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพน้ำหนักต่ำกว่า 1,000-1,499 กรัมทั้งหมด (ในเดือนเดียวกัน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>15</td><td></td><td>5.0</td><td>ร้อยละการเสียชีวิตในโรงพยาบาลของทารกแรกเกิดน้ำหนัก 1,500 - 2,499 กรัม ภายใน 28 วัน</td><td></td><td>ดึงจาก Patient resource ร่วมกับ Observation resource ที่น้ำหนักระหว่าง 1,500-2,499 กรัม</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>16</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพน้ำหนัก 1,500-2,499 กรัมที่เสียชีวิตภายใน 28 วันหลังการคลอด ใน 1 เดือน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>17</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพน้ำหนัก 1,500-2,499 กรัมทั้งหมด (ในเดือนเดียวกัน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>18</td><td></td><td>6.0</td><td>อัตราการขาดออกซิเจนในทารกแรกเกิด</td><td></td><td>ดึงจาก Patient resource ร่วมกับ Observation resource ของ APGAR score ที่มีค่าน้อยกว่าหรือเท่ากับ 7</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>19</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพ ที่มีคะแนน APGAR ที่ 1 นาที ≤ 7 ใน 1 เดือน (P21.0, P21.1, P21.9)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>20</td><td></td><td></td><td>- จำนวนทารกแรกเกิดมีชีพทั้งหมด (ในเดือนเดียวกัน)(Z37.0, Z37.2, Z37.3, Z37.5, Z37.6)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>21</td><td></td><td>7.0</td><td>จำนวนทารกแรกเกิดที่มีภาวะความดันในปอดยังคงสูง (Persistent Pulmonary hypertension of newborn; PPHN) (P29.3)</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>22</td><td></td><td>8.0</td><td>จำนวนทารกที่มีภาวะขาดอากาศหายใจแรกเกิด (Birth asphyxia) (P21)</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>23</td><td></td><td>9.0</td><td>จำนวนทารกที่มีภาวะขาดอากาศหายใจแรกเกิด (Birth asphyxia) (P21) และได้รับการรักษาด้วย Cooling</td><td></td><td>ดึงจาก Procedure resource ของหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>24</td><td></td><td>10.0</td><td>จำนวนเด็กที่ป่วยด้วยโรค Congenital Heart disease (Q20-Q28)</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>25</td><td></td><td>11.0</td><td>จำนวนเด็ก 0 - 15 ปี ที่ได้รับการสวนหัวใจเพื่อรักษา</td><td></td><td>ดึงจาก Procedure resource ของหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>26</td><td></td><td>12.0</td><td>จำนวนเด็ก 0 - 15 ปี ที่ได้รับการสวนหัวใจทั้งหมด</td><td></td><td>ดึงจาก Procedure resource ของหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>27</td><td></td><td>13.0</td><td>อัตราการผ่าตัดรูทวารใน Hirschsprung’s Disease (Q431) Transanal operative rate</td><td></td><td>ดึงจาก Procedure resource ของหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>28</td><td></td><td></td><td>- จำนวนผู้ป่วยโรค Hirschsprung’s Disease (Q431)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>29</td><td></td><td></td><td>-จำนวนผู้ป่วยโรค Hirschsprung’s Disease (Q431) ที่ได้รับการผ่าตัดแก้ไขผ่านรูทวาร (Transanal Operative Rate)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>30</td><td></td><td>14.0</td><td>อัตราการรอดชีวิตของ Congenital Diaphragmatic Hernias หลังการผ่าตัด (K44, Q790,Q791) (Operative Survival rate)</td><td></td><td>ดึงจาก Patient resource ที่รอดชีวิตหลังหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>31</td><td></td><td></td><td>- จำนวนผู้ป่วย Congenital Diaphragmatic Hernia (K44, Q790,Q791) ที่รอดชีวิต</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>32</td><td></td><td></td><td>- จำนวนผู้ป่วย Congenital Diaphragmatic Hernia (K44, Q790,Q791) ที่ได้รับการผ่าตัด</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>33</td><td></td><td>16.0</td><td>อัตราการรอดชีวิตของ Congenital Diaphragmatic Hernias (K44, Q790, Q791) (Overall Survival rate )</td><td></td><td>ดึงจาก Patient resource ที่รอดชีวิตหลังหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>34</td><td></td><td></td><td>- จำนวนผู้ป่วย Congenital Diaphragmatic Hernias (K44, Q790, Q791) ที่รอดชีวิต</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>35</td><td></td><td></td><td>- จำนวนผู้ป่วย Congenital Diaphragmatic Hernia (K44, Q790,Q791)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>36</td><td></td><td>17.0</td><td>อัตราการกลับเป็นซ้ำ Congenital Diaphragmatic Hernias (Recurrent Congenital Diaphragmatic Hernias )</td><td></td><td>ดึงจาก Patient resource ที่รอดชีวิตหลังหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>37</td><td></td><td></td><td>- จำนวนผู้ป่วย Congenital Diaphragmatic Hernias ที่ได้รับการผ่าตัดแล้วมีอาการซ้ำ</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>38</td><td></td><td>18.0</td><td>จำนวนผู้ป่วยโรค Gastroschisis (Q793) abdominal wall dc</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>39</td><td></td><td>19.0</td><td>จำนวนผู้ป่วยโรค Gastroschisis (Q793) abdominal wall dc ที่ได้รับการผ่าตัด</td><td></td><td>ดึงจาก Procedure resource ของหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>40</td><td></td><td>20.0</td><td>อัตราการรอดชีวิต Esophageal atresia (Q39) (Overall Survival rate )</td><td></td><td>ดึงจาก Patient resource ที่รอดชีวิตหลังหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>41</td><td></td><td></td><td>- จำนวนผู้ป่วย Esophageal atresia ที่รอดชีวิต</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>42</td><td></td><td></td><td>- จำนวนผู้ป่วยโรค Esophageal atresia</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>43</td><td></td><td>21.0</td><td>อัตราการกลับเป็นซ้ำ Esophageal atresia (Q39)  (Recurrent Esophageal atresia )</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>44</td><td></td><td></td><td>- จำนวนผู้ป่วย Esophageal atresia ที่ได้รับการผ่าตัดแล้วมีอาการซ้ำ</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>45</td><td></td><td></td><td>- จำนวนผู้ป่วยโรค Esophageal atresia (Q39) ที่ได้รับการผ่าตัด</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>46</td><td></td><td>22.0</td><td>จำนวนผู้ป่วยโรค Omphalocele (Q792) abdominal wall dc</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>47</td><td></td><td>23.0</td><td>จำนวนผู้ป่วยโรค Omphalocele (Q792) abdominal wall dc ที่ได้รับการผ่าตัด</td><td></td><td>ดึงจาก Procedure resource ของหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>48</td><td></td><td>24.0</td><td>อัตราการรอดชีวิตของผู้ป่วย Omphalocele (Q792) abdominal wall dc</td><td></td><td>ดึงจาก Patient resource ที่รอดชีวิตหลังหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>49</td><td></td><td></td><td>- จำนวนผู้ป่วยโรค Omphalocele ที่รอดชีวิต</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>50</td><td></td><td>25.0</td><td>จำนวนผู้ป่วยโรค Duodenal/ Jejunal/ other (Q41/ Q42)</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>51</td><td></td><td>26.0</td><td>อัตราการรอดชีวิต Duodenal/ Jejunal/ other (Q41/ Q42) หลังการผ่าตัด</td><td></td><td>ดึงจาก Patient resource ที่รอดชีวิตหลังหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>52</td><td></td><td></td><td>- จำนวนผู้ป่วยโรค Duodenal/ Jejunal/ other (Q41/ Q42) ที่รอดชีวิต</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>53</td><td></td><td></td><td>- จำนวนผู้ป่วยโรค Duodenal/ Jejunal/ other (Q41/ Q42) ที่ได้รับการผ่าตัด</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>54</td><td></td><td>27.0</td><td>จำนวนผู้ป่วย ARM (Q420 - Q423)</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>55</td><td></td><td>28.0</td><td>อัตราการอดชีวิต ARM (Q420-Q423) ที่ได้รับการผ่าตัด</td><td></td><td>ดึงจาก Procedure resource ของหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>56</td><td></td><td></td><td>- จำนวนผู้ป่วย ARM (Q420 - Q423) ที่รอดชีวิต</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>57</td><td></td><td></td><td>- จำนวนผู้ป่วย ARM (Q420-Q423) ที่ได้รับการผ่าตัด</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>58</td><td></td><td>29.0</td><td>จำนวนผู้ป่วย NEC (P77) in surgical case</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>59</td><td></td><td>30.0</td><td>อัตราการรอดชีวิตของ Surgical NEC (P77)  in surgical case</td><td></td><td>ดึงจาก Patient resource ที่รอดชีวิตหลังหัตถการนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>60</td><td></td><td>31.0</td><td>ร้อยละเด็กพัฒนาการล่าช้ารอบด้าน (Global Development Delay: GDD) มีพัฒนาการดีขึ้น</td><td></td><td>ดึงจาก Condition resource ของโรคนี้</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>61</td><td></td><td></td><td>- จำนวนเด็กพัฒนาการช้ารอบด้าน (GDD) มีพัฒนาการดีขึ้นภายใน 6 เดือน หลังรับการรักษา (คน) (F83 หรือ R62)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>62</td><td></td><td></td><td>- จํานวนเด็กพัฒนาการล่าช้ารอบด้าน (GDD) ที่ได้รับการประเมินพัฒนาการ (คน) (F83 หรือ R62)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>63</td><td></td><td>32.0</td><td>ร้อยละเด็กพัฒนาการล่าช้ารอบด้าน (Global Development Delay: GDD) มีพัฒนาการดีขึ้น จากการประเมินโดยใช้เครื่องมือ TEDA4I</td><td></td><td>ดึงจาก Condition resource และ Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>64</td><td></td><td></td><td>- จำนวนเด็กพัฒนาการช้ารอบด้าน (GDD) มีพัฒนาการดีขึ้นภายใน 6 เดือน หลังรับการรักษา (คน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>65</td><td></td><td></td><td>- จำนวนเด็กพัฒนาการล่าช้ารอบด้าน (GDD) ที่ได้รับการประเมินพัฒนาการ (คน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>66</td><td></td><td>33.0</td><td>ร้อยละเด็กออทิสติกมีพัฒนาการด้านภาษาและสังคมดีขึ้น</td><td></td><td>ดึงจาก Condition resource และ Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>67</td><td></td><td></td><td>- จำนวนเด็กออทิสติกที่ได้รับการวินิจฉัยและบำบัดรักษาตามโปรแกรมของหน่วยงานแล้วมีพัฒนาการด้านการเข้าใจภาษาหรือด้านการใช้ภาษา ร่วมกับด้านการช่วยเหลือตัวเองและสังคมดีขึ้นภายใน 6 เดือน (คน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>68</td><td></td><td></td><td>- จํานวนเด็กออทิสติกทั้งหมดที่ได้รับการวินิจฉัยและบำบัดรักษาตามโปรแกรมของหน่วยงาน (คน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>69</td><td></td><td>34.0</td><td>ร้อยละผู้ป่วยเด็กสมองพิการ (Cerebral Palsy) มีพัฒนาการดีขึ้น</td><td></td><td>ดึงจาก Condition resource และ Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>70</td><td></td><td></td><td>- จำนวนผู้ป่วยเด็กสมองพิการที่มีพัฒนาการดีขึ้นภายใน 6 เดือน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>71</td><td></td><td></td><td>- จำนวนผู้ป่วยเด็กสมองพิการทั้งหมดที่รับการรักษา</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>72</td><td></td><td>35.0</td><td>ร้อยละผู้ป่วยเด็กสมาธิสั้นรายใหม่อาการดีขึ้นภายใน 6 เดือน</td><td></td><td>ดึงจาก Condition resource และ Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>73</td><td></td><td></td><td>- จํานวนผู้ป่วยเด็กสมาธิสั้น อายุ 6-14 ปี 11 เดือน 29 วัน ที่มารับการรักษาทั้งหมดในช่วง 6 เดือนและมีคะแนน SNAP-IV ลดลงจากการประเมินโดยผู้ปกครอง (คน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>74</td><td></td><td></td><td>- จํานวนผู้ป่วยเด็กสมาธิสั้น อายุ 6-14 ปี 11 เดือน 29 วัน ที่มารับการรักษาทั้งหมดในช่วง 6 เดือน (คน)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>75</td><td></td><td>36.0</td><td>ร้อยละผู้ปกครองของเด็กสมาธิสั้น/LD/MDD รายใหม่ที่มารับการบำบัดรักษาในรอบ 6 เดือน และมารับการรักษาตามนัด</td><td></td><td>ดึงจาก Encounter resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>76</td><td></td><td></td><td>- จํานวนเด็ก/ผู้ดูแลที่นัดมารับการบำบัดรักษาตามแผนการรักษาในรอบ 6 เดือน (ราย)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>77</td><td></td><td></td><td>- จํานวนเด็ก/ผู้ดูแลทั้งหมดที่นัดมารับการบำบัดรักษาในรอบ 6 เดือน (ราย)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>78</td><td></td><td>37.0</td><td>จำนวนเด็กป่วย HIV (B24)</td><td></td><td>ดึงจาก Condition resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>79</td><td></td><td>38.0</td><td>จำนวนเด็กป่วย HIV (B24) ที่ได้รับยา</td><td></td><td>ดึงจาก Condition resource และ MedicationRequest resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>80</td><td></td><td>39.0</td><td>จำนวนเด็กที่ป่วย Tuberculosis lung (A15)</td><td></td><td>ดึงจาก Condition resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>81</td><td></td><td>40.0</td><td>จำนวนเด็กป่วย MDR-TB (ไม่ทราบ)</td><td></td><td>ดึงจาก Condition resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>82</td><td></td><td>41.0</td><td>จำนวนผู้ป่วย Septicemia (A41.9)</td><td></td><td>ดึงจาก Condition resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>83</td><td></td><td>42.0</td><td>จำนวนผู้ป่วยที่เสียชีวิตด้วย Septicemia (A41.9)</td><td></td><td>ดึงจาก Condition resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>84</td><td></td><td>43.0</td><td>อัตราการได้รับนมแม่ใน 24 ชั่วโมงก่อนจำหน่ายกลับบ้าน</td><td></td><td>ดึงจาก Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>85</td><td></td><td></td><td>- จำนวนทารกที่ได้รับนมแม่ทั้งหมดเมื่อจำหน่าย</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>86</td><td></td><td></td><td>- จำนวนทารกที่จำหน่ายทั้งหมด</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>87</td><td></td><td>44.0</td><td>อัตราการได้รับนมแม่อย่างเดียว 6 เดือน</td><td></td><td>ดึงจาก Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>88</td><td></td><td></td><td>- จำนวนทารกที่ได้รับนมแม่ทั้งหมดเมื่อ 6 เดือน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>89</td><td></td><td></td><td>- จำนวนทารกที่อายุ 6 เดือนทั้งหมด</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>90</td><td></td><td>45.0</td><td>จำนวนเด็กป่วย Epilepsy (G40.0 - 40.9)</td><td></td><td>ดึงจาก Condition resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>91</td><td></td><td>46.0</td><td>จำนวนเด็กป่วย Epilepsy (G40.0 - 40.9) ที่ได้รับยา</td><td></td><td>ดึงจาก Condition resource และ MedicationRequest resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>92</td><td></td><td>47.0</td><td>จำนวนเด็กป่วย Epilepsy (G40.0 - 40.9) ที่ได้รับการผ่าตัด</td><td></td><td>ดึงจาก Condition resource และ Procedure resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>93</td><td></td><td>48.0</td><td>จำนวนการคัดกรองโรคหัวใจพิการแต่กำเนิดด้วย pulse oximeter</td><td></td><td>ดึงจาก Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>94</td><td></td><td>49.0</td><td>จำนวนเด็กที่ได้รับการคัดกรอง ROP ในเด็ก &lt;= 1,500 g.</td><td></td><td>ดึงจาก Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>95</td><td></td><td>50.0</td><td>จำนวนเด็กที่ได้รับการคัดกรอง Refractive error</td><td></td><td>ดึงจาก Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>96</td><td></td><td>51.0</td><td>จำนวนเด็กที่ได้รับการคัดกรองการได้ยินด้วย ABR, OAE</td><td></td><td>ดึงจาก Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>97</td><td></td><td>52.0</td><td>จำนวนเด็กที่ได้รับการคัดกรองโรคทางพันธุกรรมชนิดหายาก (Rare Disease)</td><td></td><td>ดึงจาก Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>98</td><td></td><td>53.0</td><td>จำนวนเด็กที่ได้รับการคัดกรองไทรอยด์</td><td></td><td>ดึงจาก Observation resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>99</td><td></td><td>54.0</td><td>ร้อยละผู้ป่วยที่เข้ารับการผ่าตัดซ่อมแซมปากแหว่งตามเกณฑ์ช่วงอายุไม่เกิน 6 เดือน</td><td></td><td>ดึงจาก Patient resource และ Procedure resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>100</td><td></td><td></td><td>- จำนวนผู้ป่วย Cleft Lip ที่เข้ารับการผ่าตัดช่วงอายุไม่เกิน 6 เดือน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>101</td><td></td><td></td><td>- จำนวนผู้ป่วย Cleft Lip ที่เข้ารับการผ่าตัดทั้งหมดในช่วงเดียวกัน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>102</td><td></td><td>55.0</td><td>ร้อยละผู้ป่วยที่เข้ารับการผ่าตัดซ่อมแซมเพดานโหว่ตามช่วงอายุไม่เกิน 18 เดือน</td><td></td><td>ดึงจาก Patient resource และ Procedure resource</td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>103</td><td></td><td></td><td>- จำนวนผู้ป่วย Cleft Palate  ที่เข้ารับการผ่าตัดเพดานโหว่ภายในช่วงอายุไม่เกิน 18 เดือน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Pediatrics"><td>Pediatrics</td><td>104</td><td></td><td></td><td>- จำนวนผู้ป่วย Cleft Palate  ที่เข้ารับการผ่าตัดทั้งหมดในช่วงเดียวกัน</td><td></td><td></td><td></td><td></td><td></td><td></td><td>-</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>2</td><td>Adminstrative</td><td>1.0</td><td>รหัสหน่วยบริการ</td><td></td><td>TH Core Organization</td><td>Organization</td><td>identifier</td><td></td><td></td><td>MoPH-PC Organization: Provider</td><td></td><td>PERSON.HOSPCODE</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>3</td><td></td><td>2.0</td><td>รหัสเขตสุขภาพ</td><td></td><td>TH Core Organization</td><td>Organization</td><td>extension</td><td></td><td>สามารถคำนวณจากค่าอื่นได้หรือไม่</td><td>MoPH-PC Organization: Provider</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>4</td><td></td><td>21.0</td><td>วันที่เข้าสู่ระบบ IMC</td><td></td><td>-</td><td>FHIR EpisodeOfCare</td><td>period.start</td><td></td><td></td><td>FHIR EpisodeOfCare</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ EpisodeOfCare จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>5</td><td></td><td>22.0</td><td>วันที่จำหน่ายออกจากระบบ IMC</td><td></td><td>-</td><td>FHIR EpisodeOfCare</td><td>period.end</td><td></td><td></td><td>FHIR EpisodeOfCare</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ EpisodeOfCare จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>6</td><td></td><td>23.0</td><td>ประเภทการจำหน่ายออกจากระบบ IMC</td><td></td><td>-</td><td>FHIR EpisodeOfCare</td><td>extension</td><td></td><td>ยังไม่มี profile หรือ extension สำหรับข้อมูลนี้ หากต้องใช้อาจต้องมีการทำเพิ่มและรวบรวมไว้บางแห่ง</td><td></td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>7</td><td>Patient demographic</td><td>3.0</td><td>เลขที่บัตรประชาชน (CID)</td><td></td><td>TH Core Patient</td><td>Patient</td><td>identifier:hn</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.HN</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>8</td><td></td><td>4.0</td><td>ทะเบียนบุคคล (PID)</td><td></td><td>TH Core Patient</td><td>Patient</td><td>identifier:cid</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.CID</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>9</td><td></td><td>5.0</td><td>ชื่อ</td><td></td><td>TH Core Patient</td><td>Patient</td><td>name.given</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.NAME</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>10</td><td></td><td>6.0</td><td>นามสกุล</td><td></td><td>TH Core Patient</td><td>Patient</td><td>name.family</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.LNAME</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>11</td><td></td><td>7.0</td><td>เพศ</td><td></td><td>TH Core Patient</td><td>Patient</td><td>gender</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.SEX</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>12</td><td></td><td>8.0</td><td>วันเกิด</td><td></td><td>TH Core Patient</td><td>Patient</td><td>birthDate</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.BIRTH</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>13</td><td></td><td>10.0</td><td>ที่อยู่ (รหัสตามแฟ้ม Address)</td><td></td><td>TH Core Patient</td><td>Patient</td><td>address</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>ADDRESS</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>14</td><td>Health Insurance Information</td><td>9.0</td><td>รหัสประเภทสิทธิการรักษา</td><td></td><td>TH Core Coverage</td><td>Coverage</td><td>type</td><td></td><td></td><td>FHIR Coverage</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Coverage จาก FHIR core specs ได้</td><td>CARD.INSTYPE_NEW</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>15</td><td>Problems</td><td>11.0</td><td>การวินิจฉัยโรคหลัก (PRINCIPLE DX 4 กลุ่มโรค)</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>16</td><td></td><td>12.0</td><td>การวินิจฉัยโรคร่วม (CO-MORBIDITY ได้แก่ ความบกพร่อง 5 ด้าน ตามเกณฑ์คู่มือ IMC)</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>17</td><td></td><td>20.0</td><td>วันที่เกิดโรค (onset)</td><td></td><td>TH Core Condition</td><td>Condition</td><td>onsetDateTime</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>18</td><td></td><td>24.0</td><td>วันที่ตรวจพบความพิการ</td><td></td><td>TH Core Condition</td><td>Condition</td><td>recordedDate</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DISABILITY.DATE_DETECT</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>19</td><td></td><td>25.0</td><td>วันที่เริ่มมีความพิการ</td><td></td><td>TH Core Condition</td><td>Condition</td><td>onsetDateTime</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DISABILITY.DATE_DISAB</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>20</td><td></td><td>26.0</td><td>รหัสประเภทความพิการ</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DISABILITY.DISABTYPE</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>21</td><td></td><td>27.0</td><td>รหัสโรคหรือการบาดเจ็บที่เป็นสาเหตุของความพิการ</td><td></td><td>TH Core Condition</td><td>Condition</td><td>extension: dueTo</td><td></td><td>เป็น extension ใน FHIR core spec</td><td>MoPH-PC Condition</td><td></td><td>DISABILITY.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>22</td><td>Procedures</td><td>13.0</td><td>รหัสหัตถการ</td><td></td><td>TH Core Procedure</td><td>Procedure</td><td>code</td><td></td><td></td><td>MoPH-PC Procedure</td><td></td><td>PROCEDURE_OPD.PROCEDCODE หรือ PROCEDURE_IPD.PROCEDCODE</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>23</td><td></td><td>18.0</td><td>รหัสบริการฟื้นฟูสมรรถภาพ</td><td></td><td>TH Core Procedure</td><td>Procedure</td><td>code</td><td></td><td></td><td>MoPH-PC Procedure</td><td></td><td>REHABILITATION.REHABCODE</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>24</td><td>Medications</td><td>14.0</td><td>ชื่อยา</td><td></td><td>TH Core MedicationStatement</td><td>MedicationStatement</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationStatement</td><td></td><td>DRUG_OPD.DNAME หรือ DRUG_IPD.DNAME</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>25</td><td>Observations</td><td>15.0</td><td>วันที่ประเมินความบกพร่อง</td><td></td><td>TH Core Observation</td><td>Observation</td><td>effectiveDateTime</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>FUNCTIONAL.DATE_SERV</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>26</td><td></td><td>16.0</td><td>รหัสวิธีประเมินความบกพร่อง</td><td></td><td>TH Core Observation</td><td>Observation</td><td>method</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>FUNCTIONAL.FUNCTIONAL_TEST</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>27</td><td></td><td>17.0</td><td>คะแนนความบกพร่อง</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>FUNCTIONAL.TESTRESULT</td><td></td></tr>
+<tr data-sheet="Rehab"><td>Rehab</td><td>28</td><td>Device</td><td>19.0</td><td>รหัสกายอุปกรณ์ที่ได้รับ</td><td></td><td>TH Core DeviceUsage</td><td>DeviceUsage</td><td>device</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>REHABILITATION.AT_DEVICE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>2</td><td>Patient demographic</td><td>1.1</td><td>Hospital Number (HN)</td><td></td><td>TH Core Patient</td><td>Patient</td><td>identifier:hn</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.HN</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>3</td><td></td><td>1.2</td><td>เลขที่บัตรประชาชน</td><td></td><td>TH Core Patient</td><td>Patient</td><td>identifier:cid</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.CID</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>4</td><td></td><td>1.3</td><td>ชื่อ</td><td></td><td>TH Core Patient</td><td>Patient</td><td>name.given</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.NAME</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>5</td><td></td><td>1.4</td><td>นามสกุล</td><td></td><td>TH Core Patient</td><td>Patient</td><td>name.family</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.LNAME</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>6</td><td></td><td>1.5</td><td>เพศ</td><td></td><td>TH Core Patient</td><td>Patient</td><td>gender</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.SEX</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>7</td><td></td><td>1.6</td><td>วันเกิด</td><td></td><td>TH Core Patient</td><td>Patient</td><td>birthDate</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.BIRTH</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>8</td><td></td><td>1.7</td><td>อายุ</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 30525-0 Age แต่หากมี birthDate ควรคำนวณจาก birthDate</td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>9</td><td></td><td>1.8</td><td>ที่อยู่ตามทะเบียนบ้าน</td><td></td><td>TH Core Patient</td><td>Patient</td><td>address</td><td></td><td>ให้ใช้ extension official address</td><td>MoPH-PC Patient</td><td>ใน profile ไม่ได้แยกประเภทที่อยู่แบบนี้</td><td>ADDRESS</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>10</td><td></td><td>1.9</td><td>ที่อยู่ปัจจุบัน</td><td></td><td>TH Core Patient</td><td>Patient</td><td>address</td><td></td><td>ให้ address.use = home</td><td>MoPH-PC Patient</td><td>ใน profile ไม่ได้แยกประเภทที่อยู่แบบนี้</td><td>ADDRESS</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>11</td><td></td><td>1.1</td><td>สัญชาติ</td><td></td><td>TH Core Patient</td><td>Patient</td><td>extension: nationality</td><td></td><td></td><td>MoPH-PC Patient</td><td></td><td>PERSON.NATION</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>12</td><td></td><td>1.11</td><td>ชื่อโรงพยาบาล/รหัสโรงพยาบาล</td><td></td><td>TH Core Patient</td><td>Patient</td><td>managingOrganization</td><td></td><td>ไม่แน่ใจว่าข้อมูลนี้หมายถึงอะไร น่าจะหมายถึงหน่วยงานที่ส่งข้อมูล</td><td>MoPH-PC Patient</td><td>ใน profile ไม่ได้ระบุให้มี element นี้</td><td>PERSON.HOSPCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>13</td><td>Health Insurance Information</td><td>1.12</td><td>สิทธิการรักษาพยาบาล</td><td></td><td>TH Core Coverage</td><td>Coverage</td><td>type</td><td></td><td></td><td>FHIR Coverage</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Coverage จาก FHIR core specs ได้</td><td>CARD.INSTYPE_NEW</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>14</td><td>Encounter Information</td><td>1.13</td><td>วัน เดือน ปี ที่ให้บริการ</td><td></td><td>TH Core Encounter</td><td>Encounter</td><td>actualPeriod.start</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>SERVICE.DATE_SERV หรือ SERVICE.TIME_SERV หรือ ADMISSION.DATETIME_ADMIT</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>15</td><td>Vital Signs</td><td>1.18</td><td>น้ำหนัก</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 29463-7 Body weight</td><td>MoPH-PC Observation: Vital</td><td></td><td>CHRONICFU.WEIGHT หรือ NCDSCREEN.WEIGHT</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>16</td><td></td><td>1.19</td><td>ส่วนสูง</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 8302-2 Body height</td><td>MoPH-PC Observation: Vital</td><td></td><td>CHRONICFU.HEIGHT หรือ NCDSCREEN.HEIGHT</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>17</td><td></td><td>1.2</td><td>อัตราการเต้นของชีพจร(PR)</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 8867-4 Heart rate</td><td>MoPH-PC Observation: Vital</td><td></td><td>SERVICE.PR</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>18</td><td></td><td>1.21</td><td>อัตราการหายใจ(RR)</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 9279-1 Respiratory rate</td><td>MoPH-PC Observation: Vital</td><td></td><td>SERVICE.RR</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>19</td><td></td><td>1.22</td><td>อุณหภูมิร่างกายแรกรับ</td><td></td><td>TH Core Observation: Vital Signs</td><td>Observation</td><td>valueQuantity</td><td></td><td>code = LOINC: 8310-5 Body temperature</td><td>MoPH-PC Observation: Vital</td><td></td><td>SERVICE.BTEMP</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>20</td><td>Clinical Information &amp; Tests</td><td>3.1</td><td>History of present illness: chief complaint</td><td></td><td>TH Core Encounter</td><td>Encounter</td><td>reason</td><td></td><td>กำหนด use เป็น Chief complaint</td><td>MoPH-PC Encounter</td><td></td><td>SERVICE.CHIEFCOMP</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>21</td><td></td><td>3.3</td><td>History of present illness: duration of pso</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>22</td><td></td><td>3.5</td><td>History of present illness: previous treatment</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>23</td><td></td><td>3.6</td><td>Aggravating factor: ขาดยา, URI, ประจำเดือน, ยาสมุนไพร, alcohol, infection, ตั้งครรภ์, รับประทานยาสเตียรอยด์, อื่นๆ</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>24</td><td></td><td>3.11</td><td>Family history: PSO</td><td></td><td>TH Core FamilyMemberHistory</td><td>FamilyMemberHistory</td><td>Condition.code</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>25</td><td></td><td>3.13</td><td>การตรวจร่างกาย: skin</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>26</td><td></td><td>3.14</td><td>การตรวจร่างกาย: scalp</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>27</td><td></td><td>3.15</td><td>การตรวจร่างกาย: nail</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>28</td><td></td><td>3.16</td><td>การตรวจร่างกาย: genitalia</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>29</td><td></td><td>3.17</td><td>การตรวจร่างกาย: musculoskeletal</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueString</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>30</td><td></td><td>3.18</td><td>PASI score</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>31</td><td></td><td>3.19</td><td>BSA</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>32</td><td></td><td>3.2</td><td>GPPGA, GPPASI</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>33</td><td></td><td>3.21</td><td>DLQI</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>34</td><td>Health Status Assessment</td><td>3.1</td><td>Social history: smoking, alcohol</td><td></td><td>TH Core Observation: Smoking Status</td><td>Observation</td><td>valueCodeableConcept</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>35</td><td></td><td>3.22</td><td>EQ-5D-5L</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>36</td><td></td><td>3.23</td><td>การประเมินภาวะซึมเศร้า: 2Q</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>ใช้ SPECIALPP ได้</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>37</td><td></td><td>3.24</td><td>การประเมินภาวะซึมเศร้า: 9Q</td><td></td><td>TH Core Observation</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>ใช้ SPECIALPP ได้</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>38</td><td>Allergies and Intolerances</td><td>1.17</td><td>ประวัติการแพ้ยา</td><td></td><td>TH Core AllergyIntolerance</td><td>AllergyIntolerance</td><td>code</td><td></td><td>category = medication</td><td>MoPH-PC AllergyIntolerance</td><td></td><td>DRUGALLERGY.DRUGALLERGY</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>39</td><td>Finance</td><td>1.24</td><td>ค่าบริการทั้งหมด(PRICE)</td><td></td><td>-</td><td></td><td></td><td></td><td>ควรอยู่นอก scope การแลกเปลี่ยนหรือไม่?</td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>40</td><td></td><td>1.25</td><td>ค่าบริการที่ต้องจ่ายเอง(PAYPRICE)</td><td></td><td>-</td><td></td><td></td><td></td><td>ควรอยู่นอก scope การแลกเปลี่ยนหรือไม่?</td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>41</td><td></td><td>1.26</td><td>เงินที่จ่ายจริง(ACTUALPAY)</td><td></td><td>-</td><td></td><td></td><td></td><td>ควรอยู่นอก scope การแลกเปลี่ยนหรือไม่?</td><td></td><td></td><td></td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>42</td><td>Laboratory</td><td>2.1</td><td>CBC</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>43</td><td></td><td>2.2</td><td>Liver funtion test</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>44</td><td></td><td>2.3</td><td>Creatinine</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>45</td><td></td><td>2.4</td><td>Lipid</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>46</td><td></td><td>2.5</td><td>FBS</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>47</td><td></td><td>2.6</td><td>HIV</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>48</td><td></td><td>2.7</td><td>HBV</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>49</td><td></td><td>2.8</td><td>quantiferon TB/TT</td><td></td><td>TH Core Observation: Laboratory Result</td><td>Observation</td><td>valueQuantity</td><td></td><td></td><td>MoPH-PC Observation: Lab</td><td></td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>50</td><td>Diagnostic Imaging</td><td>2.9</td><td>CXR</td><td></td><td>TH Core Observation: Imaging Result</td><td>Observation</td><td>valueString</td><td></td><td></td><td>FHIR Observation</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ Observation จาก FHIR core specs ได้</td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>51</td><td></td><td>2.1</td><td>liver fibroscan</td><td></td><td>TH Core Observation: Imaging Result</td><td>Observation</td><td>valueString</td><td></td><td></td><td>None</td><td>ใน profile อื่น ไม่น่ามีข้อมูลนี้</td><td>LABFU</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>52</td><td>Problems</td><td>3.2</td><td>History of present illness: onset of PSO</td><td></td><td>TH Core Condition</td><td>Condition</td><td>onsetDateTime</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>53</td><td></td><td>3.4</td><td>History of present illness: arthritis</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>54</td><td></td><td>1.14</td><td>โรคประจำตัว</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>CHRONIC.CHRONIC หรือ DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td>อาจพอหาได้แต่ไม่ได้แม่นยำ</td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>55</td><td></td><td>1.15</td><td>โรคที่วินิจฉัย(DIAGNOSIS)</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>56</td><td></td><td>1.16</td><td>ประเภทการวินิจฉัย(DIAGTYPE)</td><td></td><td>TH Core Encounter</td><td>Encounter</td><td>diagnosis.use</td><td></td><td></td><td>MoPH-PC Encounter</td><td></td><td>DIAGNOSIS_OPD.DIAGTYPE หรือ DIAGNOSIS_IPD.DIAGTYPE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>57</td><td></td><td>3.8.1</td><td>Past medical history</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>58</td><td></td><td>3.25</td><td>Principal diagnosis: L40.0 psoriasis vulgaris</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>59</td><td></td><td>3.26</td><td>Principal diagnosis: L40.1 generalized pustular psoriasis</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>60</td><td></td><td>3.27</td><td>Principal diagnosis: L40.4 guttate psoriasis</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>61</td><td></td><td>3.28</td><td>Principal diagnosis: L40.81 psoriasis erythroderma</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>62</td><td></td><td>3.29</td><td>Principal diagnosis: L40.2 acropustulosis of hallopeau</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>63</td><td></td><td>3.3</td><td>Principal diagnosis: L40.8 other psoriasis</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>64</td><td></td><td>3.31</td><td>Principal diagnosis: L40.8 inverse psoriasis</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>65</td><td></td><td>3.32</td><td>Principal diagnosis: L40.0+O99.7psoriasis in pregnancy</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>66</td><td></td><td>3.33</td><td>Principal diagnosis: L40.5+ M07.39 psoriasis arthritis</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>67</td><td></td><td>3.34</td><td>Comorbidity (โรคร่วม)</td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>68</td><td></td><td>3.35</td><td>Complication (ภาวะแทรกซ้อนจากการรักษาครั้งนี้)</td><td></td><td>TH Core Procedure</td><td>Procedure</td><td>complication</td><td></td><td></td><td>MoPH-PC Procedure</td><td></td><td>DIAGNOSIS_OPD.DIAGCODE หรือ DIAGNOSIS_IPD.DIAGCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>69</td><td></td><td></td><td></td><td></td><td>TH Core Condition</td><td>Condition</td><td>code</td><td></td><td></td><td>MoPH-PC Condition</td><td></td><td>-</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>70</td><td>Procedures</td><td>1.23</td><td>หัตถการที่ได้รับ(PROCEDURE)</td><td></td><td>TH Core Procedure</td><td>Procedure</td><td>code</td><td></td><td></td><td>MoPH-PC Procedure</td><td></td><td>PROCEDURE_OPD.PROCEDCODE หรือ PROCEDURE_IPD.PROCEDCODE</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>71</td><td></td><td>3.8.2</td><td>Past surgical history</td><td></td><td>TH Core Procedure</td><td>Procedure</td><td>code</td><td></td><td></td><td>MoPH-PC Procedure</td><td></td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>72</td><td>Medications</td><td>3.9</td><td>Concurrent medication:</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>73</td><td></td><td>3.36</td><td>การรักษา: ยาทา</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>74</td><td></td><td>3.37</td><td>การรักษา: phototherapy</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>75</td><td></td><td>3.38</td><td>การรักษา: methotrexate</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>76</td><td></td><td>3.39</td><td>การรักษา: ciclosporin</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>77</td><td></td><td>3.4</td><td>การรักษา: neotigason</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>78</td><td></td><td>3.41</td><td>การรักษา: infliximab</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>79</td><td></td><td>3.42</td><td>การรักษา: etanercept</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>80</td><td></td><td>3.43</td><td>การรักษา: secukinumab</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>81</td><td></td><td>3.44</td><td>การรักษา: ixekizumab</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>82</td><td></td><td>3.45</td><td>การรักษา: brodalumab</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>83</td><td></td><td>3.46</td><td>การรักษา: gluselkumab</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>84</td><td></td><td>3.47</td><td>การรักษา: other</td><td></td><td>TH Core MedicationRequest</td><td>MedicationRequest</td><td>medication</td><td></td><td></td><td>MoPH-PC MedicationRequest</td><td></td><td>DRUG_OPD.DIDSTD หรือ DRUG_IPD.DIDSTD</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>85</td><td>Clinical Documents</td><td>3.48</td><td>Consult rheumatologist</td><td></td><td>TH Core DocumentReference</td><td>DocumentReference</td><td>content</td><td></td><td></td><td>None</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ DocumentReference จาก FHIR core specs ได้ หรืออาจใช้ MoPH-PC Visit Composition ก็ได้เช่นกัน</td><td>None</td><td></td></tr>
+<tr data-sheet="Skin"><td>Skin</td><td>86</td><td></td><td>3.49</td><td>Consult phychologist</td><td></td><td>TH Core DocumentReference</td><td>DocumentReference</td><td>content</td><td></td><td></td><td>None</td><td>ไม่มี profile ที่จำเพาะ แต่สามารถใช้ DocumentReference จาก FHIR core specs ได้ หรืออาจใช้ MoPH-PC Visit Composition ก็ได้เช่นกัน</td><td>None</td><td></td></tr>
+<tr data-sheet="Neuro"><td>Neuro</td><td>3</td><td>ใช้ร่วมกับ TH Cancer IG เนื่องจากเป็นข้อมูลเนื้องอกระบบประสาท</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tab-erd" class="section">
+    <h2>C) ERD + Mermaid Code (with example-data comments)</h2>
+    <p>ERD ถูกแยกเป็น 3 ภาพย่อยเพื่อลดการชนกันของโหนด และมี comment ตัวอย่างข้อมูลในโค้ดให้ทันที</p>
+    <div class="warn">หมายเหตุ: comment ตัวอย่างข้อมูลจะอยู่ในโค้ด Mermaid บรรทัดที่ขึ้นต้นด้วย <span class="code">%% Example:</span></div>
+
+    <div class="grid-2" style="margin-top:12px">
+      <div class="panel">
+        <div class="hd">ERD 1: Patient + Reference + Encounter</div>
+        <div class="bd">
+          <div class="diagram-box"><pre class="mermaid-host" id="erd1"></pre></div>
+          <div class="code-wrap">
+            <button class="copy-btn" onclick="copyCode('code1',this)">Copy</button>
+            <pre id="code1"></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="hd">ERD 2: Clinical Core + Common + Extended</div>
+        <div class="bd">
+          <div class="diagram-box"><pre class="mermaid-host" id="erd2"></pre></div>
+          <div class="code-wrap">
+            <button class="copy-btn" onclick="copyCode('code2',this)">Copy</button>
+            <pre id="code2"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <div class="hd">ERD 3: FHIR Mapping Layer + Admin</div>
+      <div class="bd">
+        <div class="diagram-box"><pre class="mermaid-host" id="erd3"></pre></div>
+        <div class="code-wrap">
+          <button class="copy-btn" onclick="copyCode('code3',this)">Copy</button>
+          <pre id="code3"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-sql" class="section">
+    <h2>D) SQL-ready Artifacts</h2>
+    <p>ไฟล์พร้อมนำไปสร้าง schema + mapping seed:</p>
+    <ul>
+      <li><span class="code">/Users/Lh/Sites/jane/mantine-UI-POC/doc/canonical-schema-v1.sql</span></li>
+      <li><span class="code">/Users/Lh/Sites/jane/mantine-UI-POC/doc/fhir-map-rule-seed-v1.sql</span></li>
+      <li><span class="code">/Users/Lh/Sites/jane/mantine-UI-POC/doc/canonical-schema-v1-spec.md</span></li>
+    </ul>
+  </section>
+
+  <footer>Generated for Lh on 2026-02-27. Canonical DB first, FHIR output by rules.</footer>
+</div>
+
+<script type="text/plain" id="mmd1">erDiagram
+  %% Example: patient row -> {id:"p-1001", birth_date:"1985-06-02", sex:"female", nationality_code:"TH"}
+  %% Example: patient_identifier row -> {identifier_type:"cid", identifier_value:"1101700203451"}
+  %% Example: patient_address row -> {address_use:"home", tambon_id:"tb-102", postal_code:"10110"}
+
+  geo_province {
+    uuid id PK
+    string code
+    string name_th
+  }
+
+  geo_amphur {
+    uuid id PK
+    uuid province_id FK
+    string code
+    string name_th
+  }
+
+  geo_tambon {
+    uuid id PK
+    uuid amphur_id FK
+    string code
+    string name_th
+    string postal_code
+  }
+
+  org_facility {
+    uuid id PK
+    string hospcode
+    string name
+    string facility_type
+  }
+
+  patient {
+    uuid id PK
+    date birth_date
+    string sex
+    string nationality_code
+    string race_code
+    string religion_code
+    boolean deceased_flag
+    datetime deceased_at
+  }
+
+  patient_name {
+    uuid id PK
+    uuid patient_id FK
+    string language_code
+    string name_use
+    string given_name
+    string family_name
+    boolean is_primary
+  }
+
+  patient_identifier {
+    uuid id PK
+    uuid patient_id FK
+    string identifier_type
+    string identifier_value
+    uuid assigner_org_id FK
+    boolean is_primary
+  }
+
+  patient_telecom {
+    uuid id PK
+    uuid patient_id FK
+    string system
+    string use_code
+    string value
+    int rank_no
+  }
+
+  patient_address {
+    uuid id PK
+    uuid patient_id FK
+    string address_use
+    string house_no
+    string moo
+    string mooban
+    string road
+    uuid tambon_id FK
+    string postal_code
+  }
+
+  related_person {
+    uuid id PK
+    uuid patient_id FK
+    string relationship_code
+    string name
+    bool is_emergency_contact
+    bool active
+  }
+
+  related_person_telecom {
+    uuid id PK
+    uuid related_person_id FK
+    string system
+    string value
+  }
+
+  coverage {
+    uuid id PK
+    uuid patient_id FK
+    string coverage_type
+    string scheme_code
+    string status
+  }
+
+  encounter {
+    uuid id PK
+    string visit_number
+    uuid patient_id FK
+    uuid facility_id FK
+    uuid coverage_id FK
+    string encounter_type
+    string status
+    datetime period_start
+    datetime period_end
+  }
+
+  patient_attribute_audit {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string field_name
+    string old_value
+    string new_value
+    datetime logged_at
+  }
+
+  geo_province ||--o{ geo_amphur : has
+  geo_amphur ||--o{ geo_tambon : has
+  geo_tambon ||--o{ patient_address : referenced_by
+
+  geo_province ||--o{ org_facility : located_in
+
+  patient ||--o{ patient_name : has
+  patient ||--o{ patient_identifier : has
+  patient ||--o{ patient_telecom : has
+  patient ||--o{ patient_address : has
+  patient ||--o{ related_person : has
+  related_person ||--o{ related_person_telecom : has
+
+  org_facility ||--o{ patient_identifier : assigns_hn
+  patient ||--o{ coverage : owns
+  patient ||--o{ encounter : visits
+  org_facility ||--o{ encounter : hosts
+  coverage ||--o{ encounter : used_for
+
+  encounter ||--o{ patient_attribute_audit : source_context
+</script>
+
+<script type="text/plain" id="mmd2">erDiagram
+  %% Example: condition_record row -> {code_system:"ICD-10", code:"J44", clinical_status:"active"}
+  %% Example: observation row -> {code:"39156-5", value_type:"quantity", value_quantity:24.1, value_unit:"kg/m2"}
+  %% Example: medication_request row -> {medication_code:"TMT12345", dose_value:1, frequency_text:"bid"}
+
+  encounter {
+    uuid id PK
+    uuid patient_id FK
+    string visit_number
+  }
+
+  patient {
+    uuid id PK
+  }
+
+  condition_record {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string code_system
+    string code
+    string diagnosis_type
+    string clinical_status
+    datetime diagnosed_at
+  }
+
+  observation {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string category_code
+    string code
+    string value_type
+    decimal value_quantity
+    string value_code
+    string value_text
+    datetime effective_at
+  }
+
+  medication_request {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string medication_code
+    string medication_name
+    string status
+    datetime authored_at
+  }
+
+  medication_statement {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string medication_code
+    string medication_name
+    string adherence_status
+  }
+
+  allergy_intolerance {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string code
+    string reaction_text
+    string severity
+  }
+
+  procedure_event {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string code
+    string status
+    datetime performed_at
+  }
+
+  immunization_event {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string vaccine_code
+    datetime occurrence_at
+  }
+
+  specimen {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string accession_number
+    string specimen_type_code
+  }
+
+  diagnostic_report {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string code
+    string status
+    datetime issued_at
+  }
+
+  diagnostic_report_result {
+    uuid id PK
+    uuid diagnostic_report_id FK
+    uuid observation_id FK
+  }
+
+  document_reference {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string document_type_code
+    string status
+    datetime document_date
+  }
+
+  imaging_study {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string modality_code
+    string study_uid
+    datetime started_at
+  }
+
+  episode_of_care {
+    uuid id PK
+    uuid patient_id FK
+    string status
+    date period_start
+    date period_end
+  }
+
+  medical_device {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string udi
+    string device_code
+  }
+
+  device_usage {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    uuid device_id FK
+    datetime started_at
+    datetime ended_at
+  }
+
+  family_history {
+    uuid id PK
+    uuid patient_id FK
+    string relationship_code
+    string condition_code
+  }
+
+  patient ||--o{ condition_record : has
+  encounter ||--o{ condition_record : context
+
+  patient ||--o{ observation : has
+  encounter ||--o{ observation : context
+
+  patient ||--o{ medication_request : has
+  encounter ||--o{ medication_request : context
+
+  patient ||--o{ medication_statement : has
+  encounter ||--o{ medication_statement : context
+
+  patient ||--o{ allergy_intolerance : has
+  encounter ||--o{ allergy_intolerance : context
+
+  patient ||--o{ procedure_event : has
+  encounter ||--o{ procedure_event : context
+
+  patient ||--o{ immunization_event : has
+  encounter ||--o{ immunization_event : context
+
+  patient ||--o{ specimen : has
+  encounter ||--o{ specimen : context
+
+  patient ||--o{ diagnostic_report : has
+  encounter ||--o{ diagnostic_report : context
+  diagnostic_report ||--o{ diagnostic_report_result : has
+  observation ||--o{ diagnostic_report_result : result
+
+  patient ||--o{ document_reference : has
+  encounter ||--o{ document_reference : context
+
+  patient ||--o{ imaging_study : has
+  encounter ||--o{ imaging_study : context
+
+  patient ||--o{ episode_of_care : has
+
+  patient ||--o{ medical_device : has
+  encounter ||--o{ medical_device : context
+  medical_device ||--o{ device_usage : used_in
+
+  patient ||--o{ family_history : has
+</script>
+
+<script type="text/plain" id="mmd3">erDiagram
+  %% Example: fhir_map_rule row -> {resource_type:"Patient", fhir_path:"Patient.birthDate", source_table:"patient", source_column:"birth_date"}
+  %% Example: fhir_code_map row -> {map_group:"sex_map", source_code:"M", target_system:"http://hl7.org/fhir/administrative-gender", target_code:"male"}
+  %% Example: admin_registration row -> {registration_type:"WSDL", old_or_new:"new", source_system:"BoStor"}
+
+  patient {
+    uuid id PK
+  }
+
+  encounter {
+    uuid id PK
+    uuid patient_id FK
+  }
+
+  billing_event {
+    uuid id PK
+    uuid encounter_id FK
+    decimal total_price
+    decimal self_pay_amount
+    decimal actual_paid
+    string payment_method
+    datetime billed_at
+  }
+
+  admin_registration {
+    uuid id PK
+    uuid patient_id FK
+    uuid encounter_id FK
+    string registration_type
+    string old_or_new
+    string source_system
+    datetime registered_at
+  }
+
+  fhir_map_rule {
+    uuid id PK
+    string profile_name
+    string resource_type
+    string fhir_path
+    string source_table
+    string source_column
+    string transform_type
+    string code_map_group
+    string cardinality
+    bool is_required
+  }
+
+  fhir_code_map {
+    uuid id PK
+    string map_group
+    string source_code
+    string target_system
+    string target_code
+    string target_display
+    bool active
+  }
+
+  patient ||--o{ admin_registration : has
+  encounter ||--o{ admin_registration : source_context
+  encounter ||--o{ billing_event : billed_by
+
+  fhir_code_map ||--o{ fhir_map_rule : referenced_by
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+function showTab(id, el){
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  var tab = document.getElementById('tab-' + id);
+  if (tab) tab.classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'erd') renderMermaidIfNeeded();
+}
+
+function activatePill(containerId, btn){
+  var root = document.getElementById(containerId);
+  if (!root) return;
+  root.querySelectorAll('.pill-btn').forEach(function(x){ x.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+}
+
+function escHtml(s){
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function injectCanonicalExamples(){
+  var examples = {
+    geo_province: '{"code":"10","name_th":"กรุงเทพมหานคร"}',
+    geo_amphur: '{"code":"1001","province_id":"pv-10"}',
+    geo_tambon: '{"code":"100101","amphur_id":"am-1001","postal_code":"10200"}',
+    org_facility: '{"hospcode":"11234","name":"Rama Clinic"}',
+    patient: '{"birth_date":"1985-06-02","sex":"F","nationality_code":"TH"}',
+    patient_name: '{"language_code":"th","name_use":"official","given_name":"สมชาย","family_name":"ใจดี"}',
+    patient_identifier: '{"identifier_type":"cid","identifier_value":"1101700203451"}',
+    patient_address: '{"address_use":"home","tambon_id":"tb-100101","postal_code":"10110"}',
+    patient_telecom: '{"system":"phone","use_code":"mobile","value":"0812345678"}',
+    related_person: '{"relationship_code":"parent","name":"นางสาวใจดี ใจงาม"}',
+    related_person_telecom: '{"system":"phone","value":"0899999999"}',
+    patient_attribute_audit: '{"field_name":"occupation","old_value":"teacher","new_value":"retired"}',
+    coverage: '{"coverage_type":"UCS","scheme_code":"NHSO","status":"active"}',
+    encounter: '{"visit_number":"VN-2026-000001","encounter_type":"OPD","status":"finished"}',
+    condition_record: '{"code":"J44","diagnosis_type":"principal","clinical_status":"active"}',
+    observation: '{"category_code":"vital-signs","code":"39156-5","value_quantity":"24.1"}',
+    medication_request: '{"medication_code":"TMT12345","status":"active","authored_at":"2026-02-27T09:00:00+07:00"}',
+    medication_statement: '{"medication_code":"TMT12345","adherence_status":"taking"}',
+    allergy_intolerance: '{"code":"PENICILLIN","reaction_text":"ผื่นลมพิษ","severity":"moderate"}',
+    procedure_event: '{"code":"99.15","status":"completed","performed_at":"2026-02-27T09:20:00+07:00"}',
+    immunization_event: '{"vaccine_code":"FLU-4","occurrence_at":"2025-11-01T10:00:00+07:00"}',
+    specimen: '{"accession_number":"LAB-2026-0001","specimen_type_code":"blood"}',
+    diagnostic_report: '{"code":"LAB-CBC","status":"final","conclusion_text":"within normal limit"}',
+    document_reference: '{"document_type_code":"progress-note","content_text":"Progress note day 1"}',
+    imaging_study: '{"study_uid":"1.2.840.113619.2.55.3.604688432.123.1678901234.1","modality_code":"CT"}',
+    episode_of_care: '{"status":"active","period_start":"2026-01-01","period_end":"2026-03-01"}',
+    medical_device: '{"udi":"UDI-0123456789","device_code":"wheelchair"}',
+    device_usage: '{"device_id":"dev-0001","started_at":"2026-02-01T08:00:00+07:00","ended_at":"2026-02-14T08:00:00+07:00"}',
+    family_history: '{"relationship_code":"mother","condition_code":"E11"}',
+    billing_event: '{"total_price":"1500.00","actual_paid":"200.00","payment_method":"cash"}',
+    admin_registration: '{"registration_type":"WSDL","old_or_new":"new","source_system":"BoStor"}',
+    fhir_map_rule: '{"resource_type":"Patient","fhir_path":"Patient.birthDate","transform_type":"direct"}',
+    fhir_code_map: '{"map_group":"sex_map","source_code":"M","target_code":"male"}'
+  };
+
+  document.querySelectorAll('#canonical-table tbody tr').forEach(function(row){
+    if (row.dataset.exampleInjected === '1') return;
+    var tname = row.cells[1] ? row.cells[1].innerText.trim() : '';
+    var sample = examples[tname] || '-';
+    var td = document.createElement('td');
+    td.innerHTML = '<span class="code">' + escHtml(sample) + '</span>';
+    row.insertBefore(td, row.cells[4]);
+    row.dataset.exampleInjected = '1';
+  });
+}
+
+function injectMappingExamples(){
+  function guessExample(dataElement, resourceType, fhirElement){
+    var d = (dataElement || '').toLowerCase();
+    var r = (resourceType || '').toLowerCase();
+    var f = (fhirElement || '').toLowerCase();
+    var hay = d + ' ' + r + ' ' + f;
+
+    if (/identifier:cid|\\bcid\\b|บัตรประชาชน/.test(hay)) return '1101700203451';
+    if (/identifier:hn|hospital number|\\bhn\\b/.test(hay)) return 'HN-65000123';
+    if (/name\\.given|\\bชื่อ\\b|first name/.test(hay)) return 'สมชาย';
+    if (/name\\.family|นามสกุล|last name/.test(hay)) return 'ใจดี';
+    if (/birthdate|วันเกิด|วันเดือนปีเกิด/.test(hay)) return '1985-06-02';
+    if (/gender|\\bsex\\b|เพศ/.test(hay)) return 'male';
+    if (/telecom:phone|telephone|phone|tel|โทรศัพท์/.test(hay)) return '0812345678';
+    if (/telecom:email|email|อีเมล/.test(hay)) return 'somchai@example.com';
+    if (/address/.test(hay)) return '{"line":"99/12 Moo 4","city":"Bangkok"}';
+    if (/actualperiod|period\\.start|period\\.end|effectivedatetime|occurrencedatetime|recordeddate|onsetdatetime|abatementdatetime|date_time|วันที่/.test(hay)) return '2026-02-27T09:30:00+07:00';
+    if (/valuequantity|bmi|score|height|weight|pressure|hr|rr|temperature/.test(hay)) return '24.1';
+    if (/valuecodeableconcept|codeableconcept|status/.test(hay)) return '{"code":"active","display":"Active"}';
+    if (/valuestring|chief complaint|symptom|อาการ/.test(hay)) return 'ไอเรื้อรัง 2 สัปดาห์';
+    if (/medication/.test(hay)) return 'TMT12345';
+    if (/condition\\.code|allergyintolerance\\.code|familymemberhistory\\.condition\\.code|\\bcondition\\b/.test(hay)) return 'J44';
+    if (/documentreference|\\bcontent\\b/.test(hay)) return 'Progress note day 1';
+    if (/imagingstudy|study_uid|identifier/.test(hay) && /imaging/.test(hay)) return '1.2.840.113619.2.55.3.604688432.123.1678901234.1';
+    if (/coverage/.test(hay)) return 'UCS';
+    if (/device/.test(hay)) return 'UDI-0123456789';
+    return '-';
+  }
+
+  document.querySelectorAll('#mapping-table tbody tr').forEach(function(row){
+    if (row.dataset.mappingExampleInjected === '1') return;
+    if (!row.cells[9]) return;
+    if (row.cells[9].textContent.trim() !== '') return;
+
+    var dataElement = row.cells[4] ? row.cells[4].textContent.trim() : '';
+    var resourceType = row.cells[7] ? row.cells[7].textContent.trim() : '';
+    var fhirElement = row.cells[8] ? row.cells[8].textContent.trim() : '';
+    var sample = guessExample(dataElement, resourceType, fhirElement);
+    row.cells[9].innerHTML = '<span class="code">' + escHtml(sample) + '</span>';
+    row.dataset.mappingExampleInjected = '1';
+  });
+}
+
+function filterCanonical(group, btn){
+  activatePill('table-pills', btn);
+  document.querySelectorAll('#canonical-table tbody tr').forEach(function(row){
+    var cluster = row.cells[0] ? row.cells[0].textContent.trim() : '';
+    row.style.display = (group === 'all' || cluster === group) ? '' : 'none';
+  });
+}
+
+var _mappingResourceFilter = 'all';
+var _mappingSheetFilter = 'all';
+
+function applyMappingFilters(){
+  document.querySelectorAll('#mapping-table tbody tr').forEach(function(row){
+    var sheet = row.getAttribute('data-sheet') || '';
+    var profile = row.cells[6] ? row.cells[6].textContent : '';
+    var resource = row.cells[7] ? row.cells[7].textContent : '';
+    var dataElement = row.cells[8] ? row.cells[8].textContent : '';
+    var hay = (profile + ' ' + resource + ' ' + dataElement).toLowerCase();
+
+    var resourceHit = false;
+    if (_mappingResourceFilter === 'all') {
+      resourceHit = true;
+    } else if (_mappingResourceFilter === 'Medication') {
+      resourceHit = /medicationrequest|medicationstatement/.test(hay);
+    } else if (_mappingResourceFilter === 'Device') {
+      resourceHit = /deviceusage|device\\b/.test(hay);
+    } else {
+      resourceHit = hay.indexOf(_mappingResourceFilter.toLowerCase()) !== -1;
+    }
+
+    var sheetHit = (_mappingSheetFilter === 'all' || sheet === _mappingSheetFilter);
+    row.style.display = (resourceHit && sheetHit) ? '' : 'none';
+  });
+}
+
+function filterMapping(key, btn){
+  activatePill('mapping-pills', btn);
+  _mappingResourceFilter = key;
+  applyMappingFilters();
+}
+
+function filterMappingSheet(sheet, btn){
+  activatePill('mapping-sheet-pills', btn);
+  _mappingSheetFilter = sheet;
+  applyMappingFilters();
+}
+
+function applyMermaid(srcId, viewId, codeId){
+  var code = document.getElementById(srcId).textContent.trim();
+  document.getElementById(viewId).textContent = code;
+  document.getElementById(codeId).textContent = code;
+}
+function copyCode(codeId, btn){
+  var text = document.getElementById(codeId).textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    var old = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(function(){btn.textContent = old;}, 1200);
+  });
+}
+
+var _mermaidRendered = false;
+async function renderMermaidIfNeeded(){
+  if (_mermaidRendered || !window.mermaid) return;
+  document.querySelectorAll('#tab-erd .mermaid-host').forEach(function(el){
+    el.classList.add('mermaid');
+  });
+  mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: 'default' });
+  await mermaid.run({ querySelector: '#tab-erd .mermaid-host' });
+  _mermaidRendered = true;
+}
+
+document.addEventListener('DOMContentLoaded', async function(){
+  injectCanonicalExamples();
+  injectMappingExamples();
+  filterCanonical('all', document.querySelector('#table-pills .pill-btn'));
+  filterMappingSheet('all', document.querySelector('#mapping-sheet-pills .pill-btn'));
+  filterMapping('all', document.querySelector('#mapping-pills .pill-btn'));
+  applyMermaid('mmd1','erd1','code1');
+  applyMermaid('mmd2','erd2','code2');
+  applyMermaid('mmd3','erd3','code3');
+});
+</script>
+</body>
+</html>
