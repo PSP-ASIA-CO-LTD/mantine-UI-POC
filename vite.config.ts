@@ -182,4 +182,7 @@ const jsonCrudPlugin = (): Plugin => ({
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), jsonCrudPlugin()],
+  server: {
+    host: '127.0.0.1',
+  },
 })
