@@ -18,7 +18,7 @@ export function RecurrenceDisplay({ interval, size = 'xs', color = 'dimmed' }: R
 
     return (
         <Group gap={4} wrap="nowrap">
-            <IconRepeat size={size === 'xs' ? 12 : 14} style={{ opacity: 0.7 }} />
+            <IconRepeat size={size === 'xs' ? 12 : 14} className="ds-opacity-70" />
             <Text size={size} c={color}>
                 {displayValue}
             </Text>

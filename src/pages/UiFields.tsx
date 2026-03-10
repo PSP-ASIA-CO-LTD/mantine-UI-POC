@@ -18,6 +18,33 @@ import {
     IconFieldInput
 } from '../components/EditableFields';
 import { IconSearch } from '@tabler/icons-react';
+import { TokenStatePalette, type TokenGroup } from '../components/TokenStatePalette';
+
+const fieldTokenGroups: TokenGroup[] = [
+    {
+        title: 'Field Colors',
+        source: 'src/styles/ds/field-tokens.scss',
+        tokens: [
+            { token: '--ds-field-label-color', label: 'Label text', state: 'all' },
+            { token: '--ds-field-text-color', label: 'Input text', state: 'all' },
+            { token: '--ds-field-muted-color', label: 'Muted / secondary text', state: 'all' },
+            { token: '--ds-field-placeholder-color', label: 'Placeholder text', state: 'all' },
+        ],
+    },
+    {
+        title: 'Field Backgrounds',
+        source: 'src/styles/ds/field-tokens.scss',
+        tokens: [
+            { token: '--ds-field-idle-bg', label: 'Default background', state: 'idle' },
+            { token: '--ds-field-hover-bg', label: 'Hovered background', state: 'hover' },
+            { token: '--ds-field-edit-bg', label: 'Active / editing background', state: 'focus / edit' },
+            { token: '--ds-field-error-bg', label: 'Error background', state: 'error' },
+            { token: '--ds-field-locked-bg', label: 'Locked field background', state: 'locked' },
+            { token: '--ds-field-locked-border', label: 'Locked dashed border', state: 'locked' },
+            { token: '--ds-field-actions-bg', label: 'Action buttons backdrop', state: 'hover / edit' },
+        ],
+    },
+];
 
 export function UiFields() {
     const [text, setText] = useState('John Doe');
@@ -62,7 +89,7 @@ export function UiFields() {
                         <div>
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">Bootstrap DS Native Field Styles</Title>
-                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                <Text size="xs" c="dimmed" className="ds-showcase-source">
                                     public/bootswatch/quartz/bootstrap.min.css (official Quartz) + src/styles/ds/field-tokens.scss
                                 </Text>
                             </Group>
@@ -73,7 +100,7 @@ export function UiFields() {
                                 <div>
                                     <Group justify="space-between" align="center">
                                         <Text fw={600} size="sm">Text Input</Text>
-                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                        <Text size="xs" c="dimmed" className="ds-showcase-source">
                                             src/components/EditableFields.tsx (TextInput)
                                         </Text>
                                     </Group>
@@ -87,7 +114,7 @@ export function UiFields() {
                                 <div>
                                     <Group justify="space-between" align="center">
                                         <Text fw={600} size="sm">Search Input</Text>
-                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                        <Text size="xs" c="dimmed" className="ds-showcase-source">
                                             src/components/EditableFields.tsx (SearchInput)
                                         </Text>
                                     </Group>
@@ -102,7 +129,7 @@ export function UiFields() {
                                 <div>
                                     <Group justify="space-between" align="center">
                                         <Text fw={600} size="sm">Number Input</Text>
-                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                        <Text size="xs" c="dimmed" className="ds-showcase-source">
                                             src/components/EditableFields.tsx (NumberInput)
                                         </Text>
                                     </Group>
@@ -116,7 +143,7 @@ export function UiFields() {
                                 <div>
                                     <Group justify="space-between" align="center">
                                         <Text fw={600} size="sm">Select Input</Text>
-                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                        <Text size="xs" c="dimmed" className="ds-showcase-source">
                                             src/components/EditableFields.tsx (Select)
                                         </Text>
                                     </Group>
@@ -131,7 +158,7 @@ export function UiFields() {
                                 <div>
                                     <Group justify="space-between" align="center">
                                         <Text fw={600} size="sm">Date Input</Text>
-                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                        <Text size="xs" c="dimmed" className="ds-showcase-source">
                                             src/components/EditableFields.tsx (DateInput)
                                         </Text>
                                     </Group>
@@ -145,7 +172,7 @@ export function UiFields() {
                                 <div>
                                     <Group justify="space-between" align="center">
                                         <Text fw={600} size="sm">Textarea</Text>
-                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                        <Text size="xs" c="dimmed" className="ds-showcase-source">
                                             src/components/EditableFields.tsx (Textarea)
                                         </Text>
                                     </Group>
@@ -159,7 +186,7 @@ export function UiFields() {
                                 <div>
                                     <Group justify="space-between" align="center">
                                         <Text fw={600} size="sm">Checkbox</Text>
-                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                        <Text size="xs" c="dimmed" className="ds-showcase-source">
                                             src/components/EditableFields.tsx (Checkbox)
                                         </Text>
                                     </Group>
@@ -173,7 +200,7 @@ export function UiFields() {
                                 <div>
                                     <Group justify="space-between" align="center">
                                         <Text fw={600} size="sm">Radio</Text>
-                                        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                        <Text size="xs" c="dimmed" className="ds-showcase-source">
                                             src/components/EditableFields.tsx (Radio)
                                         </Text>
                                     </Group>
@@ -200,7 +227,7 @@ export function UiFields() {
                         <div>
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">1. Input Fields</Title>
-                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                <Text size="xs" c="dimmed" className="ds-showcase-source">
                                     src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
@@ -224,7 +251,7 @@ export function UiFields() {
                         <div>
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">2. Search Fields</Title>
-                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                <Text size="xs" c="dimmed" className="ds-showcase-source">
                                     src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
@@ -242,7 +269,7 @@ export function UiFields() {
                         <div>
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">3. Locked Input Fields</Title>
-                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                <Text size="xs" c="dimmed" className="ds-showcase-source">
                                     src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
@@ -258,7 +285,7 @@ export function UiFields() {
                         <div>
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">4. Selection Fields</Title>
-                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                <Text size="xs" c="dimmed" className="ds-showcase-source">
                                     src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
@@ -284,7 +311,7 @@ export function UiFields() {
                         <div>
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">5. Date Picker Fields</Title>
-                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                <Text size="xs" c="dimmed" className="ds-showcase-source">
                                     src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
@@ -301,7 +328,7 @@ export function UiFields() {
                         <div>
                             <Group justify="space-between" align="center">
                                 <Title order={4} mb="xs">6. Text Area Fields</Title>
-                                <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                <Text size="xs" c="dimmed" className="ds-showcase-source">
                                     src/styles/ds/field-tokens.scss + src/components/InlineEditableField.scss
                                 </Text>
                             </Group>
@@ -316,7 +343,7 @@ export function UiFields() {
                 </Card>
 
                 <Card withBorder padding="md" radius="md" bg="gray.0">
-                    <Title order={5} size="xs" c="dimmed" mb="xs" style={{ textTransform: 'uppercase' }}>Debug State</Title>
+                    <Title order={5} size="xs" c="dimmed" mb="xs" className="ds-showcase-kicker">Debug State</Title>
                     <Stack gap={4}>
                         <Group justify="space-between">
                             <Text size="xs" fw={700}>Name:</Text>
@@ -336,6 +363,7 @@ export function UiFields() {
                         </Group>
                     </Stack>
                 </Card>
+                <TokenStatePalette groups={fieldTokenGroups} />
             </Stack>
         </Container>
     );

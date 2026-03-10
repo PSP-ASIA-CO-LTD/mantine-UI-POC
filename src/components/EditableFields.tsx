@@ -331,6 +331,7 @@ export function InlineField({
         hideActionButtons ? 'editable-field--no-actions' : '',
         className
     ].filter(Boolean).join(' ');
+    const isControlClickable = !isEditing && hideEditButton && !disabled && !locked && !disableClickToEdit;
 
     const handleControlClick = () => {
         if (!isEditing && !disabled && !locked && !disableClickToEdit && hideEditButton) {
@@ -342,9 +343,8 @@ export function InlineField({
         <div className={rootClasses}>
             <Text size="sm" className="editable-field__label">{label}</Text>
             <div 
-                className="editable-field__control"
+                className={['editable-field__control', isControlClickable ? 'editable-field__control--clickable' : ''].filter(Boolean).join(' ')}
                 onClick={handleControlClick}
-                style={{ cursor: !isEditing && hideEditButton && !disabled && !locked && !disableClickToEdit ? 'pointer' : 'default' }}
             >
                 {children({
                     isEditing,
@@ -531,7 +531,7 @@ export function InlineSelect({ label, value, onSave, ...props }: SelectProps & {
                 };
 
                 return (
-                    <div ref={wrapperRef} style={{ width: '100%' }}>
+                    <div ref={wrapperRef} className="editable-field__select-wrapper">
                         <MantineSelect
                             {...props}
                             searchable={props.searchable ?? true}

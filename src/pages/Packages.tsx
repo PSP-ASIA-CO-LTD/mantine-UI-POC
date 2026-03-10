@@ -172,7 +172,7 @@ export function Packages() {
                                 title={(
                                     <Group justify="space-between" align="center" wrap="nowrap" w="100%">
                                         <Text fw={500}>{service.title}</Text>
-                                        <Badge size="xs" variant="light" style={{ textTransform: 'none' }} data-er-field="TASK.department_id">{service.dept}</Badge>
+                                        <Badge size="xs" variant="light" className="ds-text-normal" data-er-field="TASK.department_id">{service.dept}</Badge>
                                     </Group>
                                 )}
                                 isEditing={isEditing}
@@ -209,8 +209,8 @@ export function Packages() {
                                 titleDataErField="TASK.title"
                                 description={(
                                     <Group justify="space-between" wrap="nowrap" align="center" w="100%">
-                                        <Text size="xs" c="dimmed" style={{ flex: 1 }}>{service.description}</Text>
-                                        <div data-er-field="TASK.interval" style={{ transform: 'scale(0.9)', transformOrigin: 'right' }}>
+                                        <Text size="xs" c="dimmed" className="ds-flex-fill">{service.description}</Text>
+                                        <div data-er-field="TASK.interval" className="ds-scale-right-90">
                                             <RecurrenceDisplay interval={service.interval} />
                                         </div>
                                     </Group>
@@ -366,7 +366,7 @@ export function Packages() {
                             padding="lg"
                             radius="md"
                             withBorder
-                            style={{ cursor: 'pointer' }}
+                            className="ds-cursor-pointer"
                             onClick={() => handlePackageClick(pkg)}
                             data-er-field="SALE_PACKAGE"
                         >

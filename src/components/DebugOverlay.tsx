@@ -415,7 +415,7 @@ export function DebugOverlay() {
                             onMouseDown={handleDragStart}
                         >
                             <Group gap="xs">
-                                <IconGripVertical size={14} style={{ cursor: 'grab', opacity: 0.5 }} />
+                                <IconGripVertical size={14} className="debug-panel-grip" />
                                 <IconBug size={16} color="red" />
                                 <Text fw={600} size="sm">ER Field Mapping</Text>
                             </Group>

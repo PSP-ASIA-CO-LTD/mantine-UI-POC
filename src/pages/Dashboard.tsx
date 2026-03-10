@@ -35,7 +35,7 @@ export function Dashboard() {
                 <Title order={2}>Operations Dashboard</Title>
             </Group>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+            <div className="stats-grid">
                 <Card padding="lg" radius="md" withBorder>
                     <Stack gap="xs">
                         <Text size="sm" c="dimmed">Occupancy</Text>

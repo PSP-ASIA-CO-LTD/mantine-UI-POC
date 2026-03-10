@@ -1,4 +1,4 @@
-# Bourbon Mall - Operation Manager
+# Bourbon - Operation Manager
 
 A React frontend application for managing mall operations including packages, staff, teams, and assignments.
 

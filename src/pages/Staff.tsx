@@ -9,6 +9,7 @@ import {
     Text,
     Divider,
     Stack,
+    Grid,
 } from '@mantine/core';
 import { IconPlus, IconDotsVertical } from '@tabler/icons-react';
 import { API } from '../api';
@@ -27,6 +28,7 @@ import {
     InlineTextInput,
     InlineSelect,
     InlineLockedInput,
+    InlineDateInput,
 } from '../components/EditableFields';
 import type { Staff } from '../types';
 
@@ -108,6 +110,72 @@ export function Staff() {
                     onSave={(val) => handleUpdateStaff(member.id, { name: val })}
                 />
 
+                <Divider my="xs" label="Identity" labelPosition="center" />
+
+                <InlineTextInput
+                    label="CID"
+                    value={member.cid}
+                    onSave={(val) => handleUpdateStaff(member.id, { cid: val })}
+                />
+
+                <Grid gutter="md">
+                    <Grid.Col span={6}>
+                        <InlineTextInput
+                            label="First Name (EN)"
+                            value={member.firstNameEn}
+                            onSave={(val) => handleUpdateStaff(member.id, { firstNameEn: val })}
+                        />
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                        <InlineTextInput
+                            label="Last Name (EN)"
+                            value={member.lastNameEn}
+                            onSave={(val) => handleUpdateStaff(member.id, { lastNameEn: val })}
+                        />
+                    </Grid.Col>
+                </Grid>
+
+                <Grid gutter="md">
+                    <Grid.Col span={6}>
+                        <InlineSelect
+                            label="Gender"
+                            value={member.gender || null}
+                            data={[
+                                { value: 'male', label: 'Male' },
+                                { value: 'female', label: 'Female' },
+                                { value: 'other', label: 'Other' },
+                            ]}
+                            onSave={(val) => handleUpdateStaff(member.id, { gender: val || undefined })}
+                        />
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                        <InlineDateInput
+                            label="Date of Birth"
+                            value={member.birthDate ? new Date(member.birthDate) : null}
+                            onSave={(val) => handleUpdateStaff(member.id, { birthDate: val?.toISOString() || '' })}
+                        />
+                    </Grid.Col>
+                </Grid>
+
+                <Divider my="xs" label="Contact" labelPosition="center" />
+
+                <Grid gutter="md">
+                    <Grid.Col span={6}>
+                        <InlineTextInput
+                            label="Phone"
+                            value={member.phone}
+                            onSave={(val) => handleUpdateStaff(member.id, { phone: val })}
+                        />
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                        <InlineTextInput
+                            label="Email"
+                            value={member.email}
+                            onSave={(val) => handleUpdateStaff(member.id, { email: val })}
+                        />
+                    </Grid.Col>
+                </Grid>
+
                 <InlineSelect
                     label="Department"
                     value={member.dept}
@@ -143,6 +211,23 @@ export function Staff() {
                         value={member.dept}
                         data={departments}
                         onSave={(val) => handleUpdateStaff(member.id, { dept: val || '' })}
+                    />
+                    <InlineSelect
+                        label="License Type"
+                        value={member.licenseType || null}
+                        data={[
+                            { value: 'medical', label: 'Medical' },
+                            { value: 'nursing', label: 'Nursing' },
+                            { value: 'pharmacy', label: 'Pharmacy' },
+                            { value: 'other', label: 'Other' },
+                        ]}
+                        clearable
+                        onSave={(val) => handleUpdateStaff(member.id, { licenseType: val || undefined })}
+                    />
+                    <InlineTextInput
+                        label="License Number"
+                        value={member.licenseNumber}
+                        onSave={(val) => handleUpdateStaff(member.id, { licenseNumber: val })}
                     />
                 </Stack>
             </div>
@@ -352,7 +437,6 @@ export function Staff() {
                     classNames={{
                         wrapper: 'staff-search-field',
                     }}
-                    style={{ width: 280 }}
                 />
             </Group>
 
@@ -364,7 +448,7 @@ export function Staff() {
                         <StyledTable.Th>Department</StyledTable.Th>
                         <StyledTable.Th>Role</StyledTable.Th>
                         <StyledTable.Th>Status</StyledTable.Th>
-                        <StyledTable.Th style={{ textAlign: 'right' }}>Actions</StyledTable.Th>
+                        <StyledTable.Th className="staff-table__actions-heading">Actions</StyledTable.Th>
                     </StyledTable.Tr>
                 </StyledTable.Thead>
 
@@ -373,7 +457,7 @@ export function Staff() {
                         <StyledTable.Tr
                             key={member.id}
                             data-er-field="STAFF"
-                            style={{ cursor: 'pointer' }}
+                            className="staff-table__row"
                             onClick={() => handleRowClick(member)}
                         >
                             <StyledTable.Td>

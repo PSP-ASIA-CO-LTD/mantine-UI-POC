@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore, useState } from 'react';
 import {
     Title,
     Group,
@@ -13,7 +13,6 @@ import {
     Stack,
     Table,
     Box,
-    DEFAULT_THEME,
 } from '@mantine/core';
 import { IconCheck, IconPlus } from '@tabler/icons-react';
 import { API } from '../api';
@@ -25,11 +24,13 @@ import {
     Select,
     Textarea,
     NumberInput,
+    InlineTextInput,
     InlineTextarea,
     InlineSelect,
     InlineLockedInput,
 } from '../components/EditableFields';
 import { RecurrenceDisplay } from '../components/RecurrenceIcon';
+import { TokenPreview, tokenPreviewClassName } from '../components/TokenPreview';
 import type { Department, Service, Staff } from '../types';
 import {
     formatMonthlyFallbackLabel,
@@ -102,60 +103,6 @@ const splitVarArgs = (value: string): [string, string] => {
     return [value, ''];
 };
 
-const resolveMantineTokenHex = (token: string): string | null => {
-    if (token === '--mantine-color-white') return '#ffffff';
-    if (token === '--mantine-color-black') return '#000000';
-
-    const match = token.match(/^--mantine-color-([a-z]+)-(\d)$/);
-    if (!match) return null;
-
-    const [, family, shadeRaw] = match;
-    const shade = Number(shadeRaw);
-    const shades = (DEFAULT_THEME.colors as Record<string, readonly string[]>)[family];
-    return shades?.[shade] || null;
-};
-
-const parseHexColor = (value: string) => {
-    const trimmed = value.trim();
-
-    let match = trimmed.match(/^#([0-9a-f]{3})$/i);
-    if (match) {
-        const hex = match[1];
-        return {
-            r: Number.parseInt(`${hex[0]}${hex[0]}`, 16),
-            g: Number.parseInt(`${hex[1]}${hex[1]}`, 16),
-            b: Number.parseInt(`${hex[2]}${hex[2]}`, 16),
-        };
-    }
-
-    match = trimmed.match(/^#([0-9a-f]{6})$/i);
-    if (!match) return null;
-
-    const hex = match[1];
-    return {
-        r: Number.parseInt(hex.slice(0, 2), 16),
-        g: Number.parseInt(hex.slice(2, 4), 16),
-        b: Number.parseInt(hex.slice(4, 6), 16),
-    };
-};
-
-const resolveColorToRgb = (value: string): { r: number; g: number; b: number } | null => {
-    const hex = parseHexColor(value);
-    if (hex) return hex;
-
-    const trimmed = value.trim();
-    if (!trimmed.startsWith('var(') || !trimmed.endsWith(')')) return null;
-
-    const inner = trimmed.slice(4, -1).trim();
-    const [tokenRaw, fallbackRaw] = splitVarArgs(inner);
-    const token = tokenRaw.trim();
-    const tokenHex = resolveMantineTokenHex(token);
-    if (tokenHex) return parseHexColor(tokenHex);
-
-    if (fallbackRaw.trim()) return resolveColorToRgb(fallbackRaw.trim());
-    return null;
-};
-
 const DEPARTMENT_COLOR_LABEL_BY_VALUE = new Map<string, string>(
     DEPARTMENT_COLOR_OPTIONS.flatMap((option) => {
         const keys = [toColorKey(option.value), toColorKey(extractFallbackColor(option.value))];
@@ -166,8 +113,6 @@ const DEPARTMENT_COLOR_LABEL_BY_VALUE = new Map<string, string>(
 const DEFAULT_DEPARTMENT_COLOR = DEPARTMENT_COLOR_PRESETS[0];
 const WEEKDAY_OPTIONS = getWeekdayLabels().map((label, day) => ({ label, day }));
 const WEEKDAY_SHORT_OPTIONS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const RECURRENCE_CONTROL_HEIGHT = '2.5rem';
-
 type ServiceCreateDraft = {
     title: string;
     description: string;
@@ -183,6 +128,7 @@ type DepartmentCreateDraft = {
     parentDepartmentId: string | null;
     color: string;
     headManagerId: string | null;
+    alias: string;
 };
 
 type NameBridge = {
@@ -210,64 +156,61 @@ const createNameBridge = (initial = ''): NameBridge => {
 
 const normalizeText = (value: string) => value.trim().toLowerCase();
 
-const getDepartmentTitleInputStyle = (rawValue: string, placeholder: string): CSSProperties => {
+const getDepartmentTitleInputClassName = (rawValue: string, placeholder: string) => {
     const contentLength = rawValue.trim().length;
     const placeholderLength = placeholder.trim().length;
     const lengthForScale = Math.min(Math.max(contentLength, placeholderLength, 4), 36);
-    const scaledSizeRem = Math.max(1.55, 2.6 - (lengthForScale - 4) * 0.038);
+    const sizeClass =
+        lengthForScale > 26 ? 'department-title-input--compact'
+            : lengthForScale > 16 ? 'department-title-input--balanced'
+                : 'department-title-input--expanded';
 
-    return {
-        '--dept-title-size': `${scaledSizeRem.toFixed(3)}rem`,
-        '--dept-title-min-ch': String(Math.max(placeholderLength, 1)),
-        fontSize: 'var(--dept-title-size)',
-        fontWeight: 700,
-        lineHeight: 1.12,
-        letterSpacing: lengthForScale > 24 ? '-0.01em' : 'normal',
-        color: 'var(--mantine-color-dark-6)',
-        paddingBlock: '0.16em',
-        paddingInline: '0.26em',
-        minHeight: 'calc(var(--dept-title-size) * 1.34)',
-        minInlineSize: 'calc((var(--dept-title-min-ch) * 1ch) + 0.52em)',
-        transition: 'font-size 160ms ease, min-height 160ms ease, padding 160ms ease',
-    } as CSSProperties;
+    return `department-title-input ${sizeClass}`;
 };
 
-const hexToRgba = (value: string, alpha: number) => {
-    const rgb = resolveColorToRgb(value);
-    if (!rgb) return `rgba(30, 136, 229, ${alpha})`;
-    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+const extractVarToken = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed.startsWith('var(') || !trimmed.endsWith(')')) return null;
+    const inner = trimmed.slice(4, -1).trim();
+    const [tokenRaw] = splitVarArgs(inner);
+    return tokenRaw.trim() || null;
 };
 
 const renderParentTag = (label: string, color: string) => {
     const isMainDepartment = normalizeText(label) === 'main';
+    const token = extractVarToken(color);
+
     return (
         <Badge
             radius="xl"
             size="sm"
             variant={isMainDepartment ? 'filled' : 'outline'}
-            style={{
-                borderColor: isMainDepartment ? 'transparent' : color,
-                borderWidth: isMainDepartment ? 0 : undefined,
-                color: isMainDepartment ? 'var(--mantine-color-white)' : color,
-                backgroundColor: isMainDepartment ? color : hexToRgba(color, 0.12),
-                textTransform: 'none',
-            }}
+            className={[
+                'department-parent-tag',
+                isMainDepartment ? 'department-parent-tag--filled' : '',
+                token ? tokenPreviewClassName(token) : '',
+            ].filter(Boolean).join(' ')}
         >
             {label}
         </Badge>
     );
 };
 
-const renderColorLabel = (color: string, label?: string) => (
-    <Group className="ds-color-dot-label" wrap="nowrap">
-        <Box aria-hidden className="ds-color-dot" style={{ '--ds-color-dot-color': color } as CSSProperties} />
-        <Text size="sm">{label || color}</Text>
-    </Group>
-);
+const renderColorLabel = (color: string, label?: string) => {
+    const token = extractVarToken(color);
 
-const renderColorDot = (color: string) => (
-    <Box aria-hidden className="ds-color-dot" style={{ '--ds-color-dot-color': color } as CSSProperties} />
-);
+    return (
+        <Group className="ds-color-dot-label" wrap="nowrap">
+            {token ? <TokenPreview token={token} className="ds-color-dot" /> : <Box aria-hidden className="ds-color-dot" />}
+            <Text size="sm">{label || color}</Text>
+        </Group>
+    );
+};
+
+const renderColorDot = (color: string) => {
+    const token = extractVarToken(color);
+    return token ? <TokenPreview token={token} className="ds-color-dot" /> : <Box aria-hidden className="ds-color-dot" />;
+};
 
 const colorLabelFor = (color: string) => DEPARTMENT_COLOR_LABEL_BY_VALUE.get(toColorKey(color)) || color;
 
@@ -334,8 +277,8 @@ function DepartmentTitleInput({
             value={name}
             onChange={(event) => bridge.set(event.currentTarget.value)}
             variant="unstyled"
-            styles={{
-                input: getDepartmentTitleInputStyle(name, placeholder),
+            classNames={{
+                input: getDepartmentTitleInputClassName(name, placeholder),
             }}
         />
     );
@@ -384,8 +327,8 @@ function DepartmentEditableTitleInput({
                 }
             }}
             variant="unstyled"
-            styles={{
-                input: getDepartmentTitleInputStyle(value, 'Type department name'),
+            classNames={{
+                input: getDepartmentTitleInputClassName(value, 'Type department name'),
             }}
         />
     );
@@ -539,10 +482,10 @@ function DepartmentServicesPane({
                             <Group justify="space-between" align="center" wrap="nowrap" w="100%">
                                 <Text fw={500}>{service.title}</Text>
                                 <Group gap={6} wrap="nowrap">
-                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }}>
+                                    <Badge size="xs" variant="light" className="ds-text-normal">
                                         {serviceRepeatBadgeLabel(service.interval)}
                                     </Badge>
-                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }} data-er-field="TASK.price">
+                                    <Badge size="xs" variant="light" className="ds-text-normal" data-er-field="TASK.price">
                                         ฿{service.price.toLocaleString()}
                                     </Badge>
                                 </Group>
@@ -551,7 +494,7 @@ function DepartmentServicesPane({
                         cardDataErField="TASK"
                         titleDataErField="TASK.title"
                         description={(
-                            <Text size="xs" c="dimmed" style={{ flex: 1 }}>{service.description}</Text>
+                            <Text size="xs" c="dimmed" className="ds-flex-fill">{service.description}</Text>
                         )}
                         descriptionDataErField="TASK.description"
                         meta={<div data-er-field="TASK.interval"><RecurrenceDisplay interval={service.interval} /></div>}
@@ -594,21 +537,18 @@ function DepartmentServicesPane({
                                             setDraft((current) => ({ ...current, repeatMode: value }));
                                         }
                                     }}
-                                    style={{ flex: '0 0 155px' }}
+                                    classNames={{
+                                        wrapper: 'department-recurrence-select',
+                                    }}
                                 />
 
                                 {draft.repeatMode === 'day' && (
-                                    <Box style={{ flex: 1, minWidth: 0 }}>
+                                    <Box className="ds-flex-fill">
                                         <Text className="editable-field__label" mb={2}>Days of week</Text>
                                         <Group
                                             gap={0}
                                             wrap="nowrap"
-                                            style={{
-                                                height: RECURRENCE_CONTROL_HEIGHT,
-                                                backgroundColor: 'var(--mantine-color-gray-1)',
-                                                borderRadius: 0,
-                                                overflow: 'hidden',
-                                            }}
+                                            className="department-recurrence-group"
                                         >
                                             {WEEKDAY_SHORT_OPTIONS.map((label, day) => {
                                                 const active = draft.weeklyDays.includes(day);
@@ -623,13 +563,7 @@ function DepartmentServicesPane({
                                                                 weeklyDays: toggleWeekday(current.weeklyDays, day),
                                                             }))
                                                         }
-                                                        style={{
-                                                            flex: 1,
-                                                            borderRadius: 0,
-                                                            minWidth: 0,
-                                                            height: RECURRENCE_CONTROL_HEIGHT,
-                                                            minHeight: RECURRENCE_CONTROL_HEIGHT,
-                                                        }}
+                                                        className="department-recurrence-day"
                                                     >
                                                         {label}
                                                     </Button>
@@ -640,14 +574,14 @@ function DepartmentServicesPane({
                                             <Text
                                                 size="xs"
                                                 c="dimmed"
-                                                style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                                className="department-recurrence-hint"
                                             >
                                                 Select weekly active days
                                             </Text>
                                             <Button
                                                 variant="subtle"
                                                 size="compact-xs"
-                                                style={{ flexShrink: 0 }}
+                                                className="department-recurrence-action"
                                                 onClick={() =>
                                                     setDraft((current) => ({
                                                         ...current,
@@ -676,7 +610,9 @@ function DepartmentServicesPane({
                                                 monthlyDay: Number.isInteger(day) ? day : 1,
                                             }));
                                         }}
-                                        style={{ flex: 1, minWidth: 0 }}
+                                        classNames={{
+                                            wrapper: 'ds-flex-fill',
+                                        }}
                                     />
                                 )}
                             </Group>
@@ -774,6 +710,7 @@ function CreateDepartmentLeftPane({
 }) {
     const name = useSyncExternalStore(bridge.subscribe, bridge.get, bridge.get);
     const [description, setDescription] = useState('');
+    const [alias, setAlias] = useState('');
     const [parentDepartmentId, setParentDepartmentId] = useState<string | null>(null);
     const [color, setColor] = useState(DEFAULT_DEPARTMENT_COLOR);
     const [headManagerId, setHeadManagerId] = useState<string | null>(null);
@@ -807,8 +744,9 @@ function CreateDepartmentLeftPane({
             parentDepartmentId,
             color: parentDepartment?.color || color,
             headManagerId,
+            alias,
         });
-    }, [name, description, parentDepartmentId, color, headManagerId, parentDepartment, onDraftChange]);
+    }, [name, description, alias, parentDepartmentId, color, headManagerId, parentDepartment, onDraftChange]);
 
     return (
         <Stack gap="md">
@@ -819,6 +757,13 @@ function CreateDepartmentLeftPane({
                 placeholder="Department description"
                 value={description}
                 onChange={(event) => setDescription(event.currentTarget.value)}
+            />
+
+            <TextInput
+                label="Alias"
+                placeholder="Short name or abbreviation"
+                value={alias}
+                onChange={(event) => setAlias(event.currentTarget.value)}
             />
 
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
@@ -880,6 +825,7 @@ export function Departments() {
         parentDepartmentId: null,
         color: DEFAULT_DEPARTMENT_COLOR,
         headManagerId: null,
+        alias: '',
     });
     const createServiceDraftsRef = useRef<ServiceCreateDraft[]>([]);
 
@@ -952,6 +898,7 @@ export function Departments() {
             parentDepartmentId: null,
             color: DEFAULT_DEPARTMENT_COLOR,
             headManagerId: null,
+            alias: '',
         };
         createServiceDraftsRef.current = [];
 
@@ -991,6 +938,8 @@ export function Departments() {
                         parentDepartmentId: draft.parentDepartmentId || undefined,
                         headManagerId: draft.headManagerId || undefined,
                         color: parentDepartment?.color || draft.color || DEFAULT_DEPARTMENT_COLOR,
+                        alias: draft.alias.trim() || undefined,
+                        active: true,
                     });
 
                     await Promise.all(
@@ -1067,6 +1016,23 @@ export function Departments() {
                         await updateDepartment({ description: String(value || '').trim() });
                     }}
                     minRows={2}
+                />
+
+                <InlineTextInput
+                    label="Alias"
+                    value={department.alias || ''}
+                    onSave={async (value) => {
+                        await updateDepartment({ alias: value || undefined });
+                    }}
+                />
+
+                <InlineSelect
+                    label="Active"
+                    value={department.active === false ? 'no' : 'yes'}
+                    data={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]}
+                    onSave={async (value) => {
+                        await updateDepartment({ active: value === 'yes' });
+                    }}
                 />
 
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
@@ -1177,7 +1143,7 @@ export function Departments() {
                                 padding="lg"
                                 radius="md"
                                 withBorder
-                                style={{ cursor: 'pointer' }}
+                                className="ds-cursor-pointer"
                                 onClick={() => openDepartmentSidesheet(department)}
                                 data-er-field="DEPARTMENT"
                             >

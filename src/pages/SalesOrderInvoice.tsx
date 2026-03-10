@@ -341,7 +341,7 @@ export function SalesOrderInvoice() {
                         {state.package.services.slice(0, 6).map((service, idx) => (
                             <div key={idx} className="service-item">
                                 <Text size="xs">• {service.title}</Text>
-                                <div style={{ transform: 'scale(0.85)', transformOrigin: 'right' }}>
+                                <div className="ds-scale-right-85">
                                     <RecurrenceDisplay interval={service.interval} />
                                 </div>
                             </div>

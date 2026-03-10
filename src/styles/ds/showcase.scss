@@ -1,0 +1,321 @@
+.ds-token-preview {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--bs-border-color-translucent);
+    border-radius: 0.25rem;
+    background: var(--ds-token-preview-bg, transparent);
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.ds-token-preview--table {
+    width: 1.375rem;
+    height: 1.375rem;
+}
+
+.ds-token-preview--variant {
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+.ds-showcase-source {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.ds-showcase-kicker {
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.ds-showcase-muted-panel {
+    opacity: 0.85;
+}
+
+.ds-showcase-search-field {
+    min-width: 17.5rem;
+}
+
+.ds-showcase-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 6.25rem;
+    padding: 1rem;
+    border-radius: var(--mantine-radius-md);
+    background: var(--mantine-color-gray-0);
+}
+
+.ds-showcase-placeholder--tall {
+    min-height: 9.375rem;
+}
+
+.ds-showcase-sticky-shell {
+    min-height: 9.375rem;
+}
+
+.ds-showcase-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.ds-showcase-scale {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+
+.ds-showcase-scale__item {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+}
+
+.ds-showcase-scale__preview {
+    display: block;
+    width: 100%;
+    height: 2rem;
+    border-radius: 0.1875rem;
+}
+
+.ds-showcase-scale__label {
+    margin-top: 0.125rem;
+    font-size: 0.6rem;
+}
+
+.ds-showcase-variant {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.ds-showcase-variant__label {
+    font-size: 0.65rem;
+}
+
+.ds-showcase-accent-bar {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.ds-showcase-accent-bar__swatch {
+    flex: 1;
+    height: 2.5rem;
+}
+
+.ds-showcase-table {
+    font-size: 0.8rem;
+}
+
+.ds-showcase-table__swatch-col {
+    width: 2rem;
+}
+
+.ds-showcase-table__cell {
+    padding: 0.25rem 0.5rem;
+}
+
+.ds-showcase-source-list code {
+    display: block;
+    font-size: 0.7rem;
+}
+
+.ds-form-section {
+    margin-bottom: 1rem;
+}
+
+.ds-form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--mantine-color-gray-6);
+    font-size: 0.875rem;
+}
+
+.ds-form-section--compact .ds-form-label {
+    margin-bottom: 0.25rem;
+}
+
+.ds-cursor-pointer {
+    cursor: pointer;
+}
+
+.ds-cursor-default {
+    cursor: default;
+}
+
+.ds-cursor-grab {
+    cursor: grab;
+}
+
+.ds-opacity-50 {
+    opacity: 0.5;
+}
+
+.ds-opacity-70 {
+    opacity: 0.7;
+}
+
+.ds-scale-right-85 {
+    transform: scale(0.85);
+    transform-origin: right;
+}
+
+.ds-scale-right-90 {
+    transform: scale(0.9);
+    transform-origin: right;
+}
+
+.ds-scale-left-85 {
+    transform: scale(0.85);
+    transform-origin: left;
+}
+
+.ds-scale-left-90 {
+    transform: scale(0.9);
+    transform-origin: left;
+}
+
+.ds-text-normal {
+    text-transform: none;
+}
+
+.ds-flex-fill {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ds-panel-inline {
+    padding-inline: var(--mantine-spacing-md);
+}
+
+.ds-empty-state-icon {
+    margin-bottom: 1rem;
+    color: var(--mantine-color-gray-5);
+}
+
+.ds-empty-state-icon--success {
+    color: var(--mantine-color-green-6);
+}
+
+$ds-field-preview-tokens: (
+    "field-label-color",
+    "field-text-color",
+    "field-muted-color",
+    "field-placeholder-color",
+    "field-idle-bg",
+    "field-hover-bg",
+    "field-edit-bg",
+    "field-error-bg",
+    "field-locked-bg",
+    "field-locked-border",
+    "field-actions-bg"
+);
+
+@each $token in $ds-field-preview-tokens {
+    .ds-token-preview--ds-#{$token} {
+        --ds-token-preview-bg: var(--ds-#{$token});
+    }
+}
+
+$bs-base-colors: "blue", "indigo", "purple", "pink", "red", "orange", "yellow", "green", "teal", "cyan";
+$bs-gray-steps: 100, 200, 300, 400, 500, 600, 700, 800, 900;
+$bs-intents: "primary", "secondary", "success", "info", "warning", "danger", "light", "dark";
+$bs-intent-suffixes: "", "text-emphasis", "bg-subtle", "border-subtle";
+$bs-semantic-tokens: (
+    "body-bg",
+    "body-color",
+    "emphasis-color",
+    "secondary-bg",
+    "secondary-color",
+    "tertiary-bg",
+    "tertiary-color",
+    "border-color",
+    "border-color-translucent",
+    "link-color",
+    "link-hover-color",
+    "code-color",
+    "highlight-bg",
+    "highlight-color"
+);
+
+@each $color in $bs-base-colors {
+    .ds-token-preview--bs-#{$color} {
+        --ds-token-preview-bg: var(--bs-#{$color});
+    }
+}
+
+@each $step in $bs-gray-steps {
+    .ds-token-preview--bs-gray-#{$step} {
+        --ds-token-preview-bg: var(--bs-gray-#{$step});
+    }
+}
+
+@each $intent in $bs-intents {
+    @each $suffix in $bs-intent-suffixes {
+        $name: if($suffix == "", $intent, "#{$intent}-#{$suffix}");
+
+        .ds-token-preview--bs-#{$name} {
+            --ds-token-preview-bg: var(--bs-#{$name});
+        }
+    }
+}
+
+@each $token in $bs-semantic-tokens {
+    .ds-token-preview--bs-#{$token} {
+        --ds-token-preview-bg: var(--bs-#{$token});
+    }
+}
+
+$mantine-colors: "gray", "dark", "red", "pink", "grape", "violet", "indigo", "blue", "cyan", "teal", "green", "lime", "yellow", "orange";
+$mantine-steps: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9;
+$mantine-variant-suffixes: "filled", "filled-hover", "light", "light-hover", "light-color", "outline", "outline-hover";
+$mantine-single-color-tokens: "body", "default-border", "dimmed", "white", "black", "red-light", "blue-light", "green-light", "yellow-light";
+
+@each $color in $mantine-colors {
+    @each $step in $mantine-steps {
+        .ds-token-preview--mantine-color-#{$color}-#{$step} {
+            --ds-token-preview-bg: var(--mantine-color-#{$color}-#{$step});
+        }
+    }
+
+    @each $suffix in $mantine-variant-suffixes {
+        .ds-token-preview--mantine-color-#{$color}-#{$suffix} {
+            --ds-token-preview-bg: var(--mantine-color-#{$color}-#{$suffix});
+        }
+    }
+}
+
+@each $token in $mantine-single-color-tokens {
+    .ds-token-preview--mantine-color-#{$token} {
+        --ds-token-preview-bg: var(--mantine-color-#{$token});
+    }
+}
+
+.ds-token-preview--mantine-primary-color-filled {
+    --ds-token-preview-bg: var(--mantine-primary-color-filled);
+}
+
+.ds-token-preview--mantine-primary-color-light {
+    --ds-token-preview-bg: var(--mantine-primary-color-light);
+}
+
+.ds-token-preview--surface {
+    --ds-token-preview-bg: var(--surface);
+}
+
+.ds-token-preview--white {
+    --ds-token-preview-bg: var(--white);
+}
+
+.ds-token-preview--border {
+    --ds-token-preview-bg: var(--border);
+}
+
+@for $i from 1 through 6 {
+    .ds-token-preview--button-accent-#{$i} {
+        --ds-token-preview-bg: rgb(var(--button-accent-#{$i}));
+    }
+}

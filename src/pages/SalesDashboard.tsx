@@ -257,9 +257,8 @@ export function SalesDashboard() {
                                                 key={notif.id}
                                                 padding="sm"
                                                 withBorder
-                                                className={!notif.readAt ? 'unread' : ''}
+                                                className={[!notif.readAt ? 'unread ds-cursor-pointer' : 'ds-cursor-default'].filter(Boolean).join(' ')}
                                                 onClick={() => !notif.readAt && handleMarkRead(notif.id)}
-                                                style={{ cursor: !notif.readAt ? 'pointer' : 'default' }}
                                             >
                                                 <Group justify="space-between" mb={4}>
                                                     <Badge size="xs" color={notif.type === 'sale' ? 'green' : 'blue'}>

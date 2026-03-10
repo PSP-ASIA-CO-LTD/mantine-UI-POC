@@ -30,12 +30,20 @@
     min-height: 2.25rem;
 }
 
+.editable-field__control--clickable {
+    cursor: pointer;
+}
+
 .editable-field__mantine-root {
     flex: 1;
     width: 100%;
     background-color: transparent;
     border-radius: 0;
     transition: background-color 0.2s ease;
+}
+
+.editable-field--inline .editable-field__mantine-root {
+    background-color: var(--ds-field-idle-bg);
 }
 
 .editable-field__input {
@@ -69,6 +77,10 @@
     opacity: 1;
 }
 
+.editable-field__select-wrapper {
+    width: 100%;
+}
+
 .editable-field.is-editing .editable-field__mantine-root {
     background-color: var(--ds-field-edit-bg);
 }
@@ -86,6 +98,11 @@
 .editable-field:has(.editable-field__input[data-error]) .editable-field__mantine-root,
 .editable-field:has(.editable-field__input[data-invalid]) .editable-field__mantine-root {
     background-color: var(--ds-field-error-bg);
+}
+
+.editable-field__input::placeholder {
+    color: var(--ds-field-placeholder-color);
+    opacity: 1;
 }
 
 .editable-field__input:focus {

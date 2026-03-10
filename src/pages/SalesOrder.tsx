@@ -58,6 +58,13 @@ interface GuardianFormValues {
     address: string;
     relationship: string;
     pays: boolean;
+    cid: string;
+    passportNo: string;
+    prefix: string;
+    firstNameEn: string;
+    lastNameEn: string;
+    gender: string;
+    birthDate: string;
 }
 
 type ResidentFormValues = Omit<Resident, 'id' | 'createdAt' | 'prefix' | 'guardianId'> & {
@@ -77,6 +84,9 @@ interface CheckoutData {
     salesOrder: SalesOrder | null;
     invoice: Invoice | null;
     contract: Contract | null;
+    encounterClass: 'inpatient' | 'outpatient';
+    priority: 'routine' | 'urgent' | 'asap' | 'stat';
+    admissionReason: string;
 }
 
 const formatStayEndDate = (checkIn: Date | null, days: number): string | null => {
@@ -149,7 +159,10 @@ export function SalesOrderPage() {
         },
         salesOrder: null,
         invoice: null,
-        contract: null
+        contract: null,
+        encounterClass: 'inpatient',
+        priority: 'routine',
+        admissionReason: '',
     });
     // Removed local processing state in favor of hook state
     const [guardianForms, setGuardianForms] = useState<GuardianFormValues[]>([{
@@ -159,7 +172,14 @@ export function SalesOrderPage() {
         email: '',
         address: '',
         relationship: 'son',
-        pays: true
+        pays: true,
+        cid: '',
+        passportNo: '',
+        prefix: '',
+        firstNameEn: '',
+        lastNameEn: '',
+        gender: '',
+        birthDate: '',
     }]);
 
     // Payment modals state
@@ -235,7 +255,14 @@ export function SalesOrderPage() {
                     email: g.email,
                     address: g.address,
                     relationship: g.relationship,
-                    pays: g.pays
+                    pays: g.pays,
+                    cid: g.cid || '',
+                    passportNo: g.passportNo || '',
+                    prefix: g.prefix || '',
+                    firstNameEn: g.firstNameEn || '',
+                    lastNameEn: g.lastNameEn || '',
+                    gender: g.gender || '',
+                    birthDate: g.birthDate || '',
                 })));
             }
             // Determine current step based on saved data
@@ -282,7 +309,14 @@ export function SalesOrderPage() {
             email: '',
             address: '',
             relationship: 'relative',
-            pays: false
+            pays: false,
+            cid: '',
+            passportNo: '',
+            prefix: '',
+            firstNameEn: '',
+            lastNameEn: '',
+            gender: '',
+            birthDate: '',
         }]);
     };
 
@@ -338,6 +372,10 @@ export function SalesOrderPage() {
             emergencyContactRelationship: '',
             emergencyContactAddressSameAsResident: true,
             emergencyContactAddress: '',
+            passportNo: '',
+            firstNameEn: '',
+            lastNameEn: '',
+            lineId: '',
         },
         validate: {
             firstName: (value) => value.length < 2 ? 'First name is required' : null,
@@ -436,7 +474,14 @@ export function SalesOrderPage() {
                 email: 'somchai.jaidee@email.com',
                 address: '123/45 ถ.สุขุมวิท 55 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ 10110',
                 relationship: 'son',
-                pays: true
+                pays: true,
+                cid: '1-1001-00456-78-9',
+                passportNo: '',
+                prefix: 'mr',
+                firstNameEn: 'Somchai',
+                lastNameEn: 'Jaidee',
+                gender: 'male',
+                birthDate: '1975-03-10',
             },
             {
                 firstName: 'สมหญิง',
@@ -445,7 +490,14 @@ export function SalesOrderPage() {
                 email: 'somying.jaidee@email.com',
                 address: '88/9 หมู่บ้านพฤกษา ถ.รัตนาธิเบศร์ อ.เมือง จ.นนทบุรี 11000',
                 relationship: 'daughter',
-                pays: true
+                pays: true,
+                cid: '1-1001-00456-79-0',
+                passportNo: '',
+                prefix: 'mrs',
+                firstNameEn: 'Somying',
+                lastNameEn: 'Jaidee',
+                gender: 'female',
+                birthDate: '1978-07-22',
             }
         ]);
 
@@ -484,6 +536,10 @@ export function SalesOrderPage() {
             emergencyContactRelationship: 'son',
             emergencyContactAddressSameAsResident: false,
             emergencyContactAddress: '123/45 ถ.สุขุมวิท 55 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ 10110',
+            passportNo: '',
+            firstNameEn: 'Somsri',
+            lastNameEn: 'Jaidee',
+            lineId: 'somsri.jaidee',
         });
 
         // Clear any validation errors
@@ -626,7 +682,10 @@ export function SalesOrderPage() {
                 basePrice: checkoutData.package.price,
                 adjustedPrice,
                 status: 'pending_payment',
-                createdBy: 'Manager Alice'
+                createdBy: 'Manager Alice',
+                encounterClass: checkoutData.encounterClass,
+                priority: checkoutData.priority,
+                admissionReason: checkoutData.admissionReason || undefined,
             });
 
             const invoice = await createInvoice({
@@ -818,7 +877,7 @@ export function SalesOrderPage() {
                 />
             )}
             
-            <div style={{ padding: '0 var(--mantine-spacing-md)' }}>
+            <div className="ds-panel-inline">
             {step !== 5 && <Stepper
                     active={step}
                     onStepClick={setStep}
@@ -873,7 +932,7 @@ export function SalesOrderPage() {
                         >
                             <Group justify="space-between" onClick={() => setExpandedPackage(
                                 expandedPackage === pkg.id ? null : pkg.id
-                            )} style={{ cursor: 'pointer' }}>
+                            )} className="ds-cursor-pointer">
                                 <div>
                                     <Text fw={600} size="lg" data-er-field="SALE_PACKAGE.name">{pkg.name}</Text>
                                     <Text size="sm" c="dimmed" data-er-field="SALE_PACKAGE.duration_days">{pkg.duration} days • {pkg.services.length} services</Text>
@@ -897,11 +956,11 @@ export function SalesOrderPage() {
                                             <Stack gap={2}>
                                                 <Group justify="space-between" align="center" wrap="nowrap">
                                                     <Text size="sm" fw={500}>{service.title}</Text>
-                                                    <Badge size="xs" variant="light" style={{ textTransform: 'none' }}>{service.dept}</Badge>
+                                                    <Badge size="xs" variant="light" className="ds-text-normal">{service.dept}</Badge>
                                                 </Group>
                                                 <Group justify="space-between" wrap="nowrap" align="center">
-                                                    <Text size="xs" c="dimmed" style={{ flex: 1 }}>{service.description}</Text>
-                                                    <div style={{ transform: 'scale(0.9)', transformOrigin: 'right' }}>
+                                                    <Text size="xs" c="dimmed" className="ds-flex-fill">{service.description}</Text>
+                                                    <div className="ds-scale-right-90">
                                                         <RecurrenceDisplay interval={service.interval} />
                                                     </div>
                                                 </Group>
@@ -1042,6 +1101,22 @@ export function SalesOrderPage() {
 	                                </Grid.Col>
 	                            </Grid>
 	                            <Grid>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="First Name (EN)"
+	                                        placeholder="English first name"
+	                                        {...residentForm.getInputProps('firstNameEn')}
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={6}>
+	                                    <TextInput
+	                                        label="Last Name (EN)"
+	                                        placeholder="English last name"
+	                                        {...residentForm.getInputProps('lastNameEn')}
+	                                    />
+	                                </Grid.Col>
+	                            </Grid>
+	                            <Grid>
 	                                <Grid.Col span={4}>
                                     <DateInput
                                         label="Date of Birth"
@@ -1081,6 +1156,13 @@ export function SalesOrderPage() {
                                         placeholder="National ID"
                                         {...residentForm.getInputProps('idNumber')}
 	                                        data-er-field="RESIDENT.id_number"
+	                                    />
+	                                </Grid.Col>
+	                                <Grid.Col span={4}>
+	                                    <TextInput
+	                                        label="Passport No."
+	                                        placeholder="Passport number"
+	                                        {...residentForm.getInputProps('passportNo')}
 	                                    />
 	                                </Grid.Col>
 	                            </Grid>
@@ -1179,6 +1261,11 @@ export function SalesOrderPage() {
 	                                type="email"
 	                                {...residentForm.getInputProps('email')}
 	                                data-er-field="RESIDENT.email"
+	                            />
+	                            <TextInput
+	                                label="Line ID"
+	                                placeholder="Line ID"
+	                                {...residentForm.getInputProps('lineId')}
 	                            />
 
 	                            <Divider my="xs" label="Address" labelPosition="center" />
@@ -1407,6 +1494,88 @@ export function SalesOrderPage() {
                                                     onChange={(e) => updateGuardianField(index, 'lastName', e.target.value)}
                                                     error={guardianErrors[index]?.lastName}
                                                     data-er-field="GUARDIAN.last_name"
+                                                />
+                                            </Grid.Col>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.Col span={4}>
+                                                <TextInput
+                                                    label="CID"
+                                                    placeholder="Citizen ID"
+                                                    value={guardian.cid}
+                                                    onChange={(e) => updateGuardianField(index, 'cid', e.target.value)}
+                                                />
+                                            </Grid.Col>
+                                            <Grid.Col span={4}>
+                                                <TextInput
+                                                    label="Passport No."
+                                                    placeholder="Passport number"
+                                                    value={guardian.passportNo}
+                                                    onChange={(e) => updateGuardianField(index, 'passportNo', e.target.value)}
+                                                />
+                                            </Grid.Col>
+                                            <Grid.Col span={4}>
+                                                <Select
+                                                    label="Prefix"
+                                                    placeholder="Prefix"
+                                                    data={[
+                                                        { value: 'mr', label: 'Mr.' },
+                                                        { value: 'mrs', label: 'Mrs.' },
+                                                        { value: 'miss', label: 'Miss' },
+                                                        { value: 'ms', label: 'Ms.' },
+                                                        { value: 'dr', label: 'Dr.' },
+                                                    ]}
+                                                    value={guardian.prefix || null}
+                                                    onChange={(val) => updateGuardianField(index, 'prefix', val || '')}
+                                                    clearable
+                                                />
+                                            </Grid.Col>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.Col span={6}>
+                                                <TextInput
+                                                    label="First Name (EN)"
+                                                    placeholder="English first name"
+                                                    value={guardian.firstNameEn}
+                                                    onChange={(e) => updateGuardianField(index, 'firstNameEn', e.target.value)}
+                                                />
+                                            </Grid.Col>
+                                            <Grid.Col span={6}>
+                                                <TextInput
+                                                    label="Last Name (EN)"
+                                                    placeholder="English last name"
+                                                    value={guardian.lastNameEn}
+                                                    onChange={(e) => updateGuardianField(index, 'lastNameEn', e.target.value)}
+                                                />
+                                            </Grid.Col>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.Col span={6}>
+                                                <Select
+                                                    label="Gender"
+                                                    data={[
+                                                        { value: 'male', label: 'Male' },
+                                                        { value: 'female', label: 'Female' },
+                                                        { value: 'other', label: 'Other' },
+                                                    ]}
+                                                    value={guardian.gender || null}
+                                                    onChange={(val) => updateGuardianField(index, 'gender', val || '')}
+                                                    clearable
+                                                />
+                                            </Grid.Col>
+                                            <Grid.Col span={6}>
+                                                <DateInput
+                                                    label="Date of Birth"
+                                                    placeholder="Select date"
+                                                    value={guardian.birthDate ? new Date(guardian.birthDate) : null}
+                                                    onChange={(val) => {
+                                                        const normalized = val ? new Date(val as string | number | Date) : null;
+                                                        updateGuardianField(index, 'birthDate',
+                                                            normalized && !Number.isNaN(normalized.getTime())
+                                                                ? normalized.toISOString().split('T')[0]
+                                                                : ''
+                                                        );
+                                                    }}
                                                 />
                                             </Grid.Col>
                                         </Grid>
@@ -1647,6 +1816,58 @@ export function SalesOrderPage() {
                         </div>
                     </Card>
 
+                    {/* Encounter Details */}
+                    <Card padding="lg" radius="md" withBorder>
+                        <Text fw={600} size="lg" mb="md">Encounter Details</Text>
+                        <Text size="sm" c="dimmed" mb="lg">
+                            FHIR encounter classification for this admission.
+                        </Text>
+                        <Grid>
+                            <Grid.Col span={6}>
+                                <Select
+                                    label="Encounter Class"
+                                    data={[
+                                        { value: 'inpatient', label: 'Inpatient' },
+                                        { value: 'outpatient', label: 'Outpatient' },
+                                    ]}
+                                    value={checkoutData.encounterClass}
+                                    onChange={(val) => setCheckoutData(prev => ({
+                                        ...prev,
+                                        encounterClass: (val as 'inpatient' | 'outpatient') || 'inpatient'
+                                    }))}
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                                <Select
+                                    label="Priority"
+                                    data={[
+                                        { value: 'routine', label: 'Routine' },
+                                        { value: 'urgent', label: 'Urgent' },
+                                        { value: 'asap', label: 'ASAP' },
+                                        { value: 'stat', label: 'Stat' },
+                                    ]}
+                                    value={checkoutData.priority}
+                                    onChange={(val) => setCheckoutData(prev => ({
+                                        ...prev,
+                                        priority: (val as 'routine' | 'urgent' | 'asap' | 'stat') || 'routine'
+                                    }))}
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={12}>
+                                <Textarea
+                                    label="Admission Reason"
+                                    placeholder="Reason for admission"
+                                    value={checkoutData.admissionReason}
+                                    onChange={(e) => setCheckoutData(prev => ({
+                                        ...prev,
+                                        admissionReason: e.target.value
+                                    }))}
+                                    rows={2}
+                                />
+                            </Grid.Col>
+                        </Grid>
+                    </Card>
+
                     <Group justify="space-between">
                         <Button variant="subtle" onClick={() => setStep(1)}>Back</Button>
                         <Button
@@ -1759,7 +1980,7 @@ export function SalesOrderPage() {
                                                 <Group key={idx} gap="xs">
                                                     <Text size="xs">•</Text>
                                                     <Text size="xs">{service.title}</Text>
-                                                    <div style={{ transform: 'scale(0.85)', transformOrigin: 'left' }}>
+                                                    <div className="ds-scale-left-85">
                                                         <RecurrenceDisplay interval={service.interval} />
                                                     </div>
                                                 </Group>
@@ -2080,7 +2301,7 @@ export function SalesOrderPage() {
             {/* Step 3: Invoice - No data fallback */}
             {step === 3 && !checkoutData.invoice && (
                 <Card padding="xl" radius="md" withBorder ta="center">
-                    <IconReceipt size={48} color="var(--mantine-color-gray-5)" style={{ marginBottom: 16 }} />
+                    <IconReceipt size={48} className="ds-empty-state-icon" />
                     <Title order={3} mb="sm" c="dimmed">No Invoice Available</Title>
                     <Text size="sm" c="dimmed" mb="xl">
                         Please complete the previous steps to generate an invoice.
@@ -2169,7 +2390,7 @@ export function SalesOrderPage() {
             {/* Step 4: Contract - No data fallback */}
             {step === 4 && !checkoutData.contract && (
                 <Card padding="xl" radius="md" withBorder ta="center">
-                    <IconFileText size={48} color="var(--mantine-color-gray-5)" style={{ marginBottom: 16 }} />
+                    <IconFileText size={48} className="ds-empty-state-icon" />
                     <Title order={3} mb="sm" c="dimmed">No Contract Available</Title>
                     <Text size="sm" c="dimmed" mb="xl">
                         Please complete payment first to generate a contract.
@@ -2183,7 +2404,7 @@ export function SalesOrderPage() {
             {/* Step 5: Complete */}
             {step === 5 && (
                 <Card padding="xl" radius="md" withBorder ta="center">
-                    <IconCheck size={64} color="var(--mantine-color-green-6)" style={{ marginBottom: 16 }} />
+                    <IconCheck size={64} className="ds-empty-state-icon ds-empty-state-icon--success" />
                     <Title order={2} mb="sm">Order Complete!</Title>
                     <Text size="lg" c="dimmed" mb="xl">
                         The sales order has been completed successfully.

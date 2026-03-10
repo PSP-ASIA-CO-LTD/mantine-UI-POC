@@ -1,5 +1,32 @@
 /* App-level styles */
 
+.business-setup-shell {
+  min-height: calc(100vh - (var(--app-shell-padding) * 2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface);
+  padding: 0;
+}
+
+.business-setup-shell__inner {
+  width: 100%;
+  max-width: 48rem;
+}
+
+.business-setup-shell__header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.business-setup-shell__progress {
+  margin-bottom: 2rem;
+}
+
+.business-setup-shell__progress-bar {
+  width: 50%;
+}
+
 .business-setup-split {
   display: grid;
   gap: 1.5rem;

@@ -2,6 +2,7 @@
     background-color: var(--bs-body-bg);
     border: 1px solid var(--bs-border-color);
     border-radius: 8px;
+    width: 17.5rem;
 }
 
 .staff-search-field.editable-field--form:focus-within,
@@ -9,4 +10,12 @@
 .staff-search-field.editable-field--form[data-error],
 .staff-search-field.editable-field--form[data-invalid] {
     background-color: var(--bs-body-bg);
+}
+
+.staff-table__actions-heading {
+    text-align: right;
+}
+
+.staff-table__row {
+    cursor: pointer;
 }

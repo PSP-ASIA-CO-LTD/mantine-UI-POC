@@ -15,13 +15,8 @@ export const escapeHtml = (text: string | null | undefined): string => {
  */
 export const buildLeftSection = (label: string, content: React.ReactNode): React.ReactNode => {
     return (
-        <section style={{ marginBottom: '1rem' }}>
-            <label style={{ 
-                color: 'var(--mantine-color-gray-6)', 
-                fontSize: '0.875rem', 
-                display: 'block', 
-                marginBottom: '0.25rem' 
-            }}>
+        <section className="ds-form-section ds-form-section--compact">
+            <label className="ds-form-label">
                 {label}
             </label>
             {content}
@@ -34,13 +29,8 @@ export const buildLeftSection = (label: string, content: React.ReactNode): React
  */
 export const buildField = (label: string, content: React.ReactNode): React.ReactNode => {
     return (
-        <div style={{ marginBottom: '1rem' }}>
-            <label style={{ 
-                color: 'var(--mantine-color-gray-6)', 
-                fontSize: '0.875rem', 
-                display: 'block', 
-                marginBottom: '0.5rem' 
-            }}>
+        <div className="ds-form-section">
+            <label className="ds-form-label">
                 {label}
             </label>
             {content}

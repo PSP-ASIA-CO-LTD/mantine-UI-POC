@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppShell } from '@mantine/core';
 import { AppNav } from './components/AppNav';
 import { BusinessSetup } from './pages/BusinessSetup';
@@ -18,6 +18,7 @@ import { UiButtons } from './pages/UiButtons';
 import { UiFields } from './pages/UiFields';
 import { UiLayout } from './pages/UiLayout';
 import { UiPalette } from './pages/UiPalette';
+import { UiTypography } from './pages/UiTypography';
 import { SidesheetProvider } from './contexts/SidesheetContext';
 import { DebugProvider } from './contexts/DebugContext';
 import { SalesOrderProvider } from './contexts/SalesOrderContext';
@@ -67,10 +68,17 @@ function AppLayout() {
                     <Route path="/staff" element={<Staff />} />
                     <Route path="/patient" element={<Patient />} />
                     <Route path="/profile" element={<Profile />} />
-                    <Route path="/ui/buttons" element={<UiButtons />} />
-                    <Route path="/ui/fields" element={<UiFields />} />
-                    <Route path="/ui/layout" element={<UiLayout />} />
-                    <Route path="/ui/palette" element={<UiPalette />} />
+                    <Route path="/design-system" element={<Navigate to="/design-system/layout" replace />} />
+                    <Route path="/design-system/buttons" element={<UiButtons />} />
+                    <Route path="/design-system/fields" element={<UiFields />} />
+                    <Route path="/design-system/layout" element={<UiLayout />} />
+                    <Route path="/design-system/typography" element={<UiTypography />} />
+                    <Route path="/design-system/palette" element={<UiPalette />} />
+                    <Route path="/ui/buttons" element={<Navigate to="/design-system/buttons" replace />} />
+                    <Route path="/ui/fields" element={<Navigate to="/design-system/fields" replace />} />
+                    <Route path="/ui/layout" element={<Navigate to="/design-system/layout" replace />} />
+                    <Route path="/ui/typography" element={<Navigate to="/design-system/typography" replace />} />
+                    <Route path="/ui/palette" element={<Navigate to="/design-system/palette" replace />} />
                 </Routes>
             </AppShell.Main>
         </AppShell>

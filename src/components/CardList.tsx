@@ -137,7 +137,7 @@ export function CardList({
                 {renderDescription()}
                 {renderMeta}
 
-                <div className="d-flex justify-content-end gap-1 mt-2" style={{ minHeight: 28 }}>
+                <div className="card-list__actions d-flex justify-content-end gap-1 mt-2">
                     {isEditing && !editing && canEdit && (
                         <ActionIcon
                             size={28}

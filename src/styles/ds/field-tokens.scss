@@ -2,9 +2,10 @@
   --ds-field-label-color: var(--bs-primary-text-emphasis);
   --ds-field-text-color: var(--bs-body-color);
   --ds-field-muted-color: var(--bs-secondary-color);
-  --ds-field-idle-bg: var(--bs-secondary-bg);
-  --ds-field-hover-bg: var(--bs-tertiary-bg);
-  --ds-field-edit-bg: var(--bs-primary-bg-subtle);
+  --ds-field-placeholder-color: var(--bs-gray-400);
+  --ds-field-idle-bg: var(--bs-tertiary-bg);
+  --ds-field-hover-bg: var(--bs-secondary-bg);
+  --ds-field-edit-bg: var(--bs-secondary-bg);
   --ds-field-error-bg: var(--bs-danger-bg-subtle);
   --ds-field-locked-bg: var(--bs-body-bg);
   --ds-field-locked-border: var(--bs-border-color);

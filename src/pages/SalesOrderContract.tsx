@@ -522,7 +522,7 @@ export function SalesOrderContract() {
                                         </Table.Td>
                                         <Table.Td>{s.dept}</Table.Td>
                                                                                     <Table.Td>
-                                                                                        <div style={{ transform: 'scale(0.9)', transformOrigin: 'left' }}>
+                                                                                        <div className="ds-scale-left-90">
                                                                                             <RecurrenceDisplay interval={s.interval} color="dark" />
                                                                                         </div>
                                                                                     </Table.Td>                                    </Table.Tr>

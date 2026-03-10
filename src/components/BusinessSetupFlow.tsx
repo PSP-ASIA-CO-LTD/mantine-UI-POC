@@ -34,6 +34,7 @@ export function BusinessSetupFlow({ onComplete }: BusinessSetupFlowProps) {
     businessType: '',
     address: '',
     phone: '',
+    juristicId: '',
   });
 
   const [adminInfo, setAdminInfo] = useState({
@@ -100,6 +101,7 @@ export function BusinessSetupFlow({ onComplete }: BusinessSetupFlowProps) {
       businessType: '',
       address: '',
       phone: '',
+      juristicId: '',
     });
     setAdminInfo({
       firstName: '',
@@ -170,24 +172,17 @@ export function BusinessSetupFlow({ onComplete }: BusinessSetupFlowProps) {
   };
 
   return (
-    <div style={{
-      minHeight: 'calc(100vh - (var(--app-shell-padding) * 2))',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'var(--surface)',
-      padding: 0,
-    }}>
-      <div style={{ width: '100%', maxWidth: '48rem' }}>
+    <div className="business-setup-shell">
+      <div className="business-setup-shell__inner">
         {/* Header */}
-        <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+        <div className="business-setup-shell__header">
           <Title order={1} mb="xs">Business Setup</Title>
           <Text c="dimmed">Let's set up your nursing home facility</Text>
         </div>
 
         {/* Progress Bar */}
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+        <div className="business-setup-shell__progress">
+          <div className="ds-showcase-progress-meta">
             <Text size="xs" c="dimmed">
               Step {currentStep + 1} of {totalSteps}
             </Text>
@@ -268,6 +263,16 @@ export function BusinessSetupFlow({ onComplete }: BusinessSetupFlowProps) {
                     required
                     error={errors.phone}
                     data-er-field="BUSINESS.phone"
+                  />
+
+                  <TextInput
+                    label="Juristic ID"
+                    placeholder="Enter juristic person ID"
+                    value={businessInfo.juristicId}
+                    onChange={(e) => {
+                      setBusinessInfo({ ...businessInfo, juristicId: e.target.value });
+                    }}
+                    data-er-field="BUSINESS.juristic_id"
                   />
 
                   <TextInput

@@ -328,7 +328,7 @@ export function StaffTasks() {
                 <Card padding="md" radius="md" withBorder>
                     <Group 
                         justify="space-between" 
-                        style={{ cursor: 'pointer' }}
+                        className="ds-cursor-pointer"
                         onClick={() => toggleGroup('pending')}
                     >
                         <Group gap="sm">
@@ -369,7 +369,7 @@ export function StaffTasks() {
                                                     <Tooltip label="Click to reassign">
                                                         <Badge 
                                                             variant="outline" 
-                                                            style={{ cursor: 'pointer' }}
+                                                            className="ds-cursor-pointer"
                                                             onClick={() => setReassignModal({ task, open: true })}
                                                         >
                                                             {task.assignedToName}
@@ -404,7 +404,7 @@ export function StaffTasks() {
                 <Card padding="md" radius="md" withBorder>
                     <Group 
                         justify="space-between" 
-                        style={{ cursor: 'pointer' }}
+                        className="ds-cursor-pointer"
                         onClick={() => toggleGroup('in_progress')}
                     >
                         <Group gap="sm">
@@ -461,7 +461,7 @@ export function StaffTasks() {
                 <Card padding="md" radius="md" withBorder>
                     <Group 
                         justify="space-between" 
-                        style={{ cursor: 'pointer' }}
+                        className="ds-cursor-pointer"
                         onClick={() => toggleGroup('completed')}
                     >
                         <Group gap="sm">
@@ -528,9 +528,8 @@ export function StaffTasks() {
                                 <Paper 
                                     p="xs" 
                                     withBorder 
-                                    className={`forecast-day ${status} ${isToday ? 'today' : ''}`}
+                                    className={`forecast-day ${status} ${isToday ? 'today' : ''} ds-cursor-pointer`}
                                     onClick={() => setSelectedDate(day.date)}
-                                    style={{ cursor: 'pointer' }}
                                 >
                                     <Text size="xs" ta="center" fw={isToday ? 700 : 400}>
                                         {formatShortDate(day.date)}

@@ -72,7 +72,7 @@ export function Login() {
                             <Text
                                 size="sm"
                                 c="blue"
-                                style={{ cursor: 'pointer' }}
+                                className="ds-cursor-pointer"
                                 onClick={() => navigate('/forgot-password')} // if forgot password
                             >
                                 Forgot Password?

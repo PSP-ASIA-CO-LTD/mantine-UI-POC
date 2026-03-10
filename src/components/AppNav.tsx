@@ -16,7 +16,8 @@ import {
     IconBuilding,
     IconPalette,
     IconColumns3,
-    IconForms
+    IconForms,
+    IconTypography,
 } from '@tabler/icons-react';
 import { useSidesheet } from '../contexts/SidesheetContext';
 import { API } from '../api';
@@ -155,7 +156,7 @@ export function AppNav() {
     return (
         <div className="app-nav">
             <header className="app-nav-header">
-                <NavLink to="/" className="brand">Bourbon <span>Mall</span></NavLink>
+                <NavLink to="/" className="brand">Bourbon</NavLink>
                 <div className="subtitle">Operation Manager</div>
             </header>
             
@@ -238,18 +239,21 @@ export function AppNav() {
                             Company
                         </Menu.Item>
                         <Menu.Divider />
-                        <Menu.Label>UI</Menu.Label>
-                        <Menu.Item onClick={() => navigate('/ui/buttons')} leftSection={<IconBox size={16} />}>
-                            UI Buttons
+                        <Menu.Label>Design System</Menu.Label>
+                        <Menu.Item onClick={() => navigate('/design-system/buttons')} leftSection={<IconBox size={16} />}>
+                            Buttons
                         </Menu.Item>
-                        <Menu.Item onClick={() => navigate('/ui/fields')} leftSection={<IconForms size={16} />}>
-                            UI Fields
+                        <Menu.Item onClick={() => navigate('/design-system/fields')} leftSection={<IconForms size={16} />}>
+                            Fields
                         </Menu.Item>
-                        <Menu.Item onClick={() => navigate('/ui/layout')} leftSection={<IconColumns3 size={16} />}>
-                            UI Layout
+                        <Menu.Item onClick={() => navigate('/design-system/layout')} leftSection={<IconColumns3 size={16} />}>
+                            Layout
                         </Menu.Item>
-                        <Menu.Item onClick={() => navigate('/ui/palette')} leftSection={<IconPalette size={16} />}>
-                            UI Palette
+                        <Menu.Item onClick={() => navigate('/design-system/typography')} leftSection={<IconTypography size={16} />}>
+                            Typography
+                        </Menu.Item>
+                        <Menu.Item onClick={() => navigate('/design-system/palette')} leftSection={<IconPalette size={16} />}>
+                            Palette
                         </Menu.Item>
                         <Menu.Divider />
                         <Menu.Item disabled leftSection={<IconSettings size={16} />}>

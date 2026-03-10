@@ -24,7 +24,7 @@ import {
     InlineTextarea,
     SearchInput
 } from '../components/EditableFields';
-import type { Guardian, Resident, SalesOrder, Room } from '../types';
+import type { Guardian, Resident, SalesOrder, Room, Staff } from '../types';
 
 const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '—';
@@ -101,22 +101,25 @@ export function Patient() {
     const [guardians, setGuardians] = useState<Guardian[]>([]);
     const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
     const [rooms, setRooms] = useState<Room[]>([]);
+    const [staffMembers, setStaffMembers] = useState<Staff[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const { open } = useSidesheet();
 
     const loadPatientData = useCallback(async () => {
         try {
-            const [residentData, guardianData, salesOrderData, roomData] = await Promise.all([
+            const [residentData, guardianData, salesOrderData, roomData, staffData] = await Promise.all([
                 API.getResidents(),
                 API.getGuardians(),
                 API.getSalesOrders(),
                 API.getRooms(),
+                API.getStaff(),
             ]);
             setResidents(residentData);
             setGuardians(guardianData);
             setSalesOrders(salesOrderData);
             setRooms(roomData);
+            setStaffMembers(staffData);
         } catch (error) {
             console.error('Failed to load patient data:', error);
         } finally {
@@ -246,6 +249,20 @@ export function Patient() {
                                 onSave={(val) => handleUpdateResident(latestResident.id, { lastName: val })}
                             />
                         </Grid.Col>
+                        <Grid.Col span={6}>
+                            <InlineTextInput
+                                label="First Name (EN)"
+                                value={latestResident.firstNameEn}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { firstNameEn: val })}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={6}>
+                            <InlineTextInput
+                                label="Last Name (EN)"
+                                value={latestResident.lastNameEn}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { lastNameEn: val })}
+                            />
+                        </Grid.Col>
                         <Grid.Col span={4}>
                             <InlineDateInput
                                 label="Date of Birth"
@@ -273,6 +290,13 @@ export function Patient() {
                                 label="Hospital No. (HN)"
                                 value={latestResident.hospitalNumber}
                                 onSave={(val) => handleUpdateResident(latestResident.id, { hospitalNumber: val })}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            <InlineTextInput
+                                label="Passport No."
+                                value={latestResident.passportNo}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { passportNo: val })}
                             />
                         </Grid.Col>
                         <Grid.Col span={4}>
@@ -344,6 +368,13 @@ export function Patient() {
                                 onSave={(val) => handleUpdateResident(latestResident.id, { email: val })}
                             />
                         </Grid.Col>
+                        <Grid.Col span={12}>
+                            <InlineTextInput
+                                label="Line ID"
+                                value={latestResident.lineId}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { lineId: val })}
+                            />
+                        </Grid.Col>
                     </Grid>
 
                     <Divider my="xs" label="Address" labelPosition="center" />
@@ -412,6 +443,55 @@ export function Patient() {
                                 onSave={(val) => handleUpdateResident(latestResident.id, { addressPostalCode: val })}
                             />
                         </Grid.Col>
+                        <Grid.Col span={4}>
+                            <InlineTextInput
+                                label="Address Code (DOPA)"
+                                value={latestResident.addressCode}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { addressCode: val })}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            <InlineTextInput
+                                label="Latitude"
+                                value={latestResident.latitude}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { latitude: val })}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            <InlineTextInput
+                                label="Longitude"
+                                value={latestResident.longitude}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { longitude: val })}
+                            />
+                        </Grid.Col>
+                    </Grid>
+
+                    <Divider my="xs" label="Status" labelPosition="center" />
+
+                    <Grid gutter="md">
+                        <Grid.Col span={4}>
+                            <InlineSelect
+                                label="Active"
+                                value={latestResident.active === false ? 'no' : 'yes'}
+                                data={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { active: val === 'yes' })}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            <InlineSelect
+                                label="Deceased"
+                                value={latestResident.isDeceased ? 'yes' : 'no'}
+                                data={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { isDeceased: val === 'yes' })}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={4}>
+                            <InlineDateInput
+                                label="Deceased Date"
+                                value={latestResident.deceasedDate ? new Date(latestResident.deceasedDate) : null}
+                                onSave={(val) => handleUpdateResident(latestResident.id, { deceasedDate: val?.toISOString() || '' })}
+                            />
+                        </Grid.Col>
                     </Grid>
 
                     <Divider my="xs" label="Medical" labelPosition="center" />
@@ -436,6 +516,16 @@ export function Patient() {
                                 label="Dietary Restrictions"
                                 value={latestResident.dietaryRestrictions}
                                 onSave={(val) => handleUpdateResident(latestResident.id, { dietaryRestrictions: val })}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={12}>
+                            <InlineSelect
+                                label="General Practitioner"
+                                value={latestResident.generalPractitionerId || null}
+                                data={staffMembers.map((s) => ({ value: s.id, label: s.name }))}
+                                searchable
+                                clearable
+                                onSave={(val) => handleUpdateResident(latestResident.id, { generalPractitionerId: val || undefined })}
                             />
                         </Grid.Col>
                     </Grid>
@@ -631,7 +721,6 @@ export function Patient() {
                     placeholder="Search resident, guardian, or ID"
                     value={search}
                     onChange={(event) => setSearch(event.currentTarget.value)}
-                    style={{ width: 280 }}
                 />
             </Group>
 

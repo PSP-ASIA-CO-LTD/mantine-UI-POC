@@ -36,6 +36,15 @@ export interface Staff {
     role: string;
     dept: string;
     status: string;
+    cid?: string;
+    firstNameEn?: string;
+    lastNameEn?: string;
+    gender?: string;
+    birthDate?: string;
+    phone?: string;
+    email?: string;
+    licenseType?: string;
+    licenseNumber?: string;
 }
 
 export interface Department {
@@ -45,6 +54,8 @@ export interface Department {
     headManagerId?: string;
     parentDepartmentId?: string;
     color?: string;
+    active?: boolean;
+    alias?: string;
 }
 
 export interface Order {
@@ -91,6 +102,7 @@ export interface BusinessInfo {
     businessType: string;
     address: string;
     phone: string;
+    juristicId?: string;
 }
 
 export interface AdminInfo {
@@ -138,6 +150,14 @@ export interface Guardian {
     pays: boolean; // indicates if this guardian contributes to payment
     residentId?: string;
     createdAt: string;
+    cid?: string;
+    passportNo?: string;
+    prefix?: string;
+    firstNameEn?: string;
+    lastNameEn?: string;
+    gender?: string;
+    birthDate?: string;
+    active?: boolean;
 }
 
 export interface Resident {
@@ -179,6 +199,17 @@ export interface Resident {
     emergencyContactAddress?: string;
     guardianId: string;
     createdAt: string;
+    passportNo?: string;
+    firstNameEn?: string;
+    lastNameEn?: string;
+    isDeceased?: boolean;
+    deceasedDate?: string;
+    active?: boolean;
+    lineId?: string;
+    addressCode?: string;
+    latitude?: string;
+    longitude?: string;
+    generalPractitionerId?: string;
 }
 
 export interface Room {
@@ -188,6 +219,9 @@ export interface Room {
     type: 'standard' | 'deluxe' | 'suite';
     status: 'available' | 'occupied' | 'maintenance';
     pricePerDay: number;
+    description?: string;
+    locationForm?: string;
+    managingDepartmentId?: string;
 }
 
 export interface SalesOrder {
@@ -207,6 +241,11 @@ export interface SalesOrder {
     createdBy: string;
     paidAt?: string;
     notes?: string;
+    encounterClass?: 'inpatient' | 'outpatient';
+    priority?: 'routine' | 'urgent' | 'asap' | 'stat';
+    serviceProvider?: string;
+    admissionReason?: string;
+    dischargeDisposition?: string;
 }
 
 export interface Invoice {
@@ -332,6 +371,9 @@ export interface OperationTask {
     completedBy?: string;
     notes?: string;
     priority: 'low' | 'normal' | 'high' | 'urgent';
+    intent?: 'order' | 'plan' | 'proposal';
+    authoredOn?: string;
+    requesterId?: string;
 }
 
 export interface StaffShift {

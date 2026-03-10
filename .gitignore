@@ -54,3 +54,10 @@ temp/
 .sidecar-start.sh
 .sidecar-base
 .td-root
+
+# Claude / Playwright artifacts
+.claude/settings.local.json
+.playwright-mcp/
+
+# Screenshots (dev artifacts)
+*.png

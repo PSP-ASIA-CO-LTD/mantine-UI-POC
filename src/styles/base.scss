@@ -74,7 +74,7 @@ h2 {
   width: var(--ds-color-dot-size);
   height: var(--ds-color-dot-size);
   border-radius: 999px;
-  background-color: var(--ds-color-dot-color, transparent);
+  background-color: var(--ds-color-dot-color, var(--ds-token-preview-bg, transparent));
   border: 1px solid var(--ds-color-dot-border);
   flex-shrink: 0;
 }

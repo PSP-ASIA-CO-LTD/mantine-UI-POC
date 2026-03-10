@@ -1,0 +1,169 @@
+.ui-typography-stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.ui-typography-stack-card {
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+    background: var(--bs-body-bg);
+}
+
+.ui-typography-stack-card__label,
+.ui-typography-row__label,
+.ui-typography-subsection__title {
+    font-weight: 700;
+    color: var(--bs-emphasis-color);
+}
+
+.ui-typography-stack-card__value {
+    display: block;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.ui-typography-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.ui-typography-row {
+    display: grid;
+    grid-template-columns: minmax(17rem, 21rem) minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 1rem;
+}
+
+.ui-typography-row + .ui-typography-row {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.ui-typography-row__meta {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+}
+
+.ui-typography-row__note {
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+}
+
+.ui-typography-row__source code,
+.ui-typography-row__metrics code {
+    display: block;
+    font-size: 0.72rem;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.ui-typography-row__preview {
+    display: flex;
+    align-items: center;
+    min-height: 6.25rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--bs-border-color-translucent);
+    border-radius: var(--bs-border-radius-lg);
+    background: var(--bs-body-bg);
+    overflow: hidden;
+}
+
+.ui-typography-split-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.ui-typography-subsection {
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+    padding: 1rem;
+    background: color-mix(in srgb, var(--bs-body-bg) 85%, white);
+}
+
+.ui-typography-subsection__title {
+    margin-bottom: 0.5rem;
+}
+
+.ui-typography-context--nav {
+    align-items: flex-start;
+}
+
+.ui-typography-context--page-header {
+    padding: 0;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bs-tertiary-bg) 85%, white), var(--bs-body-bg));
+}
+
+.ui-typography-context--page-header .page-actionbar {
+    width: 100%;
+}
+
+.ui-typography-context--page-header .page-actionbar--transparent {
+    margin: 0;
+    width: auto;
+    padding: 1rem 1.25rem;
+}
+
+.ui-typography-context--sidesheet,
+.ui-typography-context--sidesheet-section {
+    --sidesheet-pad-x: 1.25rem;
+    --sidesheet-pad-y: 1rem;
+    align-items: stretch;
+    padding: 0;
+    background: var(--bs-body-bg);
+}
+
+.ui-typography-context--sidesheet .sidesheet-header {
+    min-height: auto;
+}
+
+.ui-typography-context--field {
+    align-items: flex-start;
+}
+
+.ui-typography-context--button {
+    justify-content: flex-start;
+}
+
+.ui-typography-context--department {
+    background: linear-gradient(135deg, var(--mantine-color-gray-0), var(--mantine-color-blue-0));
+}
+
+.ui-typography-context--stepper {
+    align-items: flex-start;
+}
+
+.ui-typography-context--stepper .mantine-Stepper-stepBody {
+    align-items: flex-start;
+}
+
+.ui-typography-context--invoice,
+.ui-typography-context--invoice-table {
+    background: white;
+}
+
+.ui-typography-context--invoice-table table {
+    width: 100%;
+}
+
+.ui-typography-context--invoice-table th {
+    border-bottom: none;
+}
+
+@media (max-width: 1200px) {
+    .ui-typography-split-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .ui-typography-row {
+        grid-template-columns: 1fr;
+    }
+
+    .ui-typography-row__preview {
+        min-height: 5.5rem;
+    }
+}
